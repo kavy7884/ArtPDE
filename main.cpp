@@ -1,37 +1,56 @@
 #include <iostream>
 #include "DataArray.hpp"
 #include "DataTable.hpp"
+#include "GeometryDataFEM_IO.hpp"
 
 //void DemoDataArray();
+//void DemoDataTable();
 int main() {
+    // ArtCFD project
+    ProjectArt proj("TestProj");
+
+    // Geometry set up
+    Geometry<GeometryDataFEM> Geo(Dimension::Dim_3);
+
+    //FEM Geometry Read
+    IO_FileReader IO_Reader(proj);
+    GeometryReader<IO_FileReader> GeoReader{Geo,IO_Reader};
+    GeoReader.read();
+
+//    //FEM Geometry Write
+//    IO_FileWriter IO_Writer(proj);
+//    GeometryWriter<IO_FileWriter> GeoWriter{Geo,IO_Writer};
+//    GeoWriter.write();
+
+
+
+    std::cout<< *Geo.GeoData->xNode<< std::endl;
+    std::cout<< *Geo.GeoData->xNode->getContentsByDimension(0) << std::endl;
+    std::cout<< *Geo.GeoData->xNode->getContentsByDimension(1) << std::endl;
+    std::cout<< *Geo.GeoData->xNode->getContentsByDimension(2) << std::endl;
+    std::cout<< *Geo.GeoData->cElement30<< std::endl;
+
+
+
+
+
+
+
+//    test<3> tt;
+//    std::cout<< tt.Dim << std::endl;
+////    std::cout<< Geo.A.HaHa << std::endl;
+//    std::cout<< Dimension::Point << std::endl;
+
+
 //    DemoDataArray();
-
-    // DataTable Demo
-    // Two kind of data source will be created
-    std::shared_ptr<StdVectorTensor2D<int>> data1 = std::make_shared<StdVectorTensor2D<int>>();
-    (*data1).emplace_back(std::vector<int>{1,2,3});
-    (*data1).emplace_back(std::vector<int>{4,5,6});
-    (*data1).emplace_back(std::vector<int>{7,8,9});
-
-    StdVectorTensor2D<double> data2{};
-    data2.emplace_back(std::vector<double>{1.1,1.2,1.3});
-    data2.emplace_back(std::vector<double>{2.1,2.2,2.3,2.4,2.5,2.6,2.7});
-    data2.emplace_back(std::vector<double>{3.1,3.2});
-    data2.emplace_back(std::vector<double>{4e-1,5e-1,6e-1});
-
-    // Influence data builder construct memory-safe pointer with 2-D table
-    auto dataTableOut1 = DataTable<int>::create("Table1").dataFrom(data1).build();
-    auto dataTableOut2 = DataTable<double>::create("Table2").dataFrom(data2).build();
-
-    // Show table results
-    std::cout<< (*dataTableOut1) <<std::endl;
-    std::cout<< (*dataTableOut2) <<std::endl;
+//    DemoDataTable();
 
     return 0;
 }
 
 void DemoDataArray(){
     // DataArray Demo
+    std::cout<< "======== Start to Demo DataArray ========" <<std::endl;
     // Two kind of data source will be created
     std::shared_ptr<std::vector<double>> data1 = std::make_shared<std::vector<double>>(5,5.5);
     std::vector<int> data2{1,2,3,4,5,6,7,8,9};
@@ -95,4 +114,110 @@ void DemoDataArray(){
     catch(std::exception &err){
         std::cout << err.what() <<std::endl;
     }
+}
+
+void DemoDataTable(){
+    // DataTable Demo
+    std::cout<< "======== Start to Demo DataTable ========" <<std::endl;
+    // Two kind of data source will be created
+    std::shared_ptr<StdVectorTensor2D<int>> data1 = std::make_shared<StdVectorTensor2D<int>>();
+    (*data1).emplace_back(std::vector<int>{1,2,3});
+    (*data1).emplace_back(std::vector<int>{4,5,6});
+    (*data1).emplace_back(std::vector<int>{7,8,9});
+
+    StdVectorTensor2D<double> data2{};
+    data2.emplace_back(std::vector<double>{1.1,1.2,1.3});
+    data2.emplace_back(std::vector<double>{2.1,2.2,2.3,2.4,2.5,2.6,2.7});
+    data2.emplace_back(std::vector<double>{3.1,3.2});
+    data2.emplace_back(std::vector<double>{4e-1,5e-1,6e-1});
+
+    // Influence data builder construct memory-safe pointer with 2-D table
+    auto dataTableOut1 = DataTable<int>::create("Table1").dataFrom(data1).build();
+    auto dataTableOut2 = DataTable<double>::create("Table2").dataFrom(data2).build();
+
+    // Show table results
+    std::cout<< (*dataTableOut1) <<std::endl;
+    std::cout<< (*dataTableOut2) <<std::endl;
+
+    // Access element
+    std::cout<< "Access dataTableOut1(2,0)" << std::endl;
+    std::cout<< (*dataTableOut1).at(2, 0) <<std::endl;
+    std::cout<< "Access dataTableOut2(3,1)" << std::endl;
+    std::cout<< (*dataTableOut2)(3,1) <<std::endl;
+    std::cout<< "Access dataTableOut2(3,1)" << std::endl;
+    std::cout<< (*dataTableOut2).row(3).col(2) << std::endl;
+
+    // Copy (Constructor & Assignment)
+    DataTable<int> testCopyTable1{};
+    testCopyTable1 = (*dataTableOut1);
+    testCopyTable1.setName("testCopyTable1");
+
+    DataTable<double> testCopyTable2(*dataTableOut2);
+    testCopyTable2.setName("testCopyTable2");
+
+    std::cout<< testCopyTable1 <<std::endl;
+    std::cout<< testCopyTable2 <<std::endl;
+
+    // Move (Constructor & Assignment)
+    decltype(testCopyTable1) testMoveTable1;
+    testMoveTable1 = std::move(testCopyTable1);
+    testMoveTable1.setName("testCopyTable1(Move)");
+
+    std::cout << "After Move:" << std::endl;
+    std::cout<< testMoveTable1 <<std::endl;
+    std::cout << "Original Data:" << std::endl;
+    std::cout<< testCopyTable1 <<std::endl;
+
+    decltype(testCopyTable2) testMoveTable2(std::move(testCopyTable2));
+    testMoveTable2.setName("testCopyTable2(Move)");
+    std::cout << "After Move:" << std::endl;
+    std::cout<< testMoveTable2 <<std::endl;
+    std::cout << "Original Data:" << std::endl;
+    std::cout<< testCopyTable2 <<std::endl;
+
+    // Iterator
+    std::cout<< "Iterator Access row 1 in testMoveTable1" << std::endl;
+    for (auto i = testMoveTable1.row(1).begin(); i != testMoveTable1.row(1).end(); ++i) {
+        std::cout<< *i << std::endl;
+    }
+
+    std::cout<< "Iterator Access row 1 in testMoveTable2" << std::endl;
+    for (auto i = testMoveTable2.row(1).cbegin(); i != testMoveTable2.row(1).cend(); ++i) {
+        std::cout<< *i << std::endl;
+    }
+
+    // Isolated column
+    auto TableOut2_C0 = (*dataTableOut2).row(0);
+    auto TableOut2_C1 = (*dataTableOut2).row(1);
+    auto TableOut2_C2 = (*dataTableOut2).row(2);
+
+    std::cout << TableOut2_C0 << std::endl;
+    std::cout << TableOut2_C1 << std::endl;
+    std::cout << TableOut2_C2 << std::endl;
+
+    // Error
+    try {
+        std::cout<< "Try access testMoveTable1(100,1)"<<std::endl;
+        std::cout<<testMoveTable1(100,1)<<std::endl;
+    }
+    catch(std::exception &err){
+        std::cout << err.what() <<std::endl;
+    }
+
+    try {
+        std::cout<< "Try access testMoveTable2(1,100)"<<std::endl;
+        std::cout<<testMoveTable2(1,100)<<std::endl;
+    }
+    catch(std::exception &err){
+        std::cout << err.what() <<std::endl;
+    }
+
+    try {
+        std::cout<< "Try access testMoveTable2(100,100)"<<std::endl;
+        std::cout<<testMoveTable2(100,100)<<std::endl;
+    }
+    catch(std::exception &err){
+        std::cout << err.what() <<std::endl;
+    }
+
 }

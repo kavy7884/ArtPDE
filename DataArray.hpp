@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <ostream>
 #include <stdexcept>
 
@@ -16,14 +17,15 @@ template <typename T> class DataArrayBuilder;
 template <typename T>
 class DataArray {
     template <typename S> friend class DataArrayBuilder;
-    size_t arraySize;
-    T *array;
+    size_t arraySize{0};
+    T *array{nullptr};
     std::string arrayName;
 
     void resetArray(const size_t &length);
+    void checkSize(const size_t &pos);
 
 public:
-    DataArray();
+    DataArray(){};
     DataArray(const DataArray& source);
     DataArray(DataArray&& source);
     virtual ~DataArray();
@@ -136,12 +138,6 @@ DataArrayBuilder<T> &DataArrayBuilder<T>::dataFrom(std::vector<T> source) {
 }
 
 template<typename T>
-DataArray<T>::DataArray() {
-    arraySize = 0;
-    array = nullptr;
-}
-
-template<typename T>
 DataArray<T>::~DataArray() {
     if(array != nullptr) {
         delete[](array);
@@ -215,17 +211,29 @@ DataArray<T> &DataArray<T>::operator=(DataArray<T> &&source) {
 
 template<typename T>
 DataArray<T>::DataArray(DataArray<T> &&source) {
-    arraySize = source.size();
-    source.arraySize = 0;
-    array = std::move(source.array);
-    source.array = nullptr;
+    if(&source != this) {
+        arrayName = std::move(source.arrayName);
+        arraySize = source.size();
+        source.arraySize = 0;
+        array = std::move(source.array);
+        source.array = nullptr;
+    }
 }
 
 template<typename T>
 T &DataArray<T>::at(const size_t &pos) {
-    //TODO - create over bound error exception.
-    if (pos >= arraySize) throw std::out_of_range(">> Error<DataArray>::access out of range!");
+    checkSize(pos);
     return array[pos];
+}
+
+template<typename T>
+void DataArray<T>::checkSize(const size_t &pos) {
+    if (pos >= arraySize || pos < 0) {
+        std::ostringstream errMsg;
+        errMsg << ">> Error<DataArray>::access Pos = " << pos
+               << " out of range! ( Size = " << size() << " )";
+        throw std::out_of_range(errMsg.str());
+    }
 }
 
 
