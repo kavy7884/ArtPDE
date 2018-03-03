@@ -7,7 +7,8 @@
 
 #include <vector>
 #include <string>
-#include <ostream>
+#include <iostream>
+#include <sstream>
 
 template <typename T>
 using StdVectorTensor2D = std::vector<std::vector<T>>;

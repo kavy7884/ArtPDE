@@ -120,7 +120,7 @@ DataArrayBuilder<T>::DataArrayBuilder(const std::string & arrayName) {
 template<typename T>
 DataArrayBuilder<T>& DataArrayBuilder<T>::dataFrom(std::shared_ptr<std::vector<T>> source) {
     (*shPtr_dataArray).arraySize = (*source).size();
-    (*shPtr_dataArray).array = new T[(*source).size()];
+    (*shPtr_dataArray).array = new T[(*source).size()]();
     for (size_t i = 0; i < (*source).size(); ++i) {
         (*shPtr_dataArray).array[i] = (*source)[i];
     }
@@ -130,7 +130,7 @@ DataArrayBuilder<T>& DataArrayBuilder<T>::dataFrom(std::shared_ptr<std::vector<T
 template<typename T>
 DataArrayBuilder<T> &DataArrayBuilder<T>::dataFrom(std::vector<T> source) {
     (*shPtr_dataArray).arraySize = source.size();
-    (*shPtr_dataArray).array = new T[source.size()];
+    (*shPtr_dataArray).array = new T[source.size()]();
     for (size_t i = 0; i < source.size(); ++i) {
         (*shPtr_dataArray).array[i] = source[i];
     }

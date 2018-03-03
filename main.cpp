@@ -1,49 +1,33 @@
 #include <iostream>
-#include "DataArray.hpp"
-#include "DataTable.hpp"
-#include "GeometryDataFEM_IO.hpp"
+#include "ProjectUility.hpp"
+#include "GeometryMeshFemData.hpp"
 
-//void DemoDataArray();
-//void DemoDataTable();
+void DemoDataArray();
+void DemoDataTable();
 int main() {
-    // ArtCFD project
-    ProjectArt proj("TestProj");
-
-    // Geometry set up
-    Geometry<GeometryDataFEM> Geo(Dimension::Dim_3);
-
-    //FEM Geometry Read
-    IO_FileReader IO_Reader(proj);
-    GeometryReader<IO_FileReader> GeoReader{Geo,IO_Reader};
-    GeoReader.read();
-
-//    //FEM Geometry Write
-//    IO_FileWriter IO_Writer(proj);
-//    GeometryWriter<IO_FileWriter> GeoWriter{Geo,IO_Writer};
-//    GeoWriter.write();
-
-
-
-    std::cout<< *Geo.GeoData->xNode<< std::endl;
-    std::cout<< *Geo.GeoData->xNode->getContentsByDimension(0) << std::endl;
-    std::cout<< *Geo.GeoData->xNode->getContentsByDimension(1) << std::endl;
-    std::cout<< *Geo.GeoData->xNode->getContentsByDimension(2) << std::endl;
-    std::cout<< *Geo.GeoData->cElement30<< std::endl;
-
-
-
-
-
-
-
-//    test<3> tt;
-//    std::cout<< tt.Dim << std::endl;
-////    std::cout<< Geo.A.HaHa << std::endl;
-//    std::cout<< Dimension::Point << std::endl;
-
+//    // ArtCFD project
+//    ProjectArt proj("TestProj_BLM");
+//
+//    // Geometry set up
+//    Geometry<Dim2D, GeometryMeshFemData> Geo;
+//
+//    //FEM Geometry Read
+//    IO_FileReader IO_Reader(proj);
+//    Geo.getGeoData()->readFile(IO_Reader);
+////
+//////    //FEM Geometry Write
+//////    IO_FileWriter IO_Writer(proj);
+//////    Geo.getGeoData()->writeFile(IO_Writer);
+////
+//    // Check Data
+//    auto ckData =  std::static_pointer_cast<GeometryMeshFemData<Dim2D>>(Geo.getGeoData());
+//    std::cout<< *ckData->xNode<< std::endl;
+//    std::cout<< *ckData->xNode->x()<< std::endl;
+//    std::cout<< *ckData->xNode->y()<< std::endl;
+//    std::cout<< *ckData->cElement30<< std::endl;
 
 //    DemoDataArray();
-//    DemoDataTable();
+    DemoDataTable();
 
     return 0;
 }
