@@ -7,41 +7,6 @@
 void DemoDataArray();
 void DemoDataTable();
 
-
-class A_Base{
-public:
-    A_Base() {}
-};
-
-
-template <class Dimension, class DOF_Type>
-class A: public A_Base{
-public:
-    A():A_Base() {}
-
-};
-
-//template <class Dimension, class NumericalMethodUtility, class DOF_Type>
-//class GO{
-//public:
-//
-//    std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> geoData;
-//
-//};
-//
-//template <>
-//class GO<Dim2D, FEM, ScalarDOF>{
-//public:
-//    GO(const std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> &geoData) : geoData(geoData) {}
-//
-//public:
-////    GO(const std::shared_ptr<A<Dimension, DOF_Type>> &a) : a(a) {}
-//
-//    std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> geoData;
-////    std::shared_ptr<A<Dimension, DOF_Type>> a;
-//};
-
-
 int main() {
     // ArtCFD project
     ProjectArt proj("TestProj_BLM");
@@ -63,6 +28,8 @@ int main() {
 
     auto domain = std::make_shared<Domain<Dim2D, FEM>>();
     domain->addSystem(std::static_pointer_cast<SystemBase<Dim2D, FEM>>(sys));
+
+    domain->Assembly();
 
 //    auto a = std::make_shared<A<Dim2D, ScalarDOF>>();
 //    auto go = std::make_shared<GO<Dim2D, FEM, ScalarDOF>>(pGeo);

@@ -1,13 +1,13 @@
 //
 // Created by Chingkai Chou on 3/12/18.
 //
-#include "DOF_Mannger.hpp"
 
 #ifndef ARTCFD_DOF_MANNGER_HPP
 #define ARTCFD_DOF_MANNGER_HPP
 #include <vector>
 #include <memory>
 #include "DOF.hpp"
+
 class DOF_Mannger{
 public:
     DOF_Mannger() {
@@ -15,6 +15,7 @@ public:
         systemId.push_back(0);
     }
     bool addDofData(std::shared_ptr<DOF_Base> dof);
+    size_t &getTotalDof(){ return tailId;}
 
 
 private:
