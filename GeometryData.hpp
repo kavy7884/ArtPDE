@@ -1,13 +1,28 @@
 //
-// Created by Chingkai Chou on 3/2/18.
+// Created by Chingkai Chou on 3/8/18.
 //
 
-#ifndef ARTCFD_GEOMETRYMESHDATA_HPP
-#define ARTCFD_GEOMETRYMESHDATA_HPP
+#ifndef ARTCFD_GEOMETRYDATA_HPP
+#define ARTCFD_GEOMETRYDATA_HPP
 
-#include "DataTable.hpp"
+#include "IO_Uility.hpp"
 #include "CartesianVector.hpp"
-#include "Geometry.hpp"
+#include "DataArray.hpp"
+#include "DataTable.hpp"
+
+enum class ElementType{None, Line, Triangle, Quadrilateral, Tetrahedron, Pyramid, Prism, Hexahedron};
+
+template <class Dimension>
+class GeometryData{
+public:
+    GeometryData() {}
+    size_t GeoDim{Dimension::Dim};
+
+    virtual bool readFile(IO_FileReader &IO_in) = 0;
+    virtual bool writeFile(IO_FileWriter &IO_out) = 0;
+
+    virtual bool DataProcessor() = 0;
+};
 
 template <class Dimension>
 class GeometryMeshData : public GeometryData<Dimension>{
@@ -16,9 +31,29 @@ public:
 
     std::shared_ptr<CartesianVector<Dimension, double>> xNode{nullptr};
     std::shared_ptr<DataTable<size_t>> cElement30{nullptr};
+    std::shared_ptr<DataArray<ElementType>> typeElement30{nullptr};
 
     virtual bool readFile(IO_FileReader &IO_in) override;
     virtual bool writeFile(IO_FileWriter &IO_out) override  {return true;} ;
+
+    virtual bool DataProcessor() override {
+        calElementType();
+        return true;
+    };
+private:
+    bool calElementType();
+
+};
+
+template <class Dimension>
+class GeometryMeshFemData : public GeometryMeshData<Dimension>{
+public:
+    GeometryMeshFemData():GeometryMeshData<Dimension>(){};
+    virtual bool readFile(IO_FileReader &IO_in) override;
+    virtual bool writeFile(IO_FileWriter &IO_out)override{return true;};
+    virtual bool DataProcessor() override{
+        return GeometryMeshData<Dimension>::DataProcessor();
+    }
 
 };
 
@@ -90,4 +125,31 @@ bool GeometryMeshData<Dimension>::readFile(IO_FileReader &IO_in) {
     return true;
 }
 
-#endif //ARTCFD_GEOMETRYMESHDATA_HPP
+template<class Dimension>
+bool GeometryMeshData<Dimension>::calElementType() {
+    std::vector<ElementType> type;
+    for (size_t i = 0; i < cElement30->getRowSize(); ++i) {
+        //std::cout << cElement30->row(i).size() << std::endl;
+        if(Dimension::Dim == 2){
+            if(cElement30->row(i).size() == 3) type.push_back(ElementType::Triangle);
+            else if(cElement30->row(i).size() == 4) type.push_back(ElementType::Quadrilateral);
+        }
+        else if(Dimension::Dim == 3){
+
+        }
+        else{
+            type.push_back(ElementType::None);
+        }
+    }
+
+    typeElement30 = DataArray<ElementType>::create("typeElement30").dataFrom(type).build();
+
+    return true;
+}
+
+template<class Dimension>
+bool GeometryMeshFemData<Dimension>::readFile(IO_FileReader &IO_in) {
+    return GeometryMeshData<Dimension>::readFile(IO_in);
+}
+
+#endif //ARTCFD_GEOMETRYDATA_HPP

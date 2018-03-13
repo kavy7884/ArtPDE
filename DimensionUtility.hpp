@@ -4,7 +4,10 @@
 
 #ifndef ARTCFD_DIMENSIONUTILITY_HPP
 #define ARTCFD_DIMENSIONUTILITY_HPP
-class Dimension{};
+class Dimension{
+public:
+    static const size_t Dim{0};
+};
 class Dim1D : public Dimension{
 public:
     static const size_t Dim{1};

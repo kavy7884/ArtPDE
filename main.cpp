@@ -1,33 +1,112 @@
 #include <iostream>
+#include <memory>
 #include "ProjectUility.hpp"
-#include "GeometryMeshFemData.hpp"
+#include "Geometry.hpp"
+#include "Domain.hpp"
 
 void DemoDataArray();
 void DemoDataTable();
+
+
+class A_Base{
+public:
+    A_Base() {}
+};
+
+
+template <class Dimension, class DOF_Type>
+class A: public A_Base{
+public:
+    A():A_Base() {}
+
+};
+
+//template <class Dimension, class NumericalMethodUtility, class DOF_Type>
+//class GO{
+//public:
+//
+//    std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> geoData;
+//
+//};
+//
+//template <>
+//class GO<Dim2D, FEM, ScalarDOF>{
+//public:
+//    GO(const std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> &geoData) : geoData(geoData) {}
+//
+//public:
+////    GO(const std::shared_ptr<A<Dimension, DOF_Type>> &a) : a(a) {}
+//
+//    std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> geoData;
+////    std::shared_ptr<A<Dimension, DOF_Type>> a;
+//};
+
+
 int main() {
-//    // ArtCFD project
-//    ProjectArt proj("TestProj_BLM");
+    // ArtCFD project
+    ProjectArt proj("TestProj_BLM");
+
+    // Geometry set up
+    auto pGeo = std::make_shared<Geometry<Dim2D,FEM>>();
+
+    //FEM Geometry Read
+    IO_FileReader IO_Reader(proj);
+    pGeo->getGeoData()->readFile(IO_Reader);
+    pGeo->getGeoData()->DataProcessor();
+
+//    //FEM Geometry Write
+//    IO_FileWriter IO_Writer(proj);
+//    pGeo->getGeoData()->writeFile(IO_Writer);
+
+    auto dof = std::make_shared<DOF<Dim2D, ScalarDOF>>("T", pGeo->getGeoData()->xNode->getSize());
+    auto sys = std::make_shared<System<Dim2D, FEM, ScalarDOF>>(pGeo, dof);
+
+    auto domain = std::make_shared<Domain<Dim2D, FEM>>();
+    domain->addSystem(std::static_pointer_cast<SystemBase<Dim2D, FEM>>(sys));
+
+//    auto a = std::make_shared<A<Dim2D, ScalarDOF>>();
+//    auto go = std::make_shared<GO<Dim2D, FEM, ScalarDOF>>(pGeo);
+
+//    std::vector<std::shared_ptr<A<Dimension, DOF_Type>>> aaa;
+//    std::shared_ptr<A<Dimension, DOF_Type>> tmp = std::make_shared<A<Dim2D, ScalarDOF>>();
+//    aaa.push_back()
+
+//    std::shared_ptr<A_Base> aa;
+//    aa = std::make_shared<A<Dim2D, ScalarDOF>>();
 //
-//    // Geometry set up
-//    Geometry<Dim2D, GeometryMeshFemData> Geo;
-//
-//    //FEM Geometry Read
-//    IO_FileReader IO_Reader(proj);
-//    Geo.getGeoData()->readFile(IO_Reader);
-////
-//////    //FEM Geometry Write
-//////    IO_FileWriter IO_Writer(proj);
-//////    Geo.getGeoData()->writeFile(IO_Writer);
-////
+
 //    // Check Data
-//    auto ckData =  std::static_pointer_cast<GeometryMeshFemData<Dim2D>>(Geo.getGeoData());
+//    auto ckData =  pGeo->getGeoData();
 //    std::cout<< *ckData->xNode<< std::endl;
 //    std::cout<< *ckData->xNode->x()<< std::endl;
 //    std::cout<< *ckData->xNode->y()<< std::endl;
 //    std::cout<< *ckData->cElement30<< std::endl;
 
+//
+//    std::shared_ptr<TrialSpace> bs = std::make_shared<TrialSpace>();
+//    std::shared_ptr<DOF> dof1 = std::make_shared<DOF>("U", geo.getGeoData()->xNode->getSize());
+//    std::shared_ptr<DOF> dof2 = std::make_shared<DOF>("V", geo.getGeoData()->xNode->getSize());
+//    std::shared_ptr<DOF> dof3 = std::make_shared<DOF>("P", 5);
+//    std::shared_ptr<Approximation> interpo1 = std::make_shared<Approximation>(bs, dof1);
+//    std::shared_ptr<Approximation> interpo2 = std::make_shared<Approximation>(bs, dof2);
+//    std::shared_ptr<Approximation> interpo3 = std::make_shared<Approximation>(bs, dof3);
+//
+//    Solution solution;
+//    solution.addSolution(interpo1);
+//    solution.addSolution(interpo2);
+//    solution.addSolution(interpo3);
+//
+//    std::cout << solution.getGlobalDofSize() << std::endl;
+
+
+
+
+
+
+
+
 //    DemoDataArray();
-    DemoDataTable();
+//    DemoDataTable();
 
     return 0;
 }
