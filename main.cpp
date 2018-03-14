@@ -9,7 +9,7 @@ void DemoDataTable();
 
 int main() {
     // ArtCFD project
-    ProjectArt proj("TestProj_BLM");
+    ProjectArt proj("TestProj");
 
     // Geometry set up
     auto pGeo = std::make_shared<Geometry<Dim2D,FEM>>();

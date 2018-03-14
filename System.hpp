@@ -62,7 +62,30 @@ private:
 template <class Dimension, class NumericalMethodUtility, class DOF_Type>
 bool System<Dimension, NumericalMethodUtility, DOF_Type>::Assembly() {
 
-    std::cout << "System ~ Go!" << std::endl;
+    std::cout << "Integral Cell Data Init" << std::endl;
+    auto intGeo = this->integration->getIntGeoData()->getGeoData();
+    auto intPt = this->integration->getIntPtData();
+    size_t integralCellNum = intGeo->cElement30->getRowSize();
+
+    std::cout << "Operation Data Init" << std::endl;
+    auto operate = this->problemOperation;
+
+    std::cout << "Operate Init" << std::endl;
+    operate->Init();
+
+    std::cout << "Cell Loop Start" << std::endl;
+    for (size_t cellId = 0; cellId < integralCellNum; ++cellId) {
+        std::cout << "Cell Id: " << cellId << std::endl;
+        operate->ElementLoopInit(cellId);
+        for (size_t q = 0; q < intPt->QuadraturePointN; ++q) {
+            operate->CalIntegralPoint(intPt->xi[q], intPt->eta[q], intPt->w[q]);
+            //std::cout << "xi: " << intPt->xi[q] << ", eta: " << intPt->eta[q] << ", w: " <<intPt->w[q] << std::endl;
+        }
+        operate->ElementLoopEnd(cellId);
+    }
+
+    std::cout << "Operate End" << std::endl;
+    operate->End();
 
     return true;
 }

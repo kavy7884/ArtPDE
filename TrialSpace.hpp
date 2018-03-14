@@ -67,7 +67,8 @@ Eigen::MatrixXd TrialSpace<Dimension, NumericalMethodUtility>::cal_dN_dx(double 
     this->mappingFunction->cal_dxi_dx(xi, eta);
     this->mappingFunction->cal_jacobin();
 
-    return (naturalDerivatives * this->mappingFunction->get_dxi_dx());
+    return (this->mappingFunction->get_dxi_dx() * naturalDerivatives);
+//    return naturalDerivatives;
 }
 
 template<class Dimension, class NumericalMethodUtility>

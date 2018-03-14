@@ -47,7 +47,19 @@ public:
         intPtData = std::make_shared<GaussianQuadrature<Dimension>>();
     }
 
-private:
+    const std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> &getIntGeoData() const {
+        return intGeoData;
+    }
+
+    const std::shared_ptr<GaussianQuadrature<Dimension>> &getIntPtData() const {
+        return intPtData;
+    }
+
+    const std::shared_ptr<Operation<Dimension, NumericalMethodUtility, DOF_Type>> &getProblemOperation() const {
+        return problemOperation;
+    }
+
+protected:
     std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> intGeoData;
     std::shared_ptr<GaussianQuadrature<Dimension>> intPtData;
     std::shared_ptr<Operation<Dimension, NumericalMethodUtility, DOF_Type>> problemOperation;
