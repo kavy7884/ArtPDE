@@ -17,6 +17,12 @@ public:
     bool addDofData(std::shared_ptr<DOF_Base> dof);
     size_t &getTotalDof(){ return tailId;}
 
+    const std::vector<size_t> &getGroupId() const;
+
+    const std::vector<size_t> &getSystemId() const;
+
+    const std::vector<std::shared_ptr<DOF_Base>> &getDofGroupData() const;
+
 
 private:
     std::vector<std::shared_ptr<DOF_Base>> dofGroupData;
@@ -33,7 +39,20 @@ bool DOF_Mannger::addDofData(std::shared_ptr<DOF_Base> dof) {
         groupId.push_back(tailId);
     }
     systemId.push_back(tailId);
+    dofGroupData.push_back(dof);
     return ((tailId - tailBeforeAdd) == 0);
+}
+
+const std::vector<size_t> &DOF_Mannger::getGroupId() const {
+    return groupId;
+}
+
+const std::vector<size_t> &DOF_Mannger::getSystemId() const {
+    return systemId;
+}
+
+const std::vector<std::shared_ptr<DOF_Base>> &DOF_Mannger::getDofGroupData() const {
+    return dofGroupData;
 }
 
 #endif //ARTCFD_DOF_MANNGER_HPP

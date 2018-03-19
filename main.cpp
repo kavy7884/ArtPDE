@@ -1,8 +1,8 @@
 #include <iostream>
-#include <memory>
 #include "ProjectUility.hpp"
 #include "Geometry.hpp"
 #include "Domain.hpp"
+#include "Solver.hpp"
 
 void DemoDataArray();
 void DemoDataTable();
@@ -14,62 +14,28 @@ int main() {
     // Geometry set up
     auto pGeo = std::make_shared<Geometry<Dim2D,FEM>>();
 
-    //FEM Geometry Read
+    // FEM Geometry Read
     IO_FileReader IO_Reader(proj);
     pGeo->getGeoData()->readFile(IO_Reader);
     pGeo->getGeoData()->DataProcessor();
 
-//    //FEM Geometry Write
-//    IO_FileWriter IO_Writer(proj);
-//    pGeo->getGeoData()->writeFile(IO_Writer);
-
+    // DOF create
     auto dof = std::make_shared<DOF<Dim2D, ScalarDOF>>("T", pGeo->getGeoData()->xNode->getSize());
+
+    // System create
     auto sys = std::make_shared<System<Dim2D, FEM, ScalarDOF>>(pGeo, dof);
 
+    // Domain create (and add system)
     auto domain = std::make_shared<Domain<Dim2D, FEM>>();
     domain->addSystem(std::static_pointer_cast<SystemBase<Dim2D, FEM>>(sys));
 
-    domain->Assembly();
+    // Problem solve
+    auto solver = std::make_shared<Solver<Dim2D, FEM>>(domain);
+    solver->solve();
 
-//    auto a = std::make_shared<A<Dim2D, ScalarDOF>>();
-//    auto go = std::make_shared<GO<Dim2D, FEM, ScalarDOF>>(pGeo);
-
-//    std::vector<std::shared_ptr<A<Dimension, DOF_Type>>> aaa;
-//    std::shared_ptr<A<Dimension, DOF_Type>> tmp = std::make_shared<A<Dim2D, ScalarDOF>>();
-//    aaa.push_back()
-
-//    std::shared_ptr<A_Base> aa;
-//    aa = std::make_shared<A<Dim2D, ScalarDOF>>();
-//
-
-//    // Check Data
-//    auto ckData =  pGeo->getGeoData();
-//    std::cout<< *ckData->xNode<< std::endl;
-//    std::cout<< *ckData->xNode->x()<< std::endl;
-//    std::cout<< *ckData->xNode->y()<< std::endl;
-//    std::cout<< *ckData->cElement30<< std::endl;
-
-//
-//    std::shared_ptr<TrialSpace> bs = std::make_shared<TrialSpace>();
-//    std::shared_ptr<DOF> dof1 = std::make_shared<DOF>("U", geo.getGeoData()->xNode->getSize());
-//    std::shared_ptr<DOF> dof2 = std::make_shared<DOF>("V", geo.getGeoData()->xNode->getSize());
-//    std::shared_ptr<DOF> dof3 = std::make_shared<DOF>("P", 5);
-//    std::shared_ptr<Approximation> interpo1 = std::make_shared<Approximation>(bs, dof1);
-//    std::shared_ptr<Approximation> interpo2 = std::make_shared<Approximation>(bs, dof2);
-//    std::shared_ptr<Approximation> interpo3 = std::make_shared<Approximation>(bs, dof3);
-//
-//    Solution solution;
-//    solution.addSolution(interpo1);
-//    solution.addSolution(interpo2);
-//    solution.addSolution(interpo3);
-//
-//    std::cout << solution.getGlobalDofSize() << std::endl;
-
-
-
-
-
-
+    // Output DOF
+    IO_FileWriter IO_writer(proj);
+    dof->writeFile(IO_writer, pGeo->getGeoData()->xNode);
 
 
 //    DemoDataArray();

@@ -18,23 +18,14 @@ public:
 
     bool Init(){return true;};
     bool ElementLoopInit(size_t &elementId);
-    bool CalIntegralPoint(double &xi, double &eta, double &w);
+    bool CalIntegralPoint(size_t &elementId, double &xi, double &eta, double &w,
+                          Eigen::MatrixXd &systemStiffness, Eigen::VectorXd &systemForce);
     bool ElementLoopEnd(size_t &elementId){return true;};
-    bool End(){return true;};
-
-    const Eigen::MatrixXd &getStiffness() const {
-        return stiffness;
-    }
-
-    const Eigen::MatrixXd &getForce() const {
-        return force;
-    }
+    bool End(){ return true; };
 
 protected:
     std::shared_ptr<Approximation<Dimension, NumericalMethodUtility, DOF_Type>> dofApproximation;
     std::shared_ptr<TestSpace<Dimension, NumericalMethodUtility>> testSpace;
-
-    Eigen::MatrixXd stiffness, force;
 
 };
 
@@ -51,13 +42,24 @@ bool Operation<Dimension, NumericalMethodUtility, DOF_Type>::ElementLoopInit(siz
 };
 
 template <class Dimension, class NumericalMethodUtility, class DOF_Type>
-bool Operation<Dimension, NumericalMethodUtility, DOF_Type>::CalIntegralPoint(double &xi, double &eta, double &w){
+bool Operation<Dimension, NumericalMethodUtility, DOF_Type>::CalIntegralPoint(size_t &elementId, double &xi, double &eta, double &w, Eigen::MatrixXd &systemStiffness, Eigen::VectorXd &systemForce){
 
     auto du_dx = dofApproximation->getTrialSpace()->cal_dN_dx(xi, eta);
-    auto dv_dx = dofApproximation->getTrialSpace()->cal_dN_dx(xi, eta);
+    auto dv_dx = testSpace->cal_dN_dx(xi, eta);
+    auto jacobin = dofApproximation->getTrialSpace()->getMappingFunction()->getJacobin();
+    auto localStiffness = (dv_dx.transpose() * du_dx) * jacobin * w;
 
-    std::cout << du_dx << std::endl;
-    std::cout << dv_dx << std::endl;
+    auto localDOF = dofApproximation->getTrialSpace()->getGeoData()->getGeoData()->cElement30->row(elementId);
+
+    size_t rowId{0}, colId{0};
+    for (size_t i = 0; i < localDOF.size(); ++i) {
+        rowId = localDOF.col(i);
+        for (size_t j = 0; j < localDOF.size(); ++j){
+            colId = localDOF.col(j);
+            systemStiffness(rowId, colId) += localStiffness(i, j);
+        }
+    }
+
     return true;
 };
 

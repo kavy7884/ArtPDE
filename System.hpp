@@ -22,6 +22,14 @@ public:
 
     virtual bool Assembly() = 0;
 
+    Eigen::MatrixXd &getSystemStiffness() {
+        return systemStiffness;
+    }
+
+    Eigen::VectorXd &getSystemForce() {
+        return systemForce;
+    }
+
 protected:
     std::shared_ptr<DOF_Base> dofBase;
     std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> geoData;
@@ -62,31 +70,43 @@ private:
 template <class Dimension, class NumericalMethodUtility, class DOF_Type>
 bool System<Dimension, NumericalMethodUtility, DOF_Type>::Assembly() {
 
-    std::cout << "Integral Cell Data Init" << std::endl;
+    //std::cout << "Integral Cell Data Init" << std::endl;
     auto intGeo = this->integration->getIntGeoData()->getGeoData();
     auto intPt = this->integration->getIntPtData();
     size_t integralCellNum = intGeo->cElement30->getRowSize();
 
-    std::cout << "Operation Data Init" << std::endl;
+    //std::cout << "Operation Data Init" << std::endl;
     auto operate = this->problemOperation;
 
-    std::cout << "Operate Init" << std::endl;
+    //std::cout << "Operate Init" << std::endl;
     operate->Init();
 
-    std::cout << "Cell Loop Start" << std::endl;
+    //std::cout << "Cell Loop Start" << std::endl;
     for (size_t cellId = 0; cellId < integralCellNum; ++cellId) {
-        std::cout << "Cell Id: " << cellId << std::endl;
+        //std::cout << "Cell Id: " << cellId << std::endl;
         operate->ElementLoopInit(cellId);
         for (size_t q = 0; q < intPt->QuadraturePointN; ++q) {
-            operate->CalIntegralPoint(intPt->xi[q], intPt->eta[q], intPt->w[q]);
+            operate->CalIntegralPoint(cellId, intPt->xi[q], intPt->eta[q], intPt->w[q], this->systemStiffness, this->systemForce);
             //std::cout << "xi: " << intPt->xi[q] << ", eta: " << intPt->eta[q] << ", w: " <<intPt->w[q] << std::endl;
         }
         operate->ElementLoopEnd(cellId);
     }
 
-    std::cout << "Operate End" << std::endl;
+    //std::cout << "Operate End" << std::endl;
     operate->End();
 
+
+    // Force constraint
+    for (size_t i = 0; i < intGeo->constraintId->size(); ++i) {
+        this->systemForce(intGeo->constraintId->at(i)) = intGeo->constraintValue->at(i);
+        for (size_t j = 0; j < dof->size(); ++j) {
+            this->systemStiffness(intGeo->constraintId->at(i), j) = 0.0;
+        }
+        this->systemStiffness(intGeo->constraintId->at(i), intGeo->constraintId->at(i)) = 1.0;
+    }
+
+
+    //std::cout << this->systemStiffness << std::endl;
     return true;
 }
 
