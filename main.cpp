@@ -8,34 +8,51 @@ void DemoDataArray();
 void DemoDataTable();
 
 int main() {
-    // ArtCFD project
-    ProjectArt proj("TestProj");
+    auto proj_1 = ArtProject::create("TestProj").setRunPath("..").setDivideSlash("/").setInitialFolderName("Init").build();
+    auto proj_2 = ArtProject::create("FuckProj").build();
 
-    // Geometry set up
-    auto pGeo = std::make_shared<Geometry<Dim2D,FEM>>();
 
-    // FEM Geometry Read
-    IO_FileReader IO_Reader(proj);
-    pGeo->getGeoData()->readFile(IO_Reader);
-    pGeo->getGeoData()->DataProcessor();
+    std::cout << proj_1->getProjectGeometryPath() << std::endl;
+    std::cout << proj_1->getProjectSettingPath() << std::endl;
+    std::cout << proj_1->getProjectInitialPath() << std::endl;
+    std::cout << proj_1->getProjectResultsPath() << std::endl;
 
-    // DOF create
-    auto dof = std::make_shared<DOF<Dim2D, ScalarDOF>>("T", pGeo->getGeoData()->xNode->getSize());
 
-    // System create
-    auto sys = std::make_shared<System<Dim2D, FEM, ScalarDOF>>(pGeo, dof);
+    std::cout << proj_2->getProjectGeometryPath() << std::endl;
+    std::cout << proj_2->getProjectSettingPath() << std::endl;
+    std::cout << proj_2->getProjectInitialPath() << std::endl;
+    std::cout << proj_2->getProjectResultsPath() << std::endl;
 
-    // Domain create (and add system)
-    auto domain = std::make_shared<Domain<Dim2D, FEM>>();
-    domain->addSystem(std::static_pointer_cast<SystemBase<Dim2D, FEM>>(sys));
 
-    // Problem solve
-    auto solver = std::make_shared<Solver<Dim2D, FEM>>(domain);
-    solver->solve();
+//    // ArtCFD project
+//    ProjectArt proj("TestProj");
 
-    // Output DOF
-    IO_FileWriter IO_writer(proj);
-    dof->writeFile(IO_writer, pGeo->getGeoData()->xNode);
+//
+//    // Geometry set up
+//    auto pGeo = std::make_shared<Geometry<Dim2D,FEM>>();
+//
+//    // FEM Geometry Read
+//    IO_FileReader IO_Reader(proj);
+//    pGeo->getGeoData()->readFile(IO_Reader);
+//    pGeo->getGeoData()->DataProcessor();
+//
+//    // DOF create
+//    auto dof = std::make_shared<DOF<Dim2D, ScalarDOF>>("T", pGeo->getGeoData()->xNode->getSize());
+//
+//    // System create
+//    auto sys = std::make_shared<System<Dim2D, FEM, ScalarDOF>>(pGeo, dof);
+//
+//    // Domain create (and add system)
+//    auto domain = std::make_shared<Domain<Dim2D, FEM>>();
+//    domain->addSystem(std::static_pointer_cast<SystemBase<Dim2D, FEM>>(sys));
+//
+//    // Problem solve
+//    auto solver = std::make_shared<Solver<Dim2D, FEM>>(domain);
+//    solver->solve();
+//
+//    // Output DOF
+//    IO_FileWriter IO_writer(proj);
+//    dof->writeFile(IO_writer, pGeo->getGeoData()->xNode);
 
 
 //    DemoDataArray();
