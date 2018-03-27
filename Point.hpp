@@ -59,7 +59,7 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Point<Dimension>>> data;
+    std::vector<PtrPointType> data;
 };
 
 

@@ -13,6 +13,11 @@
 #include "ProjectUility.hpp"
 #include "Geometry.hpp"
 
+enum class GeometrySourceFormat{ File, HDF5};
+
+template <class Dimension, class NumericalMethodUtility>
+class Geometry;
+
 template <class Dimension, class NumericalMethodUtility>
 class GeometryLoader{
 public:
@@ -46,11 +51,13 @@ public:
 protected:
     bool load_BasicMeshData(){
         load_xNode();
+        load_cElement30();
         return true;
     }
 
 private:
     bool load_xNode();
+    bool load_cElement30();
 };
 
 
@@ -59,7 +66,7 @@ class GeometryFileLoader;
 
 
 template <class Dimension>
-class GeometryFileLoader<Dimension, MeshTypeMethod> : protected GeometryFileLoaderBase<Dimension, MeshTypeMethod>{
+class GeometryFileLoader<Dimension, MeshTypeMethod> : public GeometryFileLoaderBase<Dimension, MeshTypeMethod>{
 public:
     GeometryFileLoader(const std::string &geoName) : GeometryFileLoaderBase<Dimension, MeshTypeMethod>(geoName) {}
 
@@ -68,32 +75,16 @@ public:
         return GeometryFileLoaderBase<Dimension, MeshTypeMethod>::load();
     }
 
-    void setProj(const std::shared_ptr<ArtProject> &proj) override {
-        GeometryLoader<Dimension, MeshTypeMethod>::setProj(proj);
-    }
-
-    void setGeoData(const std::shared_ptr<typename Geometry<Dimension, MeshTypeMethod>::GeoType>& geoData) override {
-        GeometryLoader<Dimension, MeshTypeMethod>::setGeoData(geoData);
-    }
-
 };
 
 template <class Dimension>
-class GeometryFileLoader<Dimension, FEM> : protected GeometryFileLoaderBase<Dimension, FEM>{
+class GeometryFileLoader<Dimension, FEM> : public GeometryFileLoaderBase<Dimension, FEM>{
 public:
     GeometryFileLoader(const std::string &geoName) : GeometryFileLoaderBase<Dimension, FEM>(geoName) {}
 
     bool load() override {
         this->load_BasicMeshData();
         return GeometryFileLoaderBase<Dimension, FEM>::load();
-    }
-
-    void setProj(const std::shared_ptr<ArtProject> &proj) override {
-        GeometryLoader<Dimension, FEM>::setProj(proj);
-    }
-
-    void setGeoData(const std::shared_ptr<typename Geometry<Dimension, FEM>::GeoType>& geoData) override {
-        GeometryLoader<Dimension, FEM>::setGeoData(geoData);
     }
 
 };
@@ -111,17 +102,15 @@ template <class Dimension, class NumericalMethodUtility>
 bool GeometryFileLoaderBase<Dimension, NumericalMethodUtility>::load_xNode(){
     std::string path_xNode = this->proj->getProjectGeometryPath() + this->geoName + this->proj->getSlash()
                             + "xNode.txt";
-    std::cout << path_xNode << std::endl;
 
     std::ifstream fs;
     std::string bufferLine;
-
     fs.open(path_xNode);
     if(fs.is_open()){
         while(getline( fs, bufferLine )) {
             std::stringstream w(bufferLine);
             auto p_point = std::make_shared<Point<Dimension>>(this->geoData->xNode);
-            for (size_t i = 0; i < Dim2D::Dim; ++i) {
+            for (size_t i = 0; i < Dimension::Dim; ++i) {
                 w >> p_point->getDataByDim(i);
             }
             this->geoData->xNode->addPoint(p_point);
@@ -129,10 +118,39 @@ bool GeometryFileLoaderBase<Dimension, NumericalMethodUtility>::load_xNode(){
     }else
         return false;
 
-    std::cout << "Load xNode !" << std::endl;
+    std::cout << "Geometry loaded >> " << path_xNode << std::endl;
     return true;
 }
 
+template<class Dimension, class NumericalMethodUtility>
+bool GeometryFileLoaderBase<Dimension, NumericalMethodUtility>::load_cElement30() {
+    std::string path_cElement30 = this->proj->getProjectGeometryPath() + this->geoName + this->proj->getSlash()
+                             + "cElement30.txt";
+
+    std::ifstream fs;
+    std::string bufferLine;
+    size_t tempId;
+
+    if(this->geoData->xNode == nullptr)
+        return false;
+
+    fs.open(path_cElement30);
+    if(fs.is_open()) {
+        while(getline( fs, bufferLine )) {
+            std::stringstream w(bufferLine);
+            auto p_elementConnect = std::make_shared<ElementConnectivity<Dimension>>();
+            while(w >> tempId){
+                auto p_point = this->geoData->xNode->getPoint(tempId);
+                p_elementConnect->addVertex(p_point);
+            }
+            this->geoData->cElement30->addElementConnectivity(p_elementConnect);
+        }
+    }else
+        return false;
+
+    std::cout << "Geometry loaded >> " << path_cElement30 << std::endl;
+    return true;
+}
 
 
 #endif //ARTCFD_GEOMETRYLOADER_H

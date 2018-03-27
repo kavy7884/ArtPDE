@@ -13,29 +13,19 @@
 
 int main() {
     auto proj_1 = ArtProject::create("TestProj").setRunPath(".").setDivideSlash("/").setInitialFolderName("Init").build();
-//    auto proj_2 = ArtProject::create("FuckProj").build();
 
-//    std::cout << proj_1->getProjectGeometryPath() << std::endl;
-//    std::cout << proj_1->getProjectSettingPath() << std::endl;
-//    std::cout << proj_1->getProjectInitialPath() << std::endl;
-//    std::cout << proj_1->getProjectResultsPath() << std::endl;
-//
-//
-//    std::cout << proj_2->getProjectGeometryPath() << std::endl;
-//    std::cout << proj_2->getProjectSettingPath() << std::endl;
-//    std::cout << proj_2->getProjectInitialPath() << std::endl;
-//    std::cout << proj_2->getProjectResultsPath() << std::endl;
+    auto quadMeshForIntgration = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_Quad").setSourceFormat(GeometrySourceFormat::File)
+                                                   .load(proj_1).build();
 
-    auto pGeo = std::make_shared<Geometry<Dim2D,FEM>>();
+    auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).build();
 
-    std::shared_ptr<GeometryFileLoader<Dim2D,FEM>> loader;
-    loader = std::make_shared<GeometryFileLoader<Dim2D,FEM>>("test");
-    loader->setProj(proj_1);
-    loader->setGeoData(pGeo->getData());
-    loader->load();
+    std::cout << "---- Int Mesh ----" << std::endl;
+    std::cout << *(quadMeshForIntgration->xNode) << std::endl;
+    std::cout << *(quadMeshForIntgration->cElement30) << std::endl;
 
-    std::cout << *(pGeo->getData()->xNode) << std::endl;
-
+    std::cout << "---- Approxi Mesh ----" << std::endl;
+    std::cout << *(blmMeshForApproximation->xNode) << std::endl;
+    std::cout << *(blmMeshForApproximation->cElement30) << std::endl;
 
 
 //    // ArtCFD project
