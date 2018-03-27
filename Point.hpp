@@ -44,7 +44,7 @@ public:
         p_point->setId(size());
         data.push_back(p_point);
     }
-    PtrPointType & getPoint(size_t& id){ return data[id];}
+    PtrPointType & getPoint(size_t id){ return data[id];}
     const PtrPointType & c_getPoint(size_t& id)const{ return data[id];}
 
     friend std::ostream &operator<<(std::ostream &os, const PointList<Dimension> &list){

@@ -35,6 +35,8 @@ protected:
 
     void addPoint(std::shared_ptr<Point<Dimension>> &pointData);
 
+    std::vector<std::shared_ptr<Point<Dimension>>> &getPoints(){ return points;}
+
     size_t id{0};
     std::vector<std::shared_ptr<Point<Dimension>>> points;
 };
@@ -53,8 +55,13 @@ public:
 
     void addVertex(std::shared_ptr<Point<Dimension>> &vertexData){ return this->addPoint(vertexData);}
 
+    std::vector<std::shared_ptr<Point<Dimension>>> &getVertex(){ return this->getPoints();}
+
     friend std::ostream &operator<<(std::ostream &os, const ElementConnectivity &connectivity) {
-        os << static_cast<const Connectivity<Dimension> &>(connectivity);
+        //os << static_cast<const Connectivity<Dimension> &>(connectivity);
+        for (auto &pt : connectivity.points) {
+            os << pt->getId() << "\t";
+        }
         return os;
     }
 };
@@ -71,7 +78,7 @@ public:
         p_elementConnectivity->setId(size());
         data.push_back(p_elementConnectivity);
     }
-    PtrElementConnectivityType & getElementConnectivity(size_t& id){ return data[id];}
+    PtrElementConnectivityType & getElementConnectivity(size_t id){ return data[id];}
     const PtrElementConnectivityType & c_getElementConnectivity(size_t& id) const { return data[id];}
 
     friend std::ostream &operator<<(std::ostream &os, const ElementList &list) {

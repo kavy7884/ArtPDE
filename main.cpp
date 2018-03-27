@@ -28,6 +28,15 @@ int main() {
     std::cout << *(blmMeshForApproximation->cElement30) << std::endl;
 
 
+
+//    auto one2Dpoint = blmMeshForApproximation->xNode->getPoint(1);
+//    one2Dpoint->x(); one2Dpoint->y();
+//
+//    auto eleConnect = blmMeshForApproximation->cElement30->getElementConnectivity(3);
+//    eleConnect->getVertex()[1]->x();
+
+
+
 //    // ArtCFD project
 //    ProjectArt proj("TestProj");
 
