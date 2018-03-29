@@ -12,27 +12,36 @@
 #include "GeometryLoader.hpp"
 
 template <class Dimension, class NumericalMethodUtility> class GeometryBuilder;
+template <class Dimension, class NumericalMethodUtility> class GeometryType;
 
 template <class Dimension, class NumericalMethodUtility>
 class GeometryBase{
 public:
-    GeometryBase(const std::string & geoName): geoName(geoName){}
+    static GeometryBuilder<Dimension, NumericalMethodUtility> create(const std::string & geoName){
+        return GeometryBuilder<Dimension, NumericalMethodUtility>(geoName);
+    }
+
+protected:
+    GeometryBase(){};
+
+    template <class Dimension_, class NumericalMethodUtility_> friend class GeometryBuilder;
 
     virtual bool Init();
 
-    virtual bool Load(std::shared_ptr<ArtProject> &project){ return true;};
+    virtual bool Load(std::shared_ptr<ArtProject> &project);
 
-    GeometrySourceFormat getFormat() const {
-        return format;
-    }
+    GeometrySourceFormat getFormat() const { return format; }
 
-    void setFormat(GeometrySourceFormat format) {
-        GeometryBase::format = format;
-    };
-protected:
+    void setFormat(GeometrySourceFormat format) { GeometryBase::format = format; };
+
+    const std::string &getGeoName() const{ return geoName; }
+
+    void setGeoName(const std::string &geoName){GeometryBase::geoName = geoName;}
+
     std::string geoName;
     GeometrySourceFormat format{GeometrySourceFormat::File};
     std::shared_ptr<GeometryLoader<Dimension, NumericalMethodUtility>> geoLoader{nullptr};
+
 };
 
 template<class Dimension, class NumericalMethodUtility>
@@ -42,93 +51,53 @@ bool GeometryBase<Dimension, NumericalMethodUtility>::Init() {
         return true;
     }else
         return false;
+}
 
+template<class Dimension, class NumericalMethodUtility>
+bool GeometryBase<Dimension, NumericalMethodUtility>::Load(std::shared_ptr<ArtProject> &project) {
+    this->geoLoader->setProj(project);
+    this->geoLoader->load();
+    return true;
 }
 
 template <class Dimension, class NumericalMethodUtility>
-class Geometry : public GeometryBase<Dimension, NumericalMethodUtility>{
+class Geometry : public GeometryBase<Dimension, NumericalMethodUtility>, public GeometryType<Dimension, NumericalMethodUtility>{
+    struct GeometryDummy {};
 public:
-    Geometry(const std::string &geoName) : GeometryBase<Dimension, NumericalMethodUtility>(geoName) {}
-
-public:
-    using GeoType = GeometryData<Dimension>;
-};
-
-template <class Dimension>
-class Geometry<Dimension, MeshTypeMethod> : public GeometryBase<Dimension, MeshTypeMethod> {
-public:
-    using GeoType = GeometryMeshData<Dimension>;
-
-    Geometry(const std::string &geoName) : GeometryBase<Dimension, MeshTypeMethod>(geoName) {
-        data = std::make_shared<GeoType>();
-    }
-
-    static GeometryBuilder<Dimension, MeshTypeMethod> create(const std::string & geoName);
-
-    bool Load(std::shared_ptr<ArtProject> &project) override;
-
-    std::shared_ptr<GeoType> &getData() {
-        return data;
+    explicit Geometry(GeometryDummy):GeometryBase<Dimension, NumericalMethodUtility>() {
+        data = std::make_shared<typename GeometryType<Dimension, NumericalMethodUtility>::GeoType>();
     }
 
 private:
-    std::shared_ptr<GeoType> data{nullptr};
-};
+    template <class Dimension_, class NumericalMethodUtility_> friend class GeometryBuilder;
 
-template<class Dimension>
-GeometryBuilder<Dimension, MeshTypeMethod> Geometry<Dimension, MeshTypeMethod>::create(const std::string &geoName) {
-    return GeometryBuilder<Dimension, MeshTypeMethod>(geoName);
-}
-
-template<class Dimension>
-bool Geometry<Dimension, MeshTypeMethod>::Load(std::shared_ptr<ArtProject> &project) {
-    this->geoLoader->setProj(project);
-    this->geoLoader->setGeoData(data);
-    this->geoLoader->load();
-    return GeometryBase<Dimension, MeshTypeMethod>::Load(project);
-}
-
-
-template <class Dimension>
-class Geometry<Dimension, FEM> : public GeometryBase<Dimension, FEM> {
-public:
-    using GeoType = GeometryMeshFemData<Dimension>;
-
-    Geometry(const std::string &geoName) : GeometryBase<Dimension, MeshTypeMethod>(geoName) {
-        data = std::make_shared<GeoType>();
+    static std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> make_shared_Geometry() {
+        return std::make_shared<Geometry<Dimension, NumericalMethodUtility>>(GeometryDummy());
     }
 
-    static GeometryBuilder<Dimension, FEM> create(const std::string & geoName);
+    Geometry() = delete;
 
     bool Load(std::shared_ptr<ArtProject> &project) override;
 
-    std::shared_ptr<GeoType> &getData() {
+    std::shared_ptr<typename GeometryType<Dimension, NumericalMethodUtility>::GeoType> &getData(){
         return data;
-    }
+    };
 
-private:
-    std::shared_ptr<GeoType> data{nullptr};
+    std::shared_ptr<typename GeometryType<Dimension, NumericalMethodUtility>::GeoType> data{nullptr};
 };
 
-template<class Dimension>
-GeometryBuilder<Dimension, FEM> Geometry<Dimension, FEM>::create(const std::string &geoName) {
-    return GeometryBuilder<Dimension, FEM>(geoName);
-}
-
-template<class Dimension>
-bool Geometry<Dimension, FEM>::Load(std::shared_ptr<ArtProject> &project) {
-    this->geoLoader->setProj(project);
+template<class Dimension, class NumericalMethodUtility>
+bool Geometry<Dimension, NumericalMethodUtility>::Load(std::shared_ptr<ArtProject> &project) {
     this->geoLoader->setGeoData(data);
-    this->geoLoader->load();
-    return GeometryBase<Dimension, FEM>::Load(project);
+    return GeometryBase<Dimension, NumericalMethodUtility>::Load(project);
 }
-
 
 template <class Dimension, class NumericalMethodUtility>
 class GeometryBuilder{
 public:
     GeometryBuilder(const std::string & geoName) {
-        p_geometry = std::make_shared<Geometry<Dimension, NumericalMethodUtility>>(geoName);
+        p_geometry = Geometry<Dimension, NumericalMethodUtility>::make_shared_Geometry();
+        p_geometry->setGeoName(geoName);
         p_geometry->Init();
     }
 
@@ -150,7 +119,14 @@ private:
     std::shared_ptr<Geometry<Dimension, NumericalMethodUtility>> p_geometry{nullptr};
 };
 
+template <class Dimension, class NumericalMethodUtility>
+class GeometryType{ public: using GeoType = GeometryData<Dimension>; };
 
+template <class Dimension>
+class GeometryType<Dimension, MeshTypeMethod>{ public: using GeoType = GeometryMeshData<Dimension>; };
+
+template <class Dimension>
+class GeometryType<Dimension, FEM>{ public: using GeoType = GeometryMeshFemData<Dimension>; };
 
 
 #endif //ARTCFD_GEOMETRY_HPP

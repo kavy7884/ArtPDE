@@ -19,6 +19,7 @@ int main() {
 
     auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).build();
 
+
     std::cout << "---- Int Mesh ----" << std::endl;
     std::cout << *(quadMeshForIntgration->xNode) << std::endl;
     std::cout << *(quadMeshForIntgration->cElement30) << std::endl;
@@ -26,7 +27,6 @@ int main() {
     std::cout << "---- Approxi Mesh ----" << std::endl;
     std::cout << *(blmMeshForApproximation->xNode) << std::endl;
     std::cout << *(blmMeshForApproximation->cElement30) << std::endl;
-
 
 
 //    auto one2Dpoint = blmMeshForApproximation->xNode->getPoint(1);
