@@ -106,6 +106,11 @@ public:
         return *this;
     }
 
+    GeometryBuilder & preprocess(){
+
+        return *this;
+    }
+
     std::shared_ptr<typename Geometry<Dimension, NumericalMethodUtility>::GeoType> build(){
         return p_geometry->getData();
     };

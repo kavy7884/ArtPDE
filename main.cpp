@@ -17,7 +17,12 @@ int main() {
     auto quadMeshForIntgration = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_Quad").setSourceFormat(GeometrySourceFormat::File)
                                                    .load(proj_1).build();
 
-    auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).build();
+//    auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).build();
+
+    auto geoSetting = Geometry<Dim2D, FEM>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File);
+    auto geoLoading = geoSetting.load(proj_1);
+    auto geoPreProcess = geoLoading.preprocess();
+    auto blmMeshForApproximation = geoPreProcess.build();
 
 
     std::cout << "---- Int Mesh ----" << std::endl;
