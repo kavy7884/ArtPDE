@@ -10,6 +10,7 @@
 #include "NumericalMethodUtility.hpp"
 #include "GeometryData.hpp"
 #include "GeometryLoader.hpp"
+#include "GeometryDataProcessor.hpp"
 
 template <class Dimension, class NumericalMethodUtility> class GeometryBuilder;
 template <class Dimension, class NumericalMethodUtility> class GeometryType;
@@ -30,6 +31,8 @@ protected:
 
     virtual bool Load(std::shared_ptr<ArtProject> &project);
 
+    virtual bool Process(){ return true;};
+
     GeometrySourceFormat getFormat() const { return format; }
 
     void setFormat(GeometrySourceFormat format) { GeometryBase::format = format; };
@@ -41,7 +44,6 @@ protected:
     std::string geoName;
     GeometrySourceFormat format{GeometrySourceFormat::File};
     std::shared_ptr<GeometryLoader<Dimension, NumericalMethodUtility>> geoLoader{nullptr};
-
 };
 
 template<class Dimension, class NumericalMethodUtility>
@@ -81,7 +83,11 @@ private:
 
     std::shared_ptr<typename GeometryType<Dimension, NumericalMethodUtility>::GeoType> &getData(){
         return data;
-    };
+    }
+
+    bool Process() override;
+
+private:;
 
     std::shared_ptr<typename GeometryType<Dimension, NumericalMethodUtility>::GeoType> data{nullptr};
 };
@@ -90,6 +96,15 @@ template<class Dimension, class NumericalMethodUtility>
 bool Geometry<Dimension, NumericalMethodUtility>::Load(std::shared_ptr<ArtProject> &project) {
     this->geoLoader->setGeoData(data);
     return GeometryBase<Dimension, NumericalMethodUtility>::Load(project);
+}
+
+template<class Dimension, class NumericalMethodUtility>
+bool Geometry<Dimension, NumericalMethodUtility>::Process() {
+    using DataType = typename GeometryType<Dimension, NumericalMethodUtility>::GeoType;
+    std::shared_ptr<GeometryDataProcessor<Dimension, DataType>> geoProcessor
+            = std::make_shared<GeometryDataProcessor<Dimension, DataType>>(data);
+    geoProcessor->process();
+    return true;
 }
 
 template <class Dimension, class NumericalMethodUtility>
@@ -107,7 +122,7 @@ public:
     }
 
     GeometryBuilder & preprocess(){
-
+        p_geometry->Process();
         return *this;
     }
 

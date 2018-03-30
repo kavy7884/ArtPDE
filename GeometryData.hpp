@@ -5,10 +5,10 @@
 #ifndef ARTCFD_GEOMETRYDATA_HPP
 #define ARTCFD_GEOMETRYDATA_HPP
 
+#include <vector>
 #include "Point.hpp"
 #include "Connectivity.hpp"
-
-//enum class ElementType{None, Line, Triangle, Quadrilateral, Tetrahedron, Pyramid, Prism, Hexahedron};
+#include "Element.hpp"
 
 template <class Dimension>
 class GeometryData{
@@ -29,6 +29,8 @@ public:
     std::shared_ptr<PointList<Dimension>> xNode{nullptr};
     std::shared_ptr<ElementList<Dimension>> cElement30{nullptr};
 
+    std::vector<std::shared_ptr<GeoElement<Dimension>>> geoElement;
+
 private:
 
 };
@@ -37,6 +39,8 @@ template <class Dimension>
 class GeometryMeshFemData : public GeometryMeshData<Dimension>{
 public:
     GeometryMeshFemData():GeometryMeshData<Dimension>(){};
+
+
 
 };
 

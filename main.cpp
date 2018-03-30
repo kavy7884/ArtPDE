@@ -3,6 +3,7 @@
 #include "Geometry.hpp"
 //#include "Domain.hpp"
 //#include "Solver.hpp"
+#include "GeometryDataProcessor.hpp"
 
 #include "Point.hpp"
 #include "GeometryLoader.hpp"
@@ -15,14 +16,14 @@ int main() {
     auto proj_1 = ArtProject::create("TestProj").setRunPath(".").setDivideSlash("/").setInitialFolderName("Init").build();
 
     auto quadMeshForIntgration = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_Quad").setSourceFormat(GeometrySourceFormat::File)
-                                                   .load(proj_1).build();
+                                                   .load(proj_1).preprocess().build();
 
-//    auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).build();
+    auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).preprocess().build();
 
-    auto geoSetting = Geometry<Dim2D, FEM>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File);
-    auto geoLoading = geoSetting.load(proj_1);
-    auto geoPreProcess = geoLoading.preprocess();
-    auto blmMeshForApproximation = geoPreProcess.build();
+//    auto geoSetting = Geometry<Dim2D, FEM>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File);
+//    auto geoLoading = geoSetting.load(proj_1);
+//    auto geoPreProcess = geoLoading.preprocess();
+//    auto blmMeshForApproximation = geoPreProcess.build();
 
 
     std::cout << "---- Int Mesh ----" << std::endl;
@@ -32,6 +33,11 @@ int main() {
     std::cout << "---- Approxi Mesh ----" << std::endl;
     std::cout << *(blmMeshForApproximation->xNode) << std::endl;
     std::cout << *(blmMeshForApproximation->cElement30) << std::endl;
+
+    std::shared_ptr<GeometryMeshData<Dim2D>> pp{nullptr};
+
+//    GeometryDataProcessor<Dim2D, Geometry<Dim2D, MeshTypeMethod>::GeoType> a(quadMeshForIntgration);
+//    a.process();
 
 
 //    auto one2Dpoint = blmMeshForApproximation->xNode->getPoint(1);
