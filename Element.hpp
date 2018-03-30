@@ -8,6 +8,7 @@
 #include <memory>
 #include "Point.hpp"
 #include "Connectivity.hpp"
+#include <Eigen/Dense>
 
 enum class ElementGeoType{None, Line, Triangle, Quadrilateral, Tetrahedron, Pyramid, Prism, Hexahedron};
 
@@ -33,9 +34,7 @@ public:
     ElementGeoType getGeoElementType() const;
 
     void calGeoElementType();
-    void calGeoElementVolume(){
-        std::cout << "Cal element volume !" << std::endl;
-    };
+    void calGeoElementVolume();
 
 protected:
     ElementGeoType geoElementType{ElementGeoType::None};
@@ -67,8 +66,29 @@ void GeoElement<Dim3D>::calGeoElementType(){
     else{geoElementType = ElementGeoType::None;}
 }
 
+template <>
+void GeoElement<Dim2D>::calGeoElementVolume(){
+    const size_t& vertexSize = vertexConnect->getVertexSize();
+    auto& vertex = vertexConnect->getVertex();
+    
+    volume = 0;
+    
+    for (size_t i = 0; i < vertexSize-1; ++i) {
+        volume += (vertex[i]->x()*vertex[i+1]->y() - vertex[i]->y()*vertex[i+1]->x());
+    }
 
+    volume += (vertex[vertexSize-1]->x()*vertex[0]->y() - vertex[vertexSize-1]->y()*vertex[0]->x());
+    
+    volume *= 0.5;
+    
+    std::cout << "volume = " << volume << std::endl;
+}
 
+template <>
+void GeoElement<Dim3D>::calGeoElementVolume(){
+    
+    
+}
 
 
 #endif //ARTCFD_ELEMENT_HPP
