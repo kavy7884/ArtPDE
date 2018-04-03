@@ -15,10 +15,10 @@
 int main() {
     auto proj_1 = ArtProject::create("TestProj").setRunPath(".").setDivideSlash("/").setInitialFolderName("Init").build();
 
-    auto quadMeshForIntgration = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_Quad").setSourceFormat(GeometrySourceFormat::File)
+    auto quadMeshForIntgration = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File)
                                                    .load(proj_1).preprocess().build();
 
-    auto blmMeshForApproximation = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").load(proj_1).preprocess().build();
+    auto blmMeshForApproximation = Geometry<Dim2D, FEM>::create("Test2D_Quad").load(proj_1).preprocess().build();
 
 //    auto geoSetting = Geometry<Dim2D, FEM>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File);
 //    auto geoLoading = geoSetting.load(proj_1);
@@ -34,7 +34,8 @@ int main() {
     std::cout << *(blmMeshForApproximation->xNode) << std::endl;
     std::cout << *(blmMeshForApproximation->cElement30) << std::endl;
 
-    std::shared_ptr<GeometryMeshData<Dim2D>> pp{nullptr};
+    std::cout << "---- Test FemElement ----" << std::endl;
+    std::cout << *blmMeshForApproximation->femElement[2]->getVolume() << std::endl;
 
 //    GeometryDataProcessor<Dim2D, Geometry<Dim2D, MeshTypeMethod>::GeoType> a(quadMeshForIntgration);
 //    a.process();

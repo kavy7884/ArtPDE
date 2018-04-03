@@ -56,10 +56,18 @@ public:
                                                                                                pData) {};
     bool process() {
         this->calGeoMeshData();
+        this->calFemMeshData();
+        return true;
+    }
+
+protected:
+    bool calFemMeshData() {
+        newFemElement();
         return true;
     }
 
 private:
+    void newFemElement();
     std::shared_ptr<DataType> pData{nullptr};
 };
 
@@ -81,4 +89,11 @@ void GeometryDataProcessor<Dimension, GeometryMeshData<Dimension>>::calGeoElemen
     for (auto &element: pData->geoElement) element->calGeoElementVolume();
 }
 
+template <class Dimension>
+void GeometryDataProcessor<Dimension, GeometryMeshFemData<Dimension>>::newFemElement(){
+    pData->femElement = std::vector<std::shared_ptr<FemElement<Dimension>>>(pData->geoElement.size(), nullptr);
+    for (size_t i = 0; i < pData->cElement30->size(); ++i) {
+        pData->femElement[i] = std::make_shared<FemElement<Dimension>>(*pData->geoElement[i]);
+    }
+}
 #endif //ARTCFD_GEOMETRYDATAPROCESSOR_HPP
