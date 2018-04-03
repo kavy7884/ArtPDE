@@ -84,11 +84,30 @@ void GeoElement<Dim2D>::calGeoElementVolume(){
     std::cout << "volume = " << volume << std::endl;
 }
 
-template <>
-void GeoElement<Dim3D>::calGeoElementVolume(){
-    
-    
-}
+//template <>
+//void GeoElement<Dim3D>::calGeoElementVolume(){
+//    if(vertexConnect->getVertexSize() == 4){
+////        (axb.c)/6
+//
+//    }
+//    else if(vertexConnect->getVertexSize() == 5){
+////        2 tetra
+//
+//    }
+//    else if(vertexConnect->getVertexSize() == 6){
+////        3 tetra
+//
+//    }
+//    else if(vertexConnect->getVertexSize() == 8){
+////        6 tetra
+//
+//    }
+//    else{
+//        geoElementType = ElementGeoType::None;
+//
+//    }
+//
+//}
 
 
 #endif //ARTCFD_ELEMENT_HPP
