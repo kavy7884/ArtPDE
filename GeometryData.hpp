@@ -31,8 +31,6 @@ public:
 
     std::vector<std::shared_ptr<GeoElement<Dimension>>> geoElement;
 
-private:
-
 };
 
 template <class Dimension>
@@ -40,7 +38,7 @@ class GeometryMeshFemData : public GeometryMeshData<Dimension>{
 public:
     GeometryMeshFemData():GeometryMeshData<Dimension>(){};
 
-
+    std::vector<std::shared_ptr<FemElement<Dimension>>> femElement;
 
 };
 
