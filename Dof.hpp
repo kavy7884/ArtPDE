@@ -8,9 +8,9 @@
 #include "DofUnit.hpp"
 
 template <class Dimension, class DofType>
-class Dof_New{
+class Dof{
 public:
-    Dof_New();
+    Dof();
 
 private:
 

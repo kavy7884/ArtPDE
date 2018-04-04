@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ProjectUility.hpp"
+#include "DimensionUtility.hpp"
 #include "Geometry.hpp"
 //#include "Domain.hpp"
 //#include "Solver.hpp"
@@ -20,14 +21,15 @@ int main() {
     auto quadMeshForIntgration = Geometry<Dim2D, MeshTypeMethod>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File)
                                                    .load(proj_1).preprocess().build();
 
+
     auto blmMeshForApproximation = Geometry<Dim2D, FEM>::create("Test2D_Quad").load(proj_1).preprocess().build();
-
-//    auto geoSetting = Geometry<Dim2D, FEM>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File);
-//    auto geoLoading = geoSetting.load(proj_1);
-//    auto geoPreProcess = geoLoading.preprocess();
-//    auto blmMeshForApproximation = geoPreProcess.build();
-
-
+//
+////    auto geoSetting = Geometry<Dim2D, FEM>::create("Test2D_BLM").setSourceFormat(GeometrySourceFormat::File);
+////    auto geoLoading = geoSetting.load(proj_1);
+////    auto geoPreProcess = geoLoading.preprocess();
+////    auto blmMeshForApproximation = geoPreProcess.build();
+//
+//
     std::cout << "---- Int Mesh ----" << std::endl;
     std::cout << *(quadMeshForIntgration->xNode) << std::endl;
     std::cout << *(quadMeshForIntgration->cElement30) << std::endl;
@@ -39,7 +41,11 @@ int main() {
     std::cout << "---- Test FemElement ----" << std::endl;
     std::cout << *blmMeshForApproximation->femElement[2]->getVolume() << std::endl;
 
-    DofUnit<Dim2D, DofVector> a;
+    DofUnit<Dim2D, DofVector> a(*blmMeshForApproximation->xNode->getPoint(1));
+
+    std::cout << a << std::endl;
+//    std::cout << Dim2D::Dim << std::endl;
+
 
 
 
