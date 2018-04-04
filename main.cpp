@@ -8,6 +8,8 @@
 #include "Point.hpp"
 #include "GeometryLoader.hpp"
 
+#include "DofUnit.hpp"
+
 //void DemoDataArray();
 //void DemoDataTable();
 
@@ -36,6 +38,11 @@ int main() {
 
     std::cout << "---- Test FemElement ----" << std::endl;
     std::cout << *blmMeshForApproximation->femElement[2]->getVolume() << std::endl;
+
+    DofUnit<Dim2D, DofVector> a;
+
+
+
 
 //    GeometryDataProcessor<Dim2D, Geometry<Dim2D, MeshTypeMethod>::GeoType> a(quadMeshForIntgration);
 //    a.process();
