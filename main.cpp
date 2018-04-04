@@ -6,7 +6,7 @@
 //#include "Solver.hpp"
 #include "GeometryDataProcessor.hpp"
 
-#include "Point.hpp"
+#include "Dof.hpp"
 #include "GeometryLoader.hpp"
 
 #include "DofUnit.hpp"
@@ -41,14 +41,12 @@ int main() {
     std::cout << "---- Test FemElement ----" << std::endl;
     std::cout << *blmMeshForApproximation->femElement[2]->getVolume() << std::endl;
 
-    DofUnit<Dim2D, DofVector> a(*blmMeshForApproximation->xNode->getPoint(1));
+    std::cout << "---- Test Dof ----" << std::endl;
+    Dof<Dim2D, DofVector> coord("Dof_Coord", *(quadMeshForIntgration->xNode));
+    std::cout << coord << std::endl;
 
-    std::cout << a << std::endl;
-//    std::cout << Dim2D::Dim << std::endl;
-
-
-
-
+    Dof<Dim2D, DofScalar> temp("T", quadMeshForIntgration->xNode->size());
+    std::cout << temp << std::endl;
 
 //    GeometryDataProcessor<Dim2D, Geometry<Dim2D, MeshTypeMethod>::GeoType> a(quadMeshForIntgration);
 //    a.process();
