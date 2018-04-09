@@ -45,6 +45,8 @@ protected:
     VertexConnectType vertexConnect{nullptr};
     std::shared_ptr<ElementGeoType> geoElementType{nullptr};
     std::shared_ptr<double> volume{nullptr};
+private:
+    double calTetraVolume(size_t a, size_t b, size_t c, size_t d);
 };
 
 template <class Dimension>
@@ -117,9 +119,50 @@ void GeoElement<Dim2D>::calGeoElementVolume(){
 
 template <>
 void GeoElement<Dim3D>::calGeoElementVolume(){
+    const size_t& vertexSize = vertexConnect->getVertexSize();
     
+    *this->volume = 0;
+    
+    if(vertexSize == 4){
+        //Tetrahedron;
+        *this->volume += calTetraVolume(0, 1, 2, 3);
+    }
+    else if(vertexSize == 5){
+        //Pyramid;
+        *this->volume += calTetraVolume(0, 1, 3, 4);
+        *this->volume += calTetraVolume(2, 3, 1, 4);
+    }
+    else if(vertexSize == 6){
+        //Prism;
+        *this->volume += calTetraVolume(3, 4, 5, 0);
+        *this->volume += calTetraVolume(0, 2, 5, 4);
+        *this->volume += calTetraVolume(0, 1, 2, 4);
+    }
+    else if(vertexSize == 8){
+        //Hexahedron;
+        *this->volume += calTetraVolume(0, 1, 5, 3);
+        *this->volume += calTetraVolume(0, 5, 4, 3);
+        *this->volume += calTetraVolume(4, 5, 7, 3);
+        *this->volume += calTetraVolume(1, 2, 6, 3);
+        *this->volume += calTetraVolume(6, 5, 1, 3);
+        *this->volume += calTetraVolume(3, 5, 6, 7);
+    }
+    else{
+        *this->geoElementType = ElementGeoType::None;
+        
+    }
     
 }
 
+template<class Dimension>
+double GeoElement<Dimension>::calTetraVolume(size_t a, size_t b, size_t c, size_t d){
+    auto& vertex = vertexConnect->getVertex();
+    
+    Eigen::Vector3d v_ab(vertex[b]->x()-vertex[a]->x(), vertex[b]->y()-vertex[a]->y(), vertex[b]->z()-vertex[a]->z());
+    Eigen::Vector3d v_ac(vertex[c]->x()-vertex[a]->x(), vertex[c]->y()-vertex[a]->y(), vertex[c]->z()-vertex[a]->z());
+    Eigen::Vector3d v_ad(vertex[d]->x()-vertex[a]->x(), vertex[d]->y()-vertex[a]->y(), vertex[d]->z()-vertex[a]->z());
+
+    return std::abs(v_ab.cross(v_ac).dot(v_ad)/ 6.0);
+}
 
 #endif //ARTCFD_ELEMENT_HPP
