@@ -7,7 +7,7 @@
 
 #include <memory>
 #include "TrialSpace.hpp"
-#include "DOF.hpp"
+#include "Dof.hpp"
 
 template <class Dimension, class NumericalMethodUtility, class DOF_Type>
 class Approximation{

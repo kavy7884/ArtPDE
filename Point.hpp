@@ -6,15 +6,16 @@
 #define ARTCFD_POINT_HPP
 
 #include <vector>
-#include <array>
 #include <memory>
 #include <ostream>
 #include "DimensionUtility.hpp"
 
-template <class Dimension>
 class PointBase{
 public:
-    PointBase() {}
+    PointBase(const size_t dim): data(dim, nullptr){
+        for (auto &d:data) { d = std::make_shared<double>(0.0);}
+        data.shrink_to_fit();
+    }
 
     size_t getId() const {
         return id;
@@ -24,15 +25,17 @@ public:
         PointBase::id = id;
     }
 
-    double& getDataByDim(size_t &Dim){ return data[Dim];};
+    double& getDataByDim(size_t &Dim){ return (*data[Dim]);}
+
+    std::shared_ptr<double>& getDataPointerByDim(size_t &Dim){ return data[Dim];}
 
 protected:
     size_t id{0};
-    std::array<double, Dimension::Dim> data{0.0};
+    std::vector<std::shared_ptr<double>> data;
 };
 
 template <class Dimension>
-class Point: public PointBase<Dimension>{};
+class Point;
 
 template <class Dimension>
 class PointList{
@@ -64,12 +67,12 @@ private:
 
 
 template <>
-class Point<Dim1D> : public PointBase<Dim1D>{
+class Point<Dim1D> : public PointBase{
     using OwnerType = std::shared_ptr<PointList<Dim1D>>;
 public:
-    Point(): PointBase<Dim1D>(){};
-    Point(OwnerType &owner): PointBase<Dim1D>(), owner(owner){}
-    double& x(){ return data[0];};
+    Point(): PointBase(Dim1D::Dim){};
+    Point(OwnerType &owner): PointBase(Dim1D::Dim), owner(owner){}
+    double& x(){ return *data[0];};
     const OwnerType &getOwner() const {
         return owner;
     }
@@ -79,13 +82,13 @@ private:
 };
 
 template <>
-class Point<Dim2D> : public PointBase<Dim2D>{
+class Point<Dim2D> : public PointBase{
     using OwnerType = std::shared_ptr<PointList<Dim2D>>;
 public:
-    Point(): PointBase<Dim2D>(){};
-    Point(OwnerType &owner): PointBase<Dim2D>(), owner(owner){}
-    double& x(){ return data[0];};
-    double& y(){ return data[1];};
+    Point(): PointBase(Dim2D::Dim){};
+    Point(OwnerType &owner): PointBase(Dim2D::Dim), owner(owner){}
+    double& x(){ return *data[0];};
+    double& y(){ return *data[1];};
     const OwnerType &getOwner() const {
         return owner;
     }
@@ -96,14 +99,14 @@ private:
 
 
 template <>
-class Point<Dim3D> : public PointBase<Dim3D>{
+class Point<Dim3D> : public PointBase{
     using OwnerType = std::shared_ptr<PointList<Dim3D>>;
 public:
-    Point(): PointBase<Dim3D>(){};
-    Point(OwnerType &owner): PointBase<Dim3D>(), owner(owner){}
-    double& x(){ return data[0];};
-    double& y(){ return data[1];};
-    double& z(){ return data[2];};
+    Point(): PointBase(Dim3D::Dim){};
+    Point(OwnerType &owner): PointBase(Dim3D::Dim), owner(owner){}
+    double& x(){ return *data[0];};
+    double& y(){ return *data[1];};
+    double& z(){ return *data[2];};
     const OwnerType &getOwner() const {
         return owner;
     }

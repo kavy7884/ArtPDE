@@ -6,7 +6,7 @@
 #define ARTCFD_DOF_MANNGER_HPP
 #include <vector>
 #include <memory>
-#include "DOF.hpp"
+#include "Dof.hpp"
 
 class DOF_Mannger{
 public:
