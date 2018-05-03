@@ -31,8 +31,8 @@ public:
 		return method_.evaluate_shape(position);
 	}
 
-	bool evaluate(Dof& dof, const PointList& position){
-		method_.evaluate(dof, position);
+	bool evaluate(Dof& interpolant, Dof& data, const PointList& old_position, const PointList& new_position){
+		method_.evaluate(data, old_position, new_position);
 		return true;
 	}
 
