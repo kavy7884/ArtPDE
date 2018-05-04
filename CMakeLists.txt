@@ -4,7 +4,7 @@ project(ArtCFD)
 set(CMAKE_CXX_STANDARD 17)
 set(EIGEN_DIR "/Users/kavy/Documents/Eigen/")
 include_directories(${EIGEN_DIR})
-add_executable(ArtCFD main.cpp)
+add_executable(ArtCFD main.cpp geometry.hpp geometry_data.hpp point.hpp dimension_utility.hpp coordinate_basis_utility.hpp)
 
 target_link_libraries(ArtCFD ${EIGEN_DIR})
 #target_link_libraries(ArtCFD)
