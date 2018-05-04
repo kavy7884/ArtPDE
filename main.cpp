@@ -5,6 +5,7 @@
 #include "project_uility.hpp"
 #include "dimension_utility.hpp"
 #include "point.hpp"
+#include "vertex.hpp"
 #include "geometry_data.hpp"
 
 
@@ -68,8 +69,17 @@ int main() {
 //    using T3Type = test3<double , T2Type::test2_traits >;
 //    T2Type t3(t2);
 
-    art_pde::GeometryData< MeshTypeMethod, art_pde::Dim2D, art_pde::CartesianCoordinate> data;
+    using GeoData = art_pde::GeometryData< MeshTypeMethod, art_pde::Dim2D, art_pde::CartesianCoordinate>;
+    GeoData data;
     std::cout << data.PT.getX() << " " <<  data.PT.getY() << std::endl;
+
+    using PtType = GeoData::GeometryData_Traits::PointType;
+    art_pde::Vertex<PtType> V1(PtType(1.0, 2.0));
+    art_pde::Vertex<PtType> V2(std::make_shared<PtType>(3.0, 4.0));
+
+    std::cout << V1.getPoint().getX() << " " <<  V1.getPoint().getY() << std::endl;
+    std::cout << V2.getPtr_point()->getX() << " " <<  V2.getPtr_point()->getY() << std::endl;
+
 
 
 

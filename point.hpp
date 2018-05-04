@@ -23,6 +23,7 @@ namespace art_pde {
     class Point<Dim1D, CartesianCoordinate>{
     public:
         Point() {}
+        Point(const Point& point): x(point.getX()){}
         Point(double x) : x(x) {}
 
         double getX() const {
@@ -42,6 +43,7 @@ namespace art_pde {
     class Point<Dim2D, CartesianCoordinate>{
     public:
         Point() {}
+        Point(const Point& point): x(point.getX()), y(point.getY()){}
         Point(double x, double y) : x(x), y(y) {}
 
         double getX() const {
@@ -69,6 +71,7 @@ namespace art_pde {
     class Point<Dim3D, CartesianCoordinate>{
     public:
         Point() {}
+        Point(const Point& point): x(point.getX()), y(point.getY()), z(point.getZ()){}
         Point(double x, double y, double z) : x(x), y(y), z(z) {}
 
         double getX() const {
