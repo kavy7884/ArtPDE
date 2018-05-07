@@ -6,12 +6,13 @@
 #define ARTCFD_VERTEX_HPP
 
 #include <memory>
+#include <ostream>
 
 namespace art_pde {
 
+    // Geometry vertex define
     template <typename PointType>
     class Vertex{
-
     public:
         using PtrPointType = std::shared_ptr<PointType>;
         Vertex();
@@ -21,6 +22,12 @@ namespace art_pde {
         const PointType &getPoint() const;
         const PtrPointType &getPtr_point() const;
         void setPtr_point(const PtrPointType &ptr_point);
+
+        template <typename PointType_>
+        friend std::ostream &operator<<(std::ostream &os, const Vertex<PointType_> &vertex){
+            os << vertex.getPoint();
+            return os;
+        }
 
     private:
         PtrPointType ptr_point{nullptr};
@@ -55,7 +62,6 @@ namespace art_pde {
     const PointType &Vertex<PointType>::getPoint() const {
         return *ptr_point;
     }
-
 
 }
 

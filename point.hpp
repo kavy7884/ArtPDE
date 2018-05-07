@@ -5,6 +5,8 @@
 #ifndef ARTCFD_POINT_HPP
 #define ARTCFD_POINT_HPP
 
+#include <ostream>
+#include <string>
 #include "dimension_utility.hpp"
 #include "coordinate_basis_utility.hpp"
 
@@ -22,6 +24,7 @@ namespace art_pde {
     template <>
     class Point<Dim1D, CartesianCoordinate>{
     public:
+        using PointDim = Dim1D;
         Point() {}
         Point(const Point& point): x(point.getX()){}
         Point(double x) : x(x) {}
@@ -34,6 +37,12 @@ namespace art_pde {
             Point::x = x;
         }
 
+
+        friend std::ostream &operator<<(std::ostream &os, const Point<Dim1D, CartesianCoordinate> &point) {
+            os << " [ " << point.x << " ] ";
+            return os;
+        }
+
     private:
         double x{0.0};
     };
@@ -42,6 +51,7 @@ namespace art_pde {
     template <>
     class Point<Dim2D, CartesianCoordinate>{
     public:
+        using PointDim = Dim2D;
         Point() {}
         Point(const Point& point): x(point.getX()), y(point.getY()){}
         Point(double x, double y) : x(x), y(y) {}
@@ -62,6 +72,11 @@ namespace art_pde {
             Point::y = y;
         }
 
+        friend std::ostream &operator<<(std::ostream &os, const Point<Dim2D, CartesianCoordinate> &point) {
+            os << " [ " << point.x << ", "<< point.y << " ] ";
+            return os;
+        }
+
     private:
         double x{0.0}, y{0.0};
     };
@@ -70,6 +85,7 @@ namespace art_pde {
     template <>
     class Point<Dim3D, CartesianCoordinate>{
     public:
+        using PointDim = Dim3D;
         Point() {}
         Point(const Point& point): x(point.getX()), y(point.getY()), z(point.getZ()){}
         Point(double x, double y, double z) : x(x), y(y), z(z) {}
@@ -96,6 +112,11 @@ namespace art_pde {
 
         void setZ(double z) {
             Point::z = z;
+        }
+
+        friend std::ostream &operator<<(std::ostream &os, const Point<Dim3D, CartesianCoordinate> &point) {
+            os << " [ " << point.x << ", "<< point.y << ", "<< point.z << " ] ";
+            return os;
         }
 
     private:
