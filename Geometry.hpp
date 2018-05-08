@@ -7,27 +7,24 @@
 
 #include "numerical_method_utility.hpp"
 #include "geometry_data.hpp"
+#include "geometry_data_reader.hpp"
+#include "geometry_data_reader_artpde.hpp"
 
 namespace art_pde {
 
-    template <class NumericalMethodUtility>
-    class Geometry : public GeometryData<NumericalMethodUtility> {
+    template<class GeometryDataType, template<class> class GeometryDataReaderType>
+    class Geometry:
+            virtual public GeometryDataType,
+            public GeometryDataReaderType<GeometryDataType>{
     public:
-        Geometry(const size_t num_geo_dim) : GeometryData(num_geo_dim){}
+        Geometry() : GeometryDataType(), GeometryDataReaderType<GeometryDataType>(){}
 
-    public:
-        
-
-
-
-    protected:
-
-
-    private:
+        bool read(const std::shared_ptr<ArtProject>& art_project){
+            GeometryDataReaderType<GeometryDataType>::read(art_project);
+            return GeometryDataReaderType<GeometryDataType>::getStatus();
+        }
 
     };
-
-
 
 }
 
