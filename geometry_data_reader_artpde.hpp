@@ -31,7 +31,7 @@ namespace art_pde {
 
         void read(const std::shared_ptr<ArtProject>& ptr_artpde_project){
 
-            std::cout << ">> (Start) Reading ArtPDE project format file..." << std::endl;
+            std::cout << ">> (Start) Reading ArtPDE project format files..." << std::endl;
 
             ImplementClass im(this);
             im.setPtr_artpde_project(ptr_artpde_project);
@@ -41,7 +41,7 @@ namespace art_pde {
                 this->is_read_success = false;
             }
 
-            std::cout << ">> ( End ) Reading ArtPDE project format file..." << std::endl;
+            std::cout << ">> ( End ) Reading ArtPDE project format files..." << std::endl;
         }
 
     private:
@@ -70,12 +70,14 @@ namespace art_pde {
             loader->test = 3.0;
 
             if(!load_xNode()) return false;
+            if(!load_cElement30()) return false;
 
             return true;
         }
 
     private:
         bool load_xNode();
+        bool load_cElement30();
 
         GeometryDataReaderArtPDE<GeometryDataType> *loader{nullptr};
         PtrArtProjectType ptr_artpde_project{nullptr};
@@ -115,6 +117,44 @@ namespace art_pde {
         return true;
     }
 
+    template<class GeometryDataType>
+    bool
+    GeometryDataReaderArtPDE_Implementation<GeometryDataType, MeshTypeMethod, Dim2D, CartesianCoordinate>::load_cElement30() {
+        std::cout << ">>>> (Start) Loading xElement30..." << std::endl;
+        std::string file_name;
+        file_name += ptr_artpde_project->getProjectGeometryPath();
+        file_name += "cElement30.txt";
+
+        //std::cout << file_name << std::endl;
+
+        std::ifstream fs;
+        std::string bufferLine;
+        size_t bufferId;
+        CellFactory<typename GeometryDataType::Type::GeoPointType, typename GeometryDataType::Type::GeoDimType> cell_factory;
+        typename GeometryDataType::Type::VecPtrGeoVertexType& total_vertex = loader->getTotalVertex();
+        typename GeometryDataType::Type::VecPtrGeoCellType& total_cell = loader->getTotalCell();
+
+        fs.open(file_name);
+        if(fs.is_open()){
+            while(getline( fs, bufferLine )) {
+                std::stringstream w(bufferLine);
+
+                cell_factory.clearVertex();
+                while(w >> bufferId){
+                    cell_factory.addVertex(total_vertex[bufferId]);
+                }
+
+                total_cell.push_back(
+                        cell_factory.create()
+                );
+            }
+        }else
+            return false;
+
+        std::cout << ">>>> ( End ) Loading xElement30..." << std::endl;
+        return true;
+    }
+
     template <class GeometryDataType>
     class GeometryDataReaderArtPDE_Implementation<GeometryDataType, MeshTypeMethod, Dim3D, CartesianCoordinate>{
     public:
@@ -130,11 +170,17 @@ namespace art_pde {
         bool load(){
 
             loader->test = 3.0;
+
+            if(!load_xNode()) return false;
+            if(!load_cElement30()) return false;
+
             return true;
         }
 
     private:
         bool load_xNode();
+        bool load_cElement30();
+
 
         GeometryDataReaderArtPDE<GeometryDataType> *loader{nullptr};
         PtrArtProjectType ptr_artpde_project{nullptr};
@@ -175,6 +221,43 @@ namespace art_pde {
         return true;
     }
 
+    template<class GeometryDataType>
+    bool
+    GeometryDataReaderArtPDE_Implementation<GeometryDataType, MeshTypeMethod, Dim3D, CartesianCoordinate>::load_cElement30() {
+        std::cout << ">>>> (Start) Loading xElement30..." << std::endl;
+        std::string file_name;
+        file_name += ptr_artpde_project->getProjectGeometryPath();
+        file_name += "cElement30.txt";
+
+        //std::cout << file_name << std::endl;
+
+        std::ifstream fs;
+        std::string bufferLine;
+        size_t bufferId;
+        CellFactory<typename GeometryDataType::Type::GeoPointType, typename GeometryDataType::Type::GeoDimType> cell_factory;
+        typename GeometryDataType::Type::VecPtrGeoVertexType& total_vertex = loader->getTotalVertex();
+        typename GeometryDataType::Type::VecPtrGeoCellType& total_cell = loader->getTotalCell();
+
+        fs.open(file_name);
+        if(fs.is_open()){
+            while(getline( fs, bufferLine )) {
+                std::stringstream w(bufferLine);
+
+                cell_factory.clearVertex();
+                while(w >> bufferId){
+                    cell_factory.addVertex(total_vertex[bufferId]);
+                }
+
+                total_cell.push_back(
+                        cell_factory.create()
+                );
+            }
+        }else
+            return false;
+
+        std::cout << ">>>> ( End ) Loading xElement30..." << std::endl;
+        return true;
+    }
 
 }
 #endif //ARTCFD_GEOMETRY_DATA_READER_ARTPDE_HPP

@@ -39,10 +39,12 @@ namespace art_pde {
 
         GeometryData(){}
 
-        const size_t getTotalVertexNum() const{ return total_vertex.size();}
+        const size_t getTotal_VertexNum() const{ return total_vertex.size();}
+        const size_t getTotal_CellNum() const{ return total_cell.size();}
 
-
-
+        typename Type::VecPtrGeoPointType getTotal_PtrPointOnVertex() const;
+        typename Type::VecPtrGeoPointType getCell_PtrPointOnVertex(const size_t cell_id) const;
+        CellType getCell_CellType(const size_t cell_id) const { return total_cell[cell_id]->getCellType();};
 
         double test{0.0};
 
@@ -51,6 +53,40 @@ namespace art_pde {
         typename Type::VecPtrGeoVertexType total_vertex;
         typename Type::VecPtrGeoCellType total_cell;
     };
+
+    template<typename Dimension, typename CoordinateBasis>
+    typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getTotal_PtrPointOnVertex() const {
+        typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
+                reVecPtrGeoPointType;
+
+        for (size_t i = 0; i < this->getTotal_VertexNum(); ++i) {
+            reVecPtrGeoPointType.push_back(
+                    this->total_vertex[i]->getPtr_point()
+            );
+        }
+
+        return reVecPtrGeoPointType;
+    }
+
+    template<typename Dimension, typename CoordinateBasis>
+    typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getCell_PtrPointOnVertex(const size_t cell_id) const {
+        typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
+                reVecPtrGeoPointType;
+
+        //ToDo - Range check
+
+        auto vec_ptr_vertex_in_cell_id = this->total_cell[cell_id]->getVec_ptr_vetex();
+
+        for (size_t i = 0; i < this->total_cell[cell_id]->getNumVertex(); ++i) {
+            reVecPtrGeoPointType.push_back(
+                    vec_ptr_vertex_in_cell_id[i]->getPtr_point()
+            );
+        }
+
+        return reVecPtrGeoPointType;
+    }
 
 }
 

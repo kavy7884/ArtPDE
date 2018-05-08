@@ -54,6 +54,8 @@ namespace art_pde {
             return os;
         }
 
+        static std::string convertCellTypeInString(CellType cellType_);
+
     protected:
         CellType cellType{CellType::None};
         VecPtrVertexType vec_ptr_vetex;
@@ -61,8 +63,13 @@ namespace art_pde {
 
     template<typename PointType>
     std::string Cell<PointType>::getCellTypeInString() {
+        return Cell<PointType>::convertCellTypeInString(cellType);
+    }
+
+    template<typename PointType>
+    std::string Cell<PointType>::convertCellTypeInString(CellType cellType_) {
         std::string re_string;
-        switch (cellType){
+        switch (cellType_){
             case CellType::Line : re_string = "Line"; break;
             case CellType::Triangle : re_string = "Triangle"; break;
             case CellType::Quadrilateral : re_string = "Quadrilateral"; break;
@@ -102,7 +109,7 @@ namespace art_pde {
 
     // Geometry cell builder define (base)
     template <typename PointType, typename Dimension>
-    class CellBuilderBase{
+    class CellFactoryBase{
 
     public:
         using VertexType = Vertex<PointType>;
@@ -110,7 +117,7 @@ namespace art_pde {
         using VecPtrVertexType = typename Cell<PointType>::VecPtrVertexType;
         using PtrCellType = typename std::shared_ptr<Cell<PointType>>;
 
-        CellBuilderBase() {}
+        CellFactoryBase() {}
 
         void addVertex(PtrVertexType & ptr_vertex){ vec_ptr_vertex.push_back(ptr_vertex); }
         void clearVertex(){ vec_ptr_vertex.clear(); }
@@ -125,14 +132,14 @@ namespace art_pde {
 
     // Geometry cell builder abstract define
     template <typename PointType, typename Dimension>
-    class CellBuilder;
+    class CellFactory;
 
     // Geometry cell builder partial define in 2D case
     template <typename PointType>
-    class CellBuilder<PointType, Dim2D> :public CellBuilderBase<PointType, Dim2D>{
+    class CellFactory<PointType, Dim2D> :public CellFactoryBase<PointType, Dim2D>{
     public:
         using PtrCellType = typename std::shared_ptr<Cell<PointType>>;
-        CellBuilder(): CellBuilderBase<PointType, Dim2D>(){}
+        CellFactory(): CellFactoryBase<PointType, Dim2D>(){}
 
         PtrCellType create() override {
 
@@ -157,10 +164,10 @@ namespace art_pde {
 
     // Geometry cell builder partial define in 3D case
     template <typename PointType>
-    class CellBuilder<PointType, Dim3D> :public CellBuilderBase<PointType, Dim3D>{
+    class CellFactory<PointType, Dim3D> :public CellFactoryBase<PointType, Dim3D>{
     public:
         using PtrCellType = typename std::shared_ptr<Cell<PointType>>;
-        CellBuilder(): CellBuilderBase<PointType, Dim3D>(){}
+        CellFactory(): CellFactoryBase<PointType, Dim3D>(){}
 
         PtrCellType create() override {
 

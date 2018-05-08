@@ -14,9 +14,29 @@ int main() {
 
     art_pde::Geometry<GeoDataType, art_pde::GeometryDataReaderArtPDE> geo;
 
-    std::cout << geo.getTotalVertexNum() << std::endl;
+    std::cout << "Vertex Num (before): " << geo.getTotal_VertexNum() << std::endl;
+    std::cout << "Cell Num (before): " << geo.getTotal_CellNum() << std::endl;
     std::cout << geo.read(proj_1) << std::endl;
-    std::cout << geo.getTotalVertexNum() << std::endl;
+    std::cout << "Vertex Num (after): " << geo.getTotal_VertexNum() << std::endl;
+    std::cout << "Cell Num (after): " << geo.getTotal_CellNum() << std::endl;
+
+    auto all_ptr_point_on_vertex = geo.getTotal_PtrPointOnVertex();
+
+    std::cout << "List all vertex points: " << std::endl;
+    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
+        std::cout << *all_ptr_point_on_vertex[i] << std::endl;
+    }
+
+    std::cout << "List all vertex points in each cell: " << std::endl;
+    for (size_t i = 0; i < geo.getTotal_CellNum(); ++i) {
+        auto vec_ptr_point_on_vertex_in_cell_id = geo.getCell_PtrPointOnVertex(i);
+        std::cout << "Cell Type: " << GeoDataType::Type::GeoCellType::convertCellTypeInString(
+                geo.getCell_CellType(i) ) << "\t";
+        for(auto &ptr_pt : vec_ptr_point_on_vertex_in_cell_id){
+            std::cout << *ptr_pt << "\t";
+        }
+        std::cout << std::endl;
+    }
 
 
 
@@ -41,7 +61,7 @@ int main() {
 //    using PrtCellType = std::shared_ptr<CellType>;
 //    std::vector<PrtCellType> vec_cell;
 //
-//    art_pde::CellBuilder<PointType , art_pde::Dim2D> cell_builder;
+//    art_pde::CellFactory<PointType , art_pde::Dim2D> cell_builder;
 //    // Cell 1
 //    cell_builder.clearVertex();
 //    cell_builder.addVertex(vec_vertex[0]);
