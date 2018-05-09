@@ -48,7 +48,7 @@ int main() {
 
     std::cout << "List all vertex cell neighbor's center and type: " << std::endl;
     for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
-        auto vec_ptr_cell_neighbor = geo.getVertex_VecPtrCellNeighbor(i);
+        auto vec_ptr_cell_neighbor = geo.getVertex_VecPtrNeighborCell(i);
         std::cout << ">> Vertex: " << *all_ptr_point_on_vertex[i] << "'s neighbor cell: " << std::endl;
         for(auto &ptr_cell_neighbor : vec_ptr_cell_neighbor){
             std::cout << ">>>> Cell Type is: ";

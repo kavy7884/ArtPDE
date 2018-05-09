@@ -14,14 +14,14 @@ namespace art_pde {
         GeometryDataAlgorithm() : GeometryDataType() {}
 
         typename GeometryDataType::Type::VecPtrGeoPointType getTotal_VecPtrPointOnCellCenter();
-        const typename GeometryDataType::Type::VecPtrGeoCellType getVertex_VecPtrCellNeighbor(const size_t vertex_id);
+        const typename GeometryDataType::Type::VecPtrGeoCellType getVertex_VecPtrNeighborCell(const size_t vertex_id);
 
     private:
-        bool is_cal_vertex_cell_neighbor{ false };
+        bool is_cal_vertex_neighbor_cell{ false };
         bool is_gen_cell_center_point{ false };
 
         void genCellCenterPoint();
-        void calVertexCellNeighbor();
+        void calVertexNeighborCell();
     };
 
     template<class GeometryDataType>
@@ -47,7 +47,7 @@ namespace art_pde {
     }
 
     template<class GeometryDataType>
-    void GeometryDataAlgorithm<GeometryDataType>::calVertexCellNeighbor() {
+    void GeometryDataAlgorithm<GeometryDataType>::calVertexNeighborCell() {
         for (size_t i = 0; i < this->getTotal_CellNum(); ++i) {
             auto this_ptr_cell = this->total_cell[i];
             auto vec_ptr_vetex_in_cell = this_ptr_cell->getVec_ptr_vetex();
@@ -55,15 +55,15 @@ namespace art_pde {
                 vec_ptr_vetex_in_cell[j]->addPtrCellNeighbor(this_ptr_cell);
             }
         }
-        is_cal_vertex_cell_neighbor = true;
+        is_cal_vertex_neighbor_cell = true;
     }
 
     template<class GeometryDataType>
     const typename GeometryDataType::Type::VecPtrGeoCellType
-    GeometryDataAlgorithm<GeometryDataType>::getVertex_VecPtrCellNeighbor(const size_t vertex_id) {
-        if(!is_cal_vertex_cell_neighbor) calVertexCellNeighbor();
+    GeometryDataAlgorithm<GeometryDataType>::getVertex_VecPtrNeighborCell(const size_t vertex_id) {
+        if(!is_cal_vertex_neighbor_cell) calVertexNeighborCell();
         if(!is_gen_cell_center_point) genCellCenterPoint();
-        return this->total_vertex[vertex_id]->getVec_ptr_cell_neighbor();
+        return this->total_vertex[vertex_id]->getVec_ptr_neighbor_cell();
     }
 
 
