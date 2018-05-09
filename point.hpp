@@ -37,6 +37,20 @@ namespace art_pde {
             Point::x = x;
         }
 
+        inline Point& operator+=(const Point& rhs){
+            x += rhs.getX();
+            return *this;
+        }
+
+        inline Point& operator/=(const double & double_rhs){
+            x /= double_rhs;
+            return *this;
+        }
+
+        friend inline Point operator+(Point lhs, const Point& rhs){
+            lhs += rhs;
+            return lhs;
+        }
 
         friend std::ostream &operator<<(std::ostream &os, const Point<Dim1D, CartesianCoordinate> &point) {
             os << " [ " << point.x << " ] ";
@@ -70,6 +84,23 @@ namespace art_pde {
 
         void setY(double y) {
             Point::y = y;
+        }
+
+        inline Point& operator+=(const Point& rhs){
+            x += rhs.getX();
+            y += rhs.getY();
+            return *this;
+        }
+
+        inline Point& operator/=(const double & double_rhs){
+            x /= double_rhs;
+            y /= double_rhs;
+            return *this;
+        }
+
+        friend inline Point operator+(Point lhs, const Point& rhs){
+            lhs += rhs;
+            return lhs;
         }
 
         friend std::ostream &operator<<(std::ostream &os, const Point<Dim2D, CartesianCoordinate> &point) {
@@ -112,6 +143,25 @@ namespace art_pde {
 
         void setZ(double z) {
             Point::z = z;
+        }
+
+        inline Point& operator+=(const Point& rhs){
+            x += rhs.getX();
+            y += rhs.getY();
+            z += rhs.getZ();
+            return *this;
+        }
+
+        inline Point& operator/=(const double & double_rhs){
+            x /= double_rhs;
+            y /= double_rhs;
+            z /= double_rhs;
+            return *this;
+        }
+
+        friend inline Point operator+(Point lhs, const Point& rhs){
+            lhs += rhs;
+            return lhs;
         }
 
         friend std::ostream &operator<<(std::ostream &os, const Point<Dim3D, CartesianCoordinate> &point) {

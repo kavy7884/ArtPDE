@@ -20,7 +20,7 @@ int main() {
     std::cout << "Vertex Num (after): " << geo.getTotal_VertexNum() << std::endl;
     std::cout << "Cell Num (after): " << geo.getTotal_CellNum() << std::endl;
 
-    auto all_ptr_point_on_vertex = geo.getTotal_PtrPointOnVertex();
+    auto all_ptr_point_on_vertex = geo.getTotal_VecPtrPointOnVertex();
 
     std::cout << "List all vertex points: " << std::endl;
     for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
@@ -29,14 +29,42 @@ int main() {
 
     std::cout << "List all vertex points in each cell: " << std::endl;
     for (size_t i = 0; i < geo.getTotal_CellNum(); ++i) {
-        auto vec_ptr_point_on_vertex_in_cell_id = geo.getCell_PtrPointOnVertex(i);
+        auto vec_ptr_point_on_vertex_in_cell_id = geo.getCell_VecPtrPointOnVertex(i);
         std::cout << "Cell Type: " << GeoDataType::Type::GeoCellType::convertCellTypeInString(
-                geo.getCell_CellType(i) ) << "\t";
+                geo.getCell_CellType(i) ) << " -> \t";
         for(auto &ptr_pt : vec_ptr_point_on_vertex_in_cell_id){
             std::cout << *ptr_pt << "\t";
         }
         std::cout << std::endl;
     }
+
+    std::cout << std::endl;
+
+    std::cout << "List all cell center points: " << std::endl;
+    auto all_ptr_point_on_cell_center = geo.getTotal_VecPtrPointOnCellCenter();
+    for (size_t i = 0; i < geo.getTotal_CellNum(); ++i) {
+        std::cout << *all_ptr_point_on_cell_center[i] << std::endl;
+    }
+
+    std::cout << "List all vertex cell neighbor's center and type: " << std::endl;
+    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
+        auto vec_ptr_cell_neighbor = geo.getVertex_VecPtrCellNeighbor(i);
+        std::cout << ">> Vertex: " << *all_ptr_point_on_vertex[i] << "'s neighbor cell: " << std::endl;
+        for(auto &ptr_cell_neighbor : vec_ptr_cell_neighbor){
+            std::cout << ">>>> Cell Type is: ";
+            std::cout << GeoDataType::Type::GeoCellType::convertCellTypeInString(ptr_cell_neighbor->getCellType());
+            std::cout << ", Cell center is: " << *ptr_cell_neighbor->getPtr_cell_center_point()<< std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+
+
+//    using PointType = art_pde::Point<art_pde::Dim2D, art_pde::CartesianCoordinate>;
+//    PointType tmp_pt;
+//    tmp_pt += (PointType(4.0,8.0));
+//    tmp_pt /= 2.0;
+//    std::cout << tmp_pt << std::endl;
 
 
 

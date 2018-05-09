@@ -7,14 +7,20 @@
 
 #include <memory>
 #include <ostream>
+#include "cell.hpp"
 
 namespace art_pde {
+
+    template <typename PointType> class Cell;
 
     // Geometry vertex define
     template <typename PointType>
     class Vertex{
     public:
         using PtrPointType = std::shared_ptr<PointType>;
+        using CellType = Cell<PointType>;
+        using PtrCellType = std::shared_ptr<CellType>;
+        using VecPtrCellType = std::vector<PtrCellType>;
         Vertex();
         Vertex(const PointType& point);
         Vertex(const PtrPointType& ptr_point);
@@ -22,6 +28,8 @@ namespace art_pde {
         const PointType &getPoint() const;
         const PtrPointType &getPtr_point() const;
         void setPtr_point(const PtrPointType &ptr_point);
+        const VecPtrCellType &getVec_ptr_cell_neighbor() const;
+        void addPtrCellNeighbor(const PtrCellType& ptr_cell_neighbor){ vec_ptr_cell_neighbor.push_back(ptr_cell_neighbor); }
 
         template <typename PointType_>
         friend std::ostream &operator<<(std::ostream &os, const Vertex<PointType_> &vertex){
@@ -31,6 +39,7 @@ namespace art_pde {
 
     private:
         PtrPointType ptr_point{nullptr};
+        VecPtrCellType vec_ptr_cell_neighbor;
     };
 
     template<typename PointType>
@@ -61,6 +70,11 @@ namespace art_pde {
     template<typename PointType>
     const PointType &Vertex<PointType>::getPoint() const {
         return *ptr_point;
+    }
+
+    template<typename PointType>
+    const typename Vertex<PointType>::VecPtrCellType &Vertex<PointType>::getVec_ptr_cell_neighbor() const {
+        return vec_ptr_cell_neighbor;
     }
 
 }

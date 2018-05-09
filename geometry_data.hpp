@@ -42,8 +42,8 @@ namespace art_pde {
         const size_t getTotal_VertexNum() const{ return total_vertex.size();}
         const size_t getTotal_CellNum() const{ return total_cell.size();}
 
-        typename Type::VecPtrGeoPointType getTotal_PtrPointOnVertex() const;
-        typename Type::VecPtrGeoPointType getCell_PtrPointOnVertex(const size_t cell_id) const;
+        typename Type::VecPtrGeoPointType getTotal_VecPtrPointOnVertex() const;
+        typename Type::VecPtrGeoPointType getCell_VecPtrPointOnVertex(const size_t cell_id) const;
         CellType getCell_CellType(const size_t cell_id) const { return total_cell[cell_id]->getCellType();};
 
         double test{0.0};
@@ -56,7 +56,7 @@ namespace art_pde {
 
     template<typename Dimension, typename CoordinateBasis>
     typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getTotal_PtrPointOnVertex() const {
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getTotal_VecPtrPointOnVertex() const {
         typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
                 reVecPtrGeoPointType;
 
@@ -71,7 +71,7 @@ namespace art_pde {
 
     template<typename Dimension, typename CoordinateBasis>
     typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getCell_PtrPointOnVertex(const size_t cell_id) const {
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getCell_VecPtrPointOnVertex(const size_t cell_id) const {
         typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
                 reVecPtrGeoPointType;
 

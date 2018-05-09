@@ -13,6 +13,8 @@
 
 namespace art_pde {
 
+    template <typename PointType> class Vertex;
+
     // Geometry cell type define
     enum class CellType{ None, Line, Triangle, Quadrilateral, Tetrahedron, Hexahedron, Prism, Pyramid, Polyhedron };
 
@@ -20,6 +22,7 @@ namespace art_pde {
     template <typename PointType>
     class Cell{
     public:
+        using PtrPointType = std::shared_ptr<PointType>;
         using VertexType = art_pde::Vertex<PointType>;
         using PtrVertexType = std::shared_ptr<VertexType>;
         using VecPtrVertexType = std::vector<PtrVertexType>;
@@ -45,6 +48,12 @@ namespace art_pde {
 
         std::string getCellTypeInString();
 
+        void calPtr_cell_center_point();
+
+        const PtrPointType &getPtr_cell_center_point() const{
+            return ptr_cell_center_point;
+        }
+
         template <typename PointType_>
         friend std::ostream &operator<<(std::ostream &os, const Cell<PointType_> &cell) {
             auto vec_ptr_vetex = cell.getVec_ptr_vetex();
@@ -59,6 +68,8 @@ namespace art_pde {
     protected:
         CellType cellType{CellType::None};
         VecPtrVertexType vec_ptr_vetex;
+        PtrPointType ptr_cell_center_point{nullptr};
+
     };
 
     template<typename PointType>
@@ -79,6 +90,15 @@ namespace art_pde {
                 re_string = "None"; break;
         }
         return re_string;
+    }
+
+    template<typename PointType>
+    void Cell<PointType>::calPtr_cell_center_point() {
+        ptr_cell_center_point = std::make_shared<PointType>();
+        for (size_t i = 0; i < vec_ptr_vetex.size(); ++i) {
+            *ptr_cell_center_point += vec_ptr_vetex[i]->getPoint();
+        }
+        *ptr_cell_center_point /= double(vec_ptr_vetex.size());
     }
 
     // Geometry triangleCell define
