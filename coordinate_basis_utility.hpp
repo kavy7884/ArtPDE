@@ -9,6 +9,7 @@ namespace art_pde {
     // Basis define
     class CoordinateBasis {};
     class CartesianCoordinate : public CoordinateBasis {};
+	class IsoparametricCoordinate : public CoordinateBasis {};
 }
 
 #endif //ARTCFD_COORDINATE_BASIS_UTILITY_HPP
