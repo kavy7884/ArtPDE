@@ -5,6 +5,8 @@
 #include "project_uility.hpp"
 #include "geometry.hpp"
 
+
+
 int main() {
 
 
@@ -31,7 +33,7 @@ int main() {
     for (size_t i = 0; i < geo.getTotal_CellNum(); ++i) {
         auto vec_ptr_point_on_vertex_in_cell_id = geo.getCell_VecPtrPointOnVertex(i);
         std::cout << "Cell Type: " << GeoDataType::Type::GeoCellType::convertCellTypeInString(
-                geo.getCell_CellType(i) ) << " -> \t";
+                geo.getCell_CellDefineType(i) ) << " -> \t";
         for(auto &ptr_pt : vec_ptr_point_on_vertex_in_cell_id){
             std::cout << *ptr_pt << "\t";
         }
@@ -52,11 +54,13 @@ int main() {
         std::cout << ">> Vertex: " << *all_ptr_point_on_vertex[i] << "'s neighbor cell: " << std::endl;
         for(auto &ptr_cell_neighbor : vec_ptr_cell_neighbor){
             std::cout << ">>>> Cell Type is: ";
-            std::cout << GeoDataType::Type::GeoCellType::convertCellTypeInString(ptr_cell_neighbor->getCellType());
+            std::cout << GeoDataType::Type::GeoCellType::convertCellTypeInString(ptr_cell_neighbor->getCell_define_Type());
             std::cout << ", Cell center is: " << *ptr_cell_neighbor->getPtr_cell_center_point()<< std::endl;
         }
         std::cout << std::endl;
     }
+
+    std::cout << "List all cell edge number and type: " << std::endl;
 
 
 
@@ -85,8 +89,8 @@ int main() {
 //
 //    std::cout << "Vertex Num: " << " " <<  vec_vertex.size() << std::endl;
 //
-//    using CellType = art_pde::Cell<PointType>;
-//    using PrtCellType = std::shared_ptr<CellType>;
+//    using CellDefineType = art_pde::Cell<PointType>;
+//    using PrtCellType = std::shared_ptr<CellDefineType>;
 //    std::vector<PrtCellType> vec_cell;
 //
 //    art_pde::CellFactory<PointType , art_pde::Dim2D> cell_builder;

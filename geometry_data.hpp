@@ -10,6 +10,7 @@
 #include "numerical_method_utility.hpp"
 #include "point.hpp"
 #include "vertex.hpp"
+#include "edge.hpp"
 #include "cell.hpp"
 
 namespace art_pde {
@@ -32,6 +33,9 @@ namespace art_pde {
             using GeoVertexType = Vertex<GeoPointType>;
             using PtrGeoVertexType = std::shared_ptr<GeoVertexType>;
             using VecPtrGeoVertexType = std::vector<PtrGeoVertexType>;
+            using GeoEdgeType = Edge<GeoPointType>;
+            using PtrGeoEdgeType = std::shared_ptr<GeoEdgeType>;
+            using VecPtrGeoEdgeType = std::vector<PtrGeoEdgeType>;
             using GeoCellType = Cell<GeoPointType>;
             using PtrGeoCellType = std::shared_ptr<GeoCellType>;
             using VecPtrGeoCellType = std::vector<PtrGeoCellType>;
@@ -44,13 +48,14 @@ namespace art_pde {
 
         typename Type::VecPtrGeoPointType getTotal_VecPtrPointOnVertex() const;
         typename Type::VecPtrGeoPointType getCell_VecPtrPointOnVertex(const size_t cell_id) const;
-        CellType getCell_CellType(const size_t cell_id) const { return total_cell[cell_id]->getCellType();};
+        typename Type::GeoCellType::CellDefineType getCell_CellDefineType(const size_t cell_id) const { return total_cell[cell_id]->getCell_define_Type();};
 
         double test{0.0};
 
 
     protected:
         typename Type::VecPtrGeoVertexType total_vertex;
+        typename Type::VecPtrGeoEdgeType total_edge;
         typename Type::VecPtrGeoCellType total_cell;
     };
 

@@ -9,32 +9,41 @@
 #include <vector>
 #include <ostream>
 #include "vertex.hpp"
+#include "edge.hpp"
 #include "dimension_utility.hpp"
 
 namespace art_pde {
 
     template <typename PointType> class Vertex;
 
-    // Geometry cell type define
-    enum class CellType{ None, Line, Triangle, Quadrilateral, Tetrahedron, Hexahedron, Prism, Pyramid, Polyhedron };
+    class CellInterface{
+    public:
+        virtual void genEdgeData() = 0;
+    };
 
     // Geometry cell define
     template <typename PointType>
-    class Cell{
+    class Cell: public CellInterface{
     public:
+        // Geometry cell type define
+        enum class CellDefineType{ None, Line, Triangle, Quadrilateral, Tetrahedron, Hexahedron, Prism, Pyramid, Polyhedron };
+
+    protected:
         using PtrPointType = std::shared_ptr<PointType>;
         using VertexType = art_pde::Vertex<PointType>;
         using PtrVertexType = std::shared_ptr<VertexType>;
         using VecPtrVertexType = std::vector<PtrVertexType>;
+        using EdgeType = Edge<PointType>;
+        using PtrEdgeType = std::shared_ptr<EdgeType>;
+        using ListPtrEdgeType = std::list<PtrEdgeType>;
+
+    public:
+
         Cell() {}
 
-        CellType getCellType() const {
-            return cellType;
-        }
+        CellDefineType getCell_define_Type() const;
 
-        void setCellType(CellType cellType) {
-            Cell::cellType = cellType;
-        }
+        void setCell_define_Type(CellDefineType cell_define_Type);
 
         const VecPtrVertexType &getVec_ptr_vetex() const {
             return vec_ptr_vetex;
@@ -63,29 +72,32 @@ namespace art_pde {
             return os;
         }
 
-        static std::string convertCellTypeInString(CellType cellType_);
+        static std::string convertCellTypeInString(CellDefineType cellType_);
+
+        void genEdgeData() override {};
 
     protected:
-        CellType cellType{CellType::None};
+        CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrVertexType vec_ptr_vetex;
-        PtrPointType ptr_cell_center_point{nullptr};
+        PtrPointType ptr_cell_center_point {nullptr};
+        ListPtrEdgeType list_ptr_neighbor_edge;
 
     };
 
     template<typename PointType>
     std::string Cell<PointType>::getCellTypeInString() {
-        return Cell<PointType>::convertCellTypeInString(cellType);
+        return Cell<PointType>::convertCellTypeInString(cell_define_Type);
     }
 
     template<typename PointType>
-    std::string Cell<PointType>::convertCellTypeInString(CellType cellType_) {
+    std::string Cell<PointType>::convertCellTypeInString(CellDefineType cellType_) {
         std::string re_string;
         switch (cellType_){
-            case CellType::Line : re_string = "Line"; break;
-            case CellType::Triangle : re_string = "Triangle"; break;
-            case CellType::Quadrilateral : re_string = "Quadrilateral"; break;
-            case CellType::Tetrahedron : re_string = "Tetrahedron"; break;
-            case CellType::Hexahedron : re_string = "Hexahedron"; break;
+            case CellDefineType::Line : re_string = "Line"; break;
+            case CellDefineType::Triangle : re_string = "Triangle"; break;
+            case CellDefineType::Quadrilateral : re_string = "Quadrilateral"; break;
+            case CellDefineType::Tetrahedron : re_string = "Tetrahedron"; break;
+            case CellDefineType::Hexahedron : re_string = "Hexahedron"; break;
             default:
                 re_string = "None"; break;
         }
@@ -101,42 +113,90 @@ namespace art_pde {
         *ptr_cell_center_point /= double(vec_ptr_vetex.size());
     }
 
+    template<typename PointType>
+    typename Cell<PointType>::CellDefineType Cell<PointType>::getCell_define_Type() const {
+        return cell_define_Type;
+    }
+
+    template<typename PointType>
+    void Cell<PointType>::setCell_define_Type(Cell::CellDefineType cell_define_Type) {
+        Cell::cell_define_Type = cell_define_Type;
+    }
+
+
     // Geometry triangleCell define
     template <typename PointType>
     class TriangleCell : public Cell<PointType>{
+        using VertexType = art_pde::Vertex<PointType>;
+        using PtrVertexType = std::shared_ptr<VertexType>;
+        using EdgeType = Edge<PointType>;
+        using PtrEdgeType = std::shared_ptr<EdgeType>;
     public:
-        using PtrVertexType = typename Cell<PointType>::PtrVertexType;
-        TriangleCell(const PtrVertexType &v_1, const PtrVertexType &v_2, const PtrVertexType &v_3): Cell<PointType>() {
+        TriangleCell(const PtrVertexType &v_1, const PtrVertexType &v_2, const PtrVertexType &v_3)
+                : Cell<PointType>()
+        {
             this->vec_ptr_vetex.push_back(v_1); this->vec_ptr_vetex.push_back(v_2); this->vec_ptr_vetex.push_back(v_3);
             this->vec_ptr_vetex.shrink_to_fit();
-            Cell<PointType>::setCellType(CellType::Triangle);
+            Cell<PointType>::setCell_define_Type(Cell<PointType>::CellDefineType::Triangle);
+        }
+
+        void genEdgeData() override {
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[0], this->vec_ptr_vetex[1]));
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[1], this->vec_ptr_vetex[2]));
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[2], this->vec_ptr_vetex[0]));
+        };
+
+    private:
+        PtrEdgeType genPtrLineEdge(const PtrVertexType &v_1, const PtrVertexType &v_2){
+            PtrEdgeType re_ptr_edge = std::make_shared<LineEdge<PointType>>(v_1, v_2);
+            v_1->addPtrNeighborEdge(re_ptr_edge);
+            v_2->addPtrNeighborEdge(re_ptr_edge);
+            return re_ptr_edge;
         }
     };
 
     // Geometry quadrilateralCell define
     template <typename PointType>
     class QuadrilateralCell : public Cell<PointType>{
+        using VertexType = art_pde::Vertex<PointType>;
+        using PtrVertexType = std::shared_ptr<VertexType>;
+        using EdgeType = Edge<PointType>;
+        using PtrEdgeType = std::shared_ptr<EdgeType>;
     public:
-        using PtrVertexType = typename Cell<PointType>::PtrVertexType;
         QuadrilateralCell(const PtrVertexType &v_1, const PtrVertexType &v_2,
-                       const PtrVertexType &v_3, const PtrVertexType &v_4): Cell<PointType>() {
+                       const PtrVertexType &v_3, const PtrVertexType &v_4)
+                : Cell<PointType>()
+        {
             this->vec_ptr_vetex.push_back(v_1); this->vec_ptr_vetex.push_back(v_2);
             this->vec_ptr_vetex.push_back(v_3); this->vec_ptr_vetex.push_back(v_4);
             this->vec_ptr_vetex.shrink_to_fit();
-            Cell<PointType>::setCellType(CellType::Quadrilateral);
+            Cell<PointType>::setCell_define_Type(Cell<PointType>::CellDefineType::Quadrilateral);
+        }
+
+        void genEdgeData() override {
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[0], this->vec_ptr_vetex[1]));
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[1], this->vec_ptr_vetex[2]));
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[2], this->vec_ptr_vetex[3]));
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[3], this->vec_ptr_vetex[4]));
+        };
+
+    private:
+        PtrEdgeType genPtrLineEdge(const PtrVertexType &v_1, const PtrVertexType &v_2){
+            PtrEdgeType re_ptr_edge = std::make_shared<LineEdge<PointType>>(v_1, v_2);
+            v_1->addPtrNeighborEdge(re_ptr_edge);
+            v_2->addPtrNeighborEdge(re_ptr_edge);
+            return re_ptr_edge;
         }
     };
 
     // Geometry cell builder define (base)
     template <typename PointType, typename Dimension>
     class CellFactoryBase{
-
-    public:
-        using VertexType = Vertex<PointType>;
-        using PtrVertexType = typename Cell<PointType>::PtrVertexType;
-        using VecPtrVertexType = typename Cell<PointType>::VecPtrVertexType;
+        using VertexType = art_pde::Vertex<PointType>;
+        using PtrVertexType = std::shared_ptr<VertexType>;
+        using VecPtrVertexType = std::vector<PtrVertexType>;
         using PtrCellType = typename std::shared_ptr<Cell<PointType>>;
-
+    public:
         CellFactoryBase() {}
 
         void addVertex(PtrVertexType & ptr_vertex){ vec_ptr_vertex.push_back(ptr_vertex); }
@@ -176,6 +236,8 @@ namespace art_pde {
             else{
                 ptr_cell = std::make_shared<Cell<PointType>>();
             }
+
+            ptr_cell->genEdgeData();
 
             return ptr_cell;
         }

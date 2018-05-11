@@ -16,11 +16,14 @@ namespace art_pde {
     // Geometry vertex define
     template <typename PointType>
     class Vertex{
-    public:
         using PtrPointType = std::shared_ptr<PointType>;
         using CellType = Cell<PointType>;
         using PtrCellType = std::shared_ptr<CellType>;
         using VecPtrCellType = std::vector<PtrCellType>;
+        using EdgeType = Edge<PointType>;
+        using PtrEdgeType = std::shared_ptr<EdgeType>;
+        using ListPtrEdgeType = std::list<PtrEdgeType>;
+    public:
         Vertex();
         Vertex(const PointType& point);
         Vertex(const PtrPointType& ptr_point);
@@ -29,7 +32,8 @@ namespace art_pde {
         const PtrPointType &getPtr_point() const;
         void setPtr_point(const PtrPointType &ptr_point);
         const VecPtrCellType &getVec_ptr_neighbor_cell() const;
-        void addPtrCellNeighbor(const PtrCellType& ptr_neighbor_cell){ vec_ptr_neighbor_cell.push_back(ptr_neighbor_cell); }
+        void addPtrNeighborCell(const PtrCellType &ptr_neighbor_cell){ vec_ptr_neighbor_cell.push_back(ptr_neighbor_cell); }
+        void addPtrNeighborEdge(const PtrEdgeType &ptr_neighbor_edge){ list_ptr_neighbor_edge.push_back(ptr_neighbor_edge); }
 
         template <typename PointType_>
         friend std::ostream &operator<<(std::ostream &os, const Vertex<PointType_> &vertex){
@@ -40,6 +44,9 @@ namespace art_pde {
     private:
         PtrPointType ptr_point{nullptr};
         VecPtrCellType vec_ptr_neighbor_cell;
+        ListPtrEdgeType list_ptr_neighbor_edge;
+    public:
+        const ListPtrEdgeType &getList_ptr_neighbor_edge() const;
     };
 
     template<typename PointType>
@@ -75,6 +82,11 @@ namespace art_pde {
     template<typename PointType>
     const typename Vertex<PointType>::VecPtrCellType &Vertex<PointType>::getVec_ptr_neighbor_cell() const {
         return vec_ptr_neighbor_cell;
+    }
+
+    template<typename PointType>
+    const typename Vertex<PointType>::ListPtrEdgeType &Vertex<PointType>::getList_ptr_neighbor_edge() const {
+        return list_ptr_neighbor_edge;
     }
 
 }

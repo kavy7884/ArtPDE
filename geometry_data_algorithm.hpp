@@ -19,9 +19,13 @@ namespace art_pde {
     private:
         bool is_cal_vertex_neighbor_cell{ false };
         bool is_gen_cell_center_point{ false };
+        bool is_cal_edge{ false };
+
 
         void genCellCenterPoint();
         void calVertexNeighborCell();
+        void calEdge(); //ToDo - add Implementation
+
     };
 
     template<class GeometryDataType>
@@ -52,7 +56,7 @@ namespace art_pde {
             auto this_ptr_cell = this->total_cell[i];
             auto vec_ptr_vetex_in_cell = this_ptr_cell->getVec_ptr_vetex();
             for (size_t j = 0; j < vec_ptr_vetex_in_cell.size() ; ++j) {
-                vec_ptr_vetex_in_cell[j]->addPtrCellNeighbor(this_ptr_cell);
+                vec_ptr_vetex_in_cell[j]->addPtrNeighborCell(this_ptr_cell);
             }
         }
         is_cal_vertex_neighbor_cell = true;
