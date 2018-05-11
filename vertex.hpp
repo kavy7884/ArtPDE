@@ -34,6 +34,7 @@ namespace art_pde {
         const VecPtrCellType &getVec_ptr_neighbor_cell() const;
         void addPtrNeighborCell(const PtrCellType &ptr_neighbor_cell){ vec_ptr_neighbor_cell.push_back(ptr_neighbor_cell); }
         void addPtrNeighborEdge(const PtrEdgeType &ptr_neighbor_edge){ list_ptr_neighbor_edge.push_back(ptr_neighbor_edge); }
+        const ListPtrEdgeType &getList_ptr_neighbor_edge() const;
 
         template <typename PointType_>
         friend std::ostream &operator<<(std::ostream &os, const Vertex<PointType_> &vertex){
@@ -45,8 +46,6 @@ namespace art_pde {
         PtrPointType ptr_point{nullptr};
         VecPtrCellType vec_ptr_neighbor_cell;
         ListPtrEdgeType list_ptr_neighbor_edge;
-    public:
-        const ListPtrEdgeType &getList_ptr_neighbor_edge() const;
     };
 
     template<typename PointType>

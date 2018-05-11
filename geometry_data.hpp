@@ -48,10 +48,14 @@ namespace art_pde {
 
         typename Type::VecPtrGeoPointType getTotal_VecPtrPointOnVertex() const;
         typename Type::VecPtrGeoPointType getCell_VecPtrPointOnVertex(const size_t cell_id) const;
-        typename Type::GeoCellType::CellDefineType getCell_CellDefineType(const size_t cell_id) const { return total_cell[cell_id]->getCell_define_Type();};
+        const typename Type::GeoCellType::CellDefineType &getCell_CellDefineType(const size_t cell_id) const { return total_cell[cell_id]->getCell_define_Type();};
 
         double test{0.0};
 
+        // check edge
+        const typename Type::PtrGeoVertexType &getVertex_PtrVertex(const size_t vertex_id){
+            return this->total_vertex[vertex_id];
+        }
 
     protected:
         typename Type::VecPtrGeoVertexType total_vertex;

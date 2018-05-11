@@ -41,7 +41,7 @@ namespace art_pde {
 
         Cell() {}
 
-        CellDefineType getCell_define_Type() const;
+        const CellDefineType& getCell_define_Type() const;
 
         void setCell_define_Type(CellDefineType cell_define_Type);
 
@@ -114,13 +114,13 @@ namespace art_pde {
     }
 
     template<typename PointType>
-    typename Cell<PointType>::CellDefineType Cell<PointType>::getCell_define_Type() const {
-        return cell_define_Type;
+    void Cell<PointType>::setCell_define_Type(Cell::CellDefineType cell_define_Type) {
+        Cell::cell_define_Type = cell_define_Type;
     }
 
     template<typename PointType>
-    void Cell<PointType>::setCell_define_Type(Cell::CellDefineType cell_define_Type) {
-        Cell::cell_define_Type = cell_define_Type;
+    const typename Cell<PointType>::CellDefineType &Cell<PointType>::getCell_define_Type() const {
+        return cell_define_Type;
     }
 
 
@@ -177,7 +177,7 @@ namespace art_pde {
             this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[0], this->vec_ptr_vetex[1]));
             this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[1], this->vec_ptr_vetex[2]));
             this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[2], this->vec_ptr_vetex[3]));
-            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[3], this->vec_ptr_vetex[4]));
+            this->list_ptr_neighbor_edge.push_back(genPtrLineEdge(this->vec_ptr_vetex[3], this->vec_ptr_vetex[0]));
         };
 
     private:

@@ -18,7 +18,9 @@ int main() {
 
     std::cout << "Vertex Num (before): " << geo.getTotal_VertexNum() << std::endl;
     std::cout << "Cell Num (before): " << geo.getTotal_CellNum() << std::endl;
+
     std::cout << geo.read(proj_1) << std::endl;
+
     std::cout << "Vertex Num (after): " << geo.getTotal_VertexNum() << std::endl;
     std::cout << "Cell Num (after): " << geo.getTotal_CellNum() << std::endl;
 
@@ -60,9 +62,14 @@ int main() {
         std::cout << std::endl;
     }
 
-    std::cout << "List all cell edge number and type: " << std::endl;
+    std::cout << "List all vertex connected edge number: " << std::endl;
+    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
+        auto ptr_vertex = geo.getVertex_PtrVertex(i);
+        std::cout << ptr_vertex->getList_ptr_neighbor_edge().size() << std::endl;
 
 
+
+    }
 
 //    using PointType = art_pde::Point<art_pde::Dim2D, art_pde::CartesianCoordinate>;
 //    PointType tmp_pt;

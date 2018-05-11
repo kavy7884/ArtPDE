@@ -134,12 +134,15 @@ namespace art_pde {
         typename GeometryDataType::Type::VecPtrGeoVertexType& total_vertex = loader->getTotalVertex();
         typename GeometryDataType::Type::VecPtrGeoCellType& total_cell = loader->getTotalCell();
 
+
         fs.open(file_name);
         if(fs.is_open()){
+
             while(getline( fs, bufferLine )) {
                 std::stringstream w(bufferLine);
 
                 cell_factory.clearVertex();
+
                 while(w >> bufferId){
                     cell_factory.addVertex(total_vertex[bufferId]);
                 }

@@ -16,6 +16,7 @@ namespace art_pde {
         typename GeometryDataType::Type::VecPtrGeoPointType getTotal_VecPtrPointOnCellCenter();
         const typename GeometryDataType::Type::VecPtrGeoCellType getVertex_VecPtrNeighborCell(const size_t vertex_id);
 
+
     private:
         bool is_cal_vertex_neighbor_cell{ false };
         bool is_gen_cell_center_point{ false };
