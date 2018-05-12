@@ -59,17 +59,13 @@ namespace art_pde {
         }
         void mergeEdge(const Edge &rhs);
 
-
+        bool Is_merged() const;
 
     protected:
         VecPtrVertexType vec_ptr_vetex;
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrCellType vec_ptr_neighbor_cell;
-        bool merged{false};
-    public:
-        bool isMerged() const;
-
-        void setMerged(bool merged);
+        bool is_merged{false};
 
     };
 
@@ -94,21 +90,16 @@ namespace art_pde {
     void Edge<PointType>::mergeEdge(const Edge &rhs) {
         auto & rhs_vec_ptr_neighbor_cell = rhs.getVec_ptr_neighbor_cell();
 
-        std::cout << rhs_vec_ptr_neighbor_cell.size() << std::endl;
-
         for (auto & ptr_cell: rhs_vec_ptr_neighbor_cell) {
             this->addPtrNeighborCell(ptr_cell);
         }
+
+        this->is_merged = true;
     }
 
     template<typename PointType>
-    bool Edge<PointType>::isMerged() const {
-        return merged;
-    }
-
-    template<typename PointType>
-    void Edge<PointType>::setMerged(bool merged) {
-        Edge::merged = merged;
+    bool Edge<PointType>::Is_merged() const {
+        return is_merged;
     }
 
     template <typename PointType>
