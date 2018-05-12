@@ -8,19 +8,19 @@
 #include <cstdlib>
 namespace art_pde {
     class Dimension{
-        constexpr static size_t k_NumDim = 0;
+        const static size_t k_NumDim = 0;
     };
     class Dim1D : public Dimension{
     public:
-        constexpr static size_t k_NumDim = 1;
+        const static size_t k_NumDim = 1;
     };
     class Dim2D : public Dimension{
     public:
-        constexpr static size_t k_NumDim = 2;
+        const static size_t k_NumDim = 2;
     };
     class Dim3D : public Dimension{
     public:
-        constexpr static size_t k_NumDim = 3;
+        const static size_t k_NumDim = 3;
     };
 }
 
