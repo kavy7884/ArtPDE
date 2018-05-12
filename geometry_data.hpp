@@ -36,6 +36,7 @@ namespace art_pde {
             using GeoEdgeType = Edge<GeoPointType>;
             using PtrGeoEdgeType = std::shared_ptr<GeoEdgeType>;
             using VecPtrGeoEdgeType = std::vector<PtrGeoEdgeType>;
+            using ListPtrGeoEdgeType = std::list<PtrGeoEdgeType>;
             using GeoCellType = Cell<GeoPointType>;
             using PtrGeoCellType = std::shared_ptr<GeoCellType>;
             using VecPtrGeoCellType = std::vector<PtrGeoCellType>;

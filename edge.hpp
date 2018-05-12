@@ -57,21 +57,30 @@ namespace art_pde {
         bool operator!=(const Edge &rhs) const {
             return !(rhs == *this);
         }
+        void mergeEdge(const Edge &rhs);
+
+
 
     protected:
         VecPtrVertexType vec_ptr_vetex;
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrCellType vec_ptr_neighbor_cell;
+        bool merged{false};
+    public:
+        bool isMerged() const;
+
+        void setMerged(bool merged);
 
     };
 
     template<typename PointType>
     bool Edge<PointType>::operator==(const Edge &rhs) const {
+        //std::cout << "CMP edge" << std::endl;
         if(this->getVertexNum() != rhs.getVertexNum()) return false;
         else{
             std::set<PtrVertexType> set_self_vertex(vec_ptr_vetex.cbegin(), vec_ptr_vetex.cend());
             std::set<PtrVertexType> set_rhs_vertex(rhs.getVec_ptr_vetex().cbegin(), rhs.getVec_ptr_vetex().cend());
-            if ( std::equal(set_self_vertex.begin(), set_self_vertex.end(), set_rhs_vertex.begin() ))return true;
+            if ( std::equal(set_self_vertex.cbegin(), set_self_vertex.cend(), set_rhs_vertex.cbegin() ))return true;
             else return false;
         }
     }
@@ -79,6 +88,27 @@ namespace art_pde {
     template<typename PointType>
     const typename Edge<PointType>::VecPtrVertexType &Edge<PointType>::getVec_ptr_vetex() const {
         return vec_ptr_vetex;
+    }
+
+    template<typename PointType>
+    void Edge<PointType>::mergeEdge(const Edge &rhs) {
+        auto & rhs_vec_ptr_neighbor_cell = rhs.getVec_ptr_neighbor_cell();
+
+        std::cout << rhs_vec_ptr_neighbor_cell.size() << std::endl;
+
+        for (auto & ptr_cell: rhs_vec_ptr_neighbor_cell) {
+            this->addPtrNeighborCell(ptr_cell);
+        }
+    }
+
+    template<typename PointType>
+    bool Edge<PointType>::isMerged() const {
+        return merged;
+    }
+
+    template<typename PointType>
+    void Edge<PointType>::setMerged(bool merged) {
+        Edge::merged = merged;
     }
 
     template <typename PointType>

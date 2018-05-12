@@ -15,7 +15,9 @@ namespace art_pde {
 
         typename GeometryDataType::Type::VecPtrGeoPointType getTotal_VecPtrPointOnCellCenter();
         const typename GeometryDataType::Type::VecPtrGeoCellType getVertex_VecPtrNeighborCell(const size_t vertex_id);
-        void calEdge(); 
+        void calEdge(){
+            calEdgeMerge();
+        }
 
 
     private:
@@ -75,9 +77,36 @@ namespace art_pde {
 
     template<class GeometryDataType>
     void GeometryDataAlgorithm<GeometryDataType>::calEdgeMerge() {
-//        for (int i = 0; i < ; ++i) {
-//
-//        }
+
+        for (int i = 0; i < this->getTotal_VertexNum(); ++i) {
+            auto & list_ptr_neighbor_edge = this->total_vertex[i]->getList_ptr_neighbor_edge();
+
+            std::cout << i << std::endl;
+            auto it_1 = list_ptr_neighbor_edge.begin();
+            while( it_1 != list_ptr_neighbor_edge.end()){
+                auto it_2 = it_1;
+                ++it_2;
+                while( it_2 != list_ptr_neighbor_edge.end()) {
+                    if((*(*it_1))==(*(*it_2)))
+                    {
+                        std::cout << "Merge" << std::endl;
+
+                        (*it_1)->mergeEdge(*(*it_2));
+
+                        for(auto & replace_cell : (*it_2)->getVec_ptr_neighbor_cell()){
+                            replace_cell->replaceEdge((*it_2), (*it_1));
+                        }
+
+                        for(auto &  ptr_vetex: (*it_2)->getVec_ptr_vetex()){
+                            ptr_vetex->eraseEdge((*it_2));
+                        }
+                        break;
+                    }
+                    ++it_2;
+                }
+                ++it_1;
+            }
+        }
     }
 
 

@@ -78,6 +78,8 @@ namespace art_pde {
 
         void genEdgeData() override {};
 
+        void replaceEdge(const PtrEdgeType& ptr_edge_old, const PtrEdgeType& ptr_edge_new);
+
     protected:
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrVertexType vec_ptr_vetex;
@@ -123,6 +125,15 @@ namespace art_pde {
     template<typename PointType>
     const typename Cell<PointType>::CellDefineType &Cell<PointType>::getCell_define_Type() const {
         return cell_define_Type;
+    }
+
+    template<typename PointType>
+    void Cell<PointType>::replaceEdge(const PtrEdgeType& ptr_edge_old, const PtrEdgeType& ptr_edge_new) {
+        for(auto & ptr_neighbor_edge: list_ptr_neighbor_edge){
+            if(ptr_neighbor_edge == ptr_edge_old){
+                ptr_neighbor_edge = ptr_edge_new;
+            }
+        }
     }
 
 

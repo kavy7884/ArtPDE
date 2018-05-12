@@ -35,7 +35,10 @@ namespace art_pde {
         const VecPtrCellType &getVec_ptr_neighbor_cell() const;
         void addPtrNeighborCell(const PtrCellType &ptr_neighbor_cell){ vec_ptr_neighbor_cell.push_back(ptr_neighbor_cell); }
         void addPtrNeighborEdge(const PtrEdgeType &ptr_neighbor_edge){ list_ptr_neighbor_edge.push_back(ptr_neighbor_edge); }
-        const ListPtrEdgeType &getList_ptr_neighbor_edge() const;
+        const ListPtrEdgeType &c_getList_ptr_neighbor_edge() const;
+        ListPtrEdgeType &getList_ptr_neighbor_edge(){return list_ptr_neighbor_edge;}
+
+        void eraseEdge(const PtrEdgeType &ptr_edge);
 
         template <typename PointType_>
         friend std::ostream &operator<<(std::ostream &os, const Vertex<PointType_> &vertex){
@@ -85,8 +88,19 @@ namespace art_pde {
     }
 
     template<typename PointType>
-    const typename Vertex<PointType>::ListPtrEdgeType &Vertex<PointType>::getList_ptr_neighbor_edge() const {
+    const typename Vertex<PointType>::ListPtrEdgeType &Vertex<PointType>::c_getList_ptr_neighbor_edge() const {
         return list_ptr_neighbor_edge;
+    }
+
+    template<typename PointType>
+    void Vertex<PointType>::eraseEdge(const Vertex<PointType>::PtrEdgeType &ptr_edge) {
+        auto it = list_ptr_neighbor_edge.begin();
+        while (it != list_ptr_neighbor_edge.end()){
+            if((*it) == ptr_edge){
+                list_ptr_neighbor_edge.erase(it);
+            }
+            ++it;
+        }
     }
 
 }
