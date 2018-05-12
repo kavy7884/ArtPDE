@@ -59,8 +59,8 @@ namespace art_pde {
 
     protected:
         typename Type::VecPtrGeoVertexType total_vertex;
-        typename Type::VecPtrGeoEdgeType total_edge;
         typename Type::VecPtrGeoCellType total_cell;
+        typename Type::VecPtrGeoEdgeType total_edge;
     };
 
     template<typename Dimension, typename CoordinateBasis>

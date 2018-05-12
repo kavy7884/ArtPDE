@@ -15,6 +15,7 @@ namespace art_pde {
 
         typename GeometryDataType::Type::VecPtrGeoPointType getTotal_VecPtrPointOnCellCenter();
         const typename GeometryDataType::Type::VecPtrGeoCellType getVertex_VecPtrNeighborCell(const size_t vertex_id);
+        void calEdge(); 
 
 
     private:
@@ -25,7 +26,8 @@ namespace art_pde {
 
         void genCellCenterPoint();
         void calVertexNeighborCell();
-        void calEdge(); //ToDo - add Implementation
+        void calEdgeMerge();
+        
 
     };
 
@@ -69,6 +71,13 @@ namespace art_pde {
         if(!is_cal_vertex_neighbor_cell) calVertexNeighborCell();
         if(!is_gen_cell_center_point) genCellCenterPoint();
         return this->total_vertex[vertex_id]->getVec_ptr_neighbor_cell();
+    }
+
+    template<class GeometryDataType>
+    void GeometryDataAlgorithm<GeometryDataType>::calEdgeMerge() {
+//        for (int i = 0; i < ; ++i) {
+//
+//        }
     }
 
 

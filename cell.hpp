@@ -8,9 +8,11 @@
 #include <memory>
 #include <vector>
 #include <ostream>
+#include <list>
 #include "vertex.hpp"
 #include "edge.hpp"
 #include "dimension_utility.hpp"
+
 
 namespace art_pde {
 
@@ -151,6 +153,7 @@ namespace art_pde {
             PtrEdgeType re_ptr_edge = std::make_shared<LineEdge<PointType>>(v_1, v_2);
             v_1->addPtrNeighborEdge(re_ptr_edge);
             v_2->addPtrNeighborEdge(re_ptr_edge);
+            re_ptr_edge->addPtrNeighborCell(std::shared_ptr<TriangleCell<PointType>>(this));
             return re_ptr_edge;
         }
     };
@@ -185,6 +188,7 @@ namespace art_pde {
             PtrEdgeType re_ptr_edge = std::make_shared<LineEdge<PointType>>(v_1, v_2);
             v_1->addPtrNeighborEdge(re_ptr_edge);
             v_2->addPtrNeighborEdge(re_ptr_edge);
+            re_ptr_edge->addPtrNeighborCell(std::shared_ptr<QuadrilateralCell<PointType>>(this));
             return re_ptr_edge;
         }
     };

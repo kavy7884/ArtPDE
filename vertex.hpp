@@ -5,6 +5,7 @@
 #ifndef ARTCFD_VERTEX_HPP
 #define ARTCFD_VERTEX_HPP
 
+#include <list>
 #include <memory>
 #include <ostream>
 #include "cell.hpp"
