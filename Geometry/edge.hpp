@@ -65,6 +65,7 @@ namespace art_pde {
         VecPtrVertexType vec_ptr_vetex;
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrCellType vec_ptr_neighbor_cell;
+        PtrPointType edge_center_point {nullptr};
         bool is_merged{false};
 
     };
