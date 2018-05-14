@@ -9,12 +9,14 @@
 
 // ArtPDE Lib Include Zone
 #include "Typelist.h"
-#include "dimension_utility.hpp"
-#include "numerical_method_utility.hpp"
-#include "shape_function_name_utility.h"
-#include "element_type_utility.h"
-#include "Point.hpp"
-#include "Eigen/Dense"
+#include "../Utility/dimension_utility.hpp"
+#include "../Utility/numerical_method_utility.hpp"
+#include "../Utility/shape_function_name_utility.h"
+#include "../Utility/element_type_utility.h"
+#include "../Geometry/Point.hpp"
+
+// External Lib Include Zone
+#include "/Users/Jeting/Documents/eigen/Eigen/Dense"
 
 namespace art_pde{
 

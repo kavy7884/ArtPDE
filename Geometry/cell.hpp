@@ -11,7 +11,7 @@
 #include <list>
 #include "vertex.hpp"
 #include "edge.hpp"
-#include "dimension_utility.hpp"
+#include "../Utility/dimension_utility.hpp"
 
 
 namespace art_pde {

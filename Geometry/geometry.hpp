@@ -5,7 +5,7 @@
 #ifndef ARTCFD_GEOMESH_HPP
 #define ARTCFD_GEOMESH_HPP
 
-#include "numerical_method_utility.hpp"
+#include "../Utility/numerical_method_utility.hpp"
 #include "geometry_data.hpp"
 #include "geometry_data_reader.hpp"
 #include "geometry_data_reader_artpde.hpp"

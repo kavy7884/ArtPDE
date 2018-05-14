@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <memory>
-#include "numerical_method_utility.hpp"
+#include "../Utility/numerical_method_utility.hpp"
 #include "point.hpp"
 #include "vertex.hpp"
 #include "edge.hpp"
