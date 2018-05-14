@@ -47,7 +47,9 @@ namespace art_pde {
         const size_t getTotal_VertexNum() const{ return total_vertex.size();}
         const size_t getTotal_CellNum() const{ return total_cell.size();}
 
-        typename Type::VecPtrGeoPointType getTotal_VecPtrPointOnVertex() const;
+        //typename Type::VecPtrGeoPointType getTotal_VecPtrPointOnVertex() const;
+        const typename Type::PtrGeoPointType& getVertex_PtrPoint(const size_t vertex_id) const;
+
         typename Type::VecPtrGeoPointType getCell_VecPtrPointOnVertex(const size_t cell_id) const;
         const typename Type::GeoCellType::CellDefineType &getCell_CellDefineType(const size_t cell_id) const { return total_cell[cell_id]->getCell_define_Type();};
 
@@ -64,20 +66,27 @@ namespace art_pde {
         typename Type::VecPtrGeoEdgeType total_edge;
     };
 
+//    template<typename Dimension, typename CoordinateBasis>
+//    typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
+//    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getTotal_VecPtrPointOnVertex() const {
+//        typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
+//                reVecPtrGeoPointType;
+//
+//        for (size_t i = 0; i < this->getTotal_VertexNum(); ++i) {
+//            reVecPtrGeoPointType.push_back(
+//                    this->total_vertex[i]->getPtr_point()
+//            );
+//        }
+//
+//        return reVecPtrGeoPointType;
+//    }
+
     template<typename Dimension, typename CoordinateBasis>
-    typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getTotal_VecPtrPointOnVertex() const {
-        typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-                reVecPtrGeoPointType;
+    const typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::PtrGeoPointType&
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getVertex_PtrPoint(const size_t vertex_id) const {
+        return total_vertex[vertex_id]->getPtr_point();
+    };
 
-        for (size_t i = 0; i < this->getTotal_VertexNum(); ++i) {
-            reVecPtrGeoPointType.push_back(
-                    this->total_vertex[i]->getPtr_point()
-            );
-        }
-
-        return reVecPtrGeoPointType;
-    }
 
     template<typename Dimension, typename CoordinateBasis>
     typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType

@@ -59,15 +59,17 @@ namespace art_pde {
         }
         void mergeEdge(const Edge &rhs);
 
-        bool Is_merged() const;
+        bool is_Merged_edge() const { return merged_edge;};
+
+        bool is_Exist_center_point() const { return exist_center_point;};
 
     protected:
         VecPtrVertexType vec_ptr_vetex;
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrCellType vec_ptr_neighbor_cell;
-        PtrPointType edge_center_point {nullptr};
-        bool is_merged{false};
-
+        PtrPointType ptr_edge_center_point {nullptr};
+        bool merged_edge{false};
+        bool exist_center_point{false};
     };
 
     template<typename PointType>
@@ -95,12 +97,7 @@ namespace art_pde {
             this->addPtrNeighborCell(ptr_cell);
         }
 
-        this->is_merged = true;
-    }
-
-    template<typename PointType>
-    bool Edge<PointType>::Is_merged() const {
-        return is_merged;
+        this->merged_edge = true;
     }
 
     template <typename PointType>

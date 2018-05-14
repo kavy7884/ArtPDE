@@ -84,7 +84,7 @@ namespace art_pde {
             auto it_1 = list_ptr_neighbor_edge.begin();
             while( it_1 != list_ptr_neighbor_edge.end()){
 
-                if((*it_1)->Is_merged()){
+                if((*it_1)->is_Merged_edge()){
                     ++it_1;
                     continue;
                 }
@@ -93,7 +93,7 @@ namespace art_pde {
                 ++it_2;
                 while( it_2 != list_ptr_neighbor_edge.end()) {
 
-                    if((*it_2)->Is_merged()){
+                    if((*it_2)->is_Merged_edge()){
                         ++it_2;
                         continue;
                     }

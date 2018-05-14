@@ -80,11 +80,14 @@ namespace art_pde {
 
         void replaceEdge(const PtrEdgeType& ptr_edge_old, const PtrEdgeType& ptr_edge_new);
 
+        bool is_Exist_center_point() const { return exist_center_point;};
+
     protected:
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrVertexType vec_ptr_vetex;
         PtrPointType ptr_cell_center_point {nullptr};
         ListPtrEdgeType list_ptr_neighbor_edge;
+        bool exist_center_point{false};
 
     };
 
