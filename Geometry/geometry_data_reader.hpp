@@ -5,7 +5,7 @@
 #ifndef ARTCFD_GEOMETRY_DATA_READER_HPP
 #define ARTCFD_GEOMETRY_DATA_READER_HPP
 
-#include "numerical_method_utility.hpp"
+#include "../Utility/numerical_method_utility.hpp"
 #include "geometry_data.hpp"
 
 namespace art_pde {
