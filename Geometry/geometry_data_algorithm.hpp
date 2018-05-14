@@ -100,7 +100,7 @@ namespace art_pde {
 
                     if((*(*it_1))==(*(*it_2)))
                     {
-                        //std::cout << "Merge" << std::endl;
+                        std::cout << "Merge" << std::endl;
 
                         (*it_1)->mergeEdge(*(*it_2));
 
