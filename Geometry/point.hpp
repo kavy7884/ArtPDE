@@ -7,8 +7,8 @@
 
 #include <ostream>
 #include <string>
-#include "dimension_utility.hpp"
-#include "coordinate_basis_utility.hpp"
+#include "../Utility/dimension_utility.hpp"
+#include "../Utility/coordinate_basis_utility.hpp"
 
 namespace art_pde {
 
