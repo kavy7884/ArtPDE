@@ -16,3 +16,7 @@ include_directories(FunctionSpace)
 add_executable(ArtPDE_jeting main_Jeting.cpp)
 add_executable(ArtPDE_kavy main_kavy.cpp)
 add_executable(ArtPDE_marvin main_marvin.cpp)
+
+target_link_libraries(ArtPDE_jeting)
+target_link_libraries(ArtPDE_kavy)
+target_link_libraries(ArtPDE_marvin)
