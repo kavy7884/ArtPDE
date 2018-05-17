@@ -16,62 +16,54 @@ int main() {
 
     art_pde::Geometry<GeoDataType, art_pde::GeometryDataReaderArtPDE> geo;
 
-    std::cout << "Vertex Num (before): " << geo.getTotal_VertexNum() << std::endl;
-    std::cout << "Cell Num (before): " << geo.getTotal_CellNum() << std::endl;
+    std::cout << "Vertex Num (before): " << geo.getNum_TotalVertex() << std::endl;
+    std::cout << "Cell Num (before): " << geo.getNum_TotalCell() << std::endl;
 
     std::cout << geo.read(proj_1) << std::endl;
 
-    std::cout << "Vertex Num (after): " << geo.getTotal_VertexNum() << std::endl;
-    std::cout << "Cell Num (after): " << geo.getTotal_CellNum() << std::endl;
+    std::cout << "Vertex Num (after): " << geo.getNum_TotalVertex() << std::endl;
+    std::cout << "Cell Num (after): " << geo.getNum_TotalCell() << std::endl;
 
 
     std::cout << "List all vertex points: " << std::endl;
-    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
+    for (size_t i = 0; i < geo.getNum_TotalVertex(); ++i) {
         std::cout << *geo.getVertex_PtrPoint(i) << std::endl;
     }
 
+    std::cout << "List all cell center points: " << std::endl;
+    for (size_t i = 0; i < geo.getNum_TotalCell(); ++i) {
+        std::cout << *geo.getCell_Center_PtrPoint(i) << std::endl;
+    }
+
+    std::cout << "List all vertex points in each cell: " << std::endl;
+    for (size_t i = 0; i < geo.getNum_TotalCell(); ++i) {
+        std::cout << "Cell Type: " << GeoDataType::Type::GeoCellType::convertCellTypeInString(
+                geo.getCell_CellDefineType(i) ) << " -> \t";
+        auto vec_ptr_vertex_on_cell = geo.getRelation_Cell_Neighbor_Vertex(i);
+        for(auto &ptr_vertex : vec_ptr_vertex_on_cell){
+            std::cout << ptr_vertex->getPoint() << "\t";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "List all vertex cell neighbor's center and type: " << std::endl;
+    for (size_t i = 0; i < geo.getNum_TotalVertex(); ++i) {
+        std::cout << "Cell " << i << " is: " << std::endl;
+        auto vec_neighbor_cell = geo.getRelation_Vertex_Neighbor_Cell(i);
+        for(auto &ptr_cell : vec_neighbor_cell){
+            std::cout << ">>>> Cell Type is: ";
+            std::cout << GeoDataType::Type::GeoCellType::convertCellTypeInString(ptr_cell->getCell_define_Type());
+            std::cout << ", Cell center is: " << *ptr_cell->getPtr_cell_center_point()<< std::endl;
+        }
+    }
+
+    std::cout << "List all edge center: " << std::endl;
+    for (size_t i = 0; i < geo.getNum_TotalEdge(); ++i) {
+        std::cout << *geo.getEdge_Center_PtrPoint(i) << std::endl;
+
+    }
 
 
-//    auto all_ptr_point_on_vertex = geo.getTotal_VecPtrPointOnVertex();
-//
-//    std::cout << "List all vertex points: " << std::endl;
-//    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
-//        std::cout << *all_ptr_point_on_vertex[i] << std::endl;
-//    }
-//
-//    std::cout << "List all vertex points in each cell: " << std::endl;
-//    for (size_t i = 0; i < geo.getTotal_CellNum(); ++i) {
-//        auto vec_ptr_point_on_vertex_in_cell_id = geo.getCell_VecPtrPointOnVertex(i);
-//        std::cout << "Cell Type: " << GeoDataType::Type::GeoCellType::convertCellTypeInString(
-//                geo.getCell_CellDefineType(i) ) << " -> \t";
-//        for(auto &ptr_pt : vec_ptr_point_on_vertex_in_cell_id){
-//            std::cout << *ptr_pt << "\t";
-//        }
-//        std::cout << std::endl;
-//    }
-//
-//    std::cout << std::endl;
-//
-//    std::cout << "List all cell center points: " << std::endl;
-//    auto all_ptr_point_on_cell_center = geo.getTotal_VecPtrPointOnCellCenter();
-//    for (size_t i = 0; i < geo.getTotal_CellNum(); ++i) {
-//        std::cout << *all_ptr_point_on_cell_center[i] << std::endl;
-//    }
-//
-//    std::cout << "List all vertex cell neighbor's center and type: " << std::endl;
-//    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {
-//        auto vec_ptr_cell_neighbor = geo.getVertex_VecPtrNeighborCell(i);
-//        std::cout << ">> Vertex: " << *all_ptr_point_on_vertex[i] << "'s neighbor cell: " << std::endl;
-//        for(auto &ptr_cell_neighbor : vec_ptr_cell_neighbor){
-//            std::cout << ">>>> Cell Type is: ";
-//            std::cout << GeoDataType::Type::GeoCellType::convertCellTypeInString(ptr_cell_neighbor->getCell_define_Type());
-//            std::cout << ", Cell center is: " << *ptr_cell_neighbor->getPtr_cell_center_point()<< std::endl;
-//        }
-//        std::cout << std::endl;
-//    }
-//
-//
-//    geo.calEdge();
 //
 //    std::cout << "List all vertex connected edge number: " << std::endl;
 //    for (size_t i = 0; i < geo.getTotal_VertexNum(); ++i) {

@@ -59,9 +59,18 @@ namespace art_pde {
         }
         void mergeEdge(const Edge &rhs);
 
+        void calPtr_cell_center_point();
+
         bool is_Merged_edge() const { return merged_edge;};
 
         bool is_Exist_center_point() const { return exist_center_point;};
+
+        const PtrPointType &getPtr_edge_center_point(){
+            if(!exist_center_point){
+                calPtr_cell_center_point();
+            }
+            return ptr_edge_center_point;
+        }
 
     protected:
         VecPtrVertexType vec_ptr_vetex;
@@ -100,6 +109,16 @@ namespace art_pde {
         this->merged_edge = true;
     }
 
+    template<typename PointType>
+    void Edge<PointType>::calPtr_cell_center_point() {
+        ptr_edge_center_point = std::make_shared<PointType>();
+        for (size_t i = 0; i < vec_ptr_vetex.size(); ++i) {
+            *ptr_edge_center_point += vec_ptr_vetex[i]->getPoint();
+        }
+        *ptr_edge_center_point /= double(vec_ptr_vetex.size());
+        exist_center_point = true;
+    }
+
     template <typename PointType>
     class LineEdge : public Edge<PointType>{
         using VertexType = art_pde::Vertex<PointType>;
@@ -115,6 +134,8 @@ namespace art_pde {
             this->setCell_define_Type(CellDefineType::Line);
         }
     };
+
+
 
 }
 

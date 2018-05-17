@@ -61,7 +61,10 @@ namespace art_pde {
 
         void calPtr_cell_center_point();
 
-        const PtrPointType &getPtr_cell_center_point() const{
+        const PtrPointType &getPtr_cell_center_point(){
+            if(!is_Exist_center_point()){
+                calPtr_cell_center_point();
+            }
             return ptr_cell_center_point;
         }
 
@@ -81,6 +84,9 @@ namespace art_pde {
         void replaceEdge(const PtrEdgeType& ptr_edge_old, const PtrEdgeType& ptr_edge_new);
 
         bool is_Exist_center_point() const { return exist_center_point;};
+
+        const ListPtrEdgeType &getList_ptr_neighbor_edge(){ return list_ptr_neighbor_edge;}
+
 
     protected:
         CellDefineType cell_define_Type {CellDefineType::None};
@@ -118,6 +124,7 @@ namespace art_pde {
             *ptr_cell_center_point += vec_ptr_vetex[i]->getPoint();
         }
         *ptr_cell_center_point /= double(vec_ptr_vetex.size());
+        exist_center_point = true;
     }
 
     template<typename PointType>
@@ -154,6 +161,7 @@ namespace art_pde {
             this->vec_ptr_vetex.push_back(v_1); this->vec_ptr_vetex.push_back(v_2); this->vec_ptr_vetex.push_back(v_3);
             this->vec_ptr_vetex.shrink_to_fit();
             Cell<PointType>::setCell_define_Type(Cell<PointType>::CellDefineType::Triangle);
+            addVertexNeighborCell();
         }
 
         void genEdgeData() override {
@@ -169,6 +177,13 @@ namespace art_pde {
             v_2->addPtrNeighborEdge(re_ptr_edge);
             re_ptr_edge->addPtrNeighborCell(std::shared_ptr<TriangleCell<PointType>>(this));
             return re_ptr_edge;
+        }
+
+        void addVertexNeighborCell(){
+            std::shared_ptr<TriangleCell> self(this);
+            this->vec_ptr_vetex[0]->addPtrNeighborCell(self);
+            this->vec_ptr_vetex[1]->addPtrNeighborCell(self);
+            this->vec_ptr_vetex[2]->addPtrNeighborCell(self);
         }
     };
 
@@ -188,6 +203,7 @@ namespace art_pde {
             this->vec_ptr_vetex.push_back(v_3); this->vec_ptr_vetex.push_back(v_4);
             this->vec_ptr_vetex.shrink_to_fit();
             Cell<PointType>::setCell_define_Type(Cell<PointType>::CellDefineType::Quadrilateral);
+            addVertexNeighborCell();
         }
 
         void genEdgeData() override {
@@ -204,6 +220,14 @@ namespace art_pde {
             v_2->addPtrNeighborEdge(re_ptr_edge);
             re_ptr_edge->addPtrNeighborCell(std::shared_ptr<QuadrilateralCell<PointType>>(this));
             return re_ptr_edge;
+        }
+
+        void addVertexNeighborCell(){
+            std::shared_ptr<QuadrilateralCell> self(this);
+            this->vec_ptr_vetex[0]->addPtrNeighborCell(self);
+            this->vec_ptr_vetex[1]->addPtrNeighborCell(self);
+            this->vec_ptr_vetex[2]->addPtrNeighborCell(self);
+            this->vec_ptr_vetex[3]->addPtrNeighborCell(self);
         }
     };
 
