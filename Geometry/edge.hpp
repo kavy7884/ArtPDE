@@ -59,15 +59,26 @@ namespace art_pde {
         }
         void mergeEdge(const Edge &rhs);
 
-        bool Is_merged() const;
+        void calPtr_cell_center_point();
+
+        bool is_Merged_edge() const { return merged_edge;};
+
+        bool is_Exist_center_point() const { return exist_center_point;};
+
+        const PtrPointType &getPtr_edge_center_point(){
+            if(!exist_center_point){
+                calPtr_cell_center_point();
+            }
+            return ptr_edge_center_point;
+        }
 
     protected:
         VecPtrVertexType vec_ptr_vetex;
         CellDefineType cell_define_Type {CellDefineType::None};
         VecPtrCellType vec_ptr_neighbor_cell;
-        PtrPointType edge_center_point {nullptr};
-        bool is_merged{false};
-
+        PtrPointType ptr_edge_center_point {nullptr};
+        bool merged_edge{false};
+        bool exist_center_point{false};
     };
 
     template<typename PointType>
@@ -95,12 +106,17 @@ namespace art_pde {
             this->addPtrNeighborCell(ptr_cell);
         }
 
-        this->is_merged = true;
+        this->merged_edge = true;
     }
 
     template<typename PointType>
-    bool Edge<PointType>::Is_merged() const {
-        return is_merged;
+    void Edge<PointType>::calPtr_cell_center_point() {
+        ptr_edge_center_point = std::make_shared<PointType>();
+        for (size_t i = 0; i < vec_ptr_vetex.size(); ++i) {
+            *ptr_edge_center_point += vec_ptr_vetex[i]->getPoint();
+        }
+        *ptr_edge_center_point /= double(vec_ptr_vetex.size());
+        exist_center_point = true;
     }
 
     template <typename PointType>
@@ -118,6 +134,8 @@ namespace art_pde {
             this->setCell_define_Type(CellDefineType::Line);
         }
     };
+
+
 
 }
 

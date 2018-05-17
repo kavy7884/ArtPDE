@@ -12,6 +12,7 @@
 #include "vertex.hpp"
 #include "edge.hpp"
 #include "cell.hpp"
+#include "geometry_data_algorithm.hpp"
 
 namespace art_pde {
 
@@ -44,59 +45,36 @@ namespace art_pde {
 
         GeometryData(){}
 
-        const size_t getTotal_VertexNum() const{ return total_vertex.size();}
-        const size_t getTotal_CellNum() const{ return total_cell.size();}
+        const size_t getNum_TotalVertex() const{ return total_vertex.size();}
+        const size_t getNum_TotalCell() const{ return total_cell.size();}
 
-        typename Type::VecPtrGeoPointType getTotal_VecPtrPointOnVertex() const;
-        typename Type::VecPtrGeoPointType getCell_VecPtrPointOnVertex(const size_t cell_id) const;
-        const typename Type::GeoCellType::CellDefineType &getCell_CellDefineType(const size_t cell_id) const { return total_cell[cell_id]->getCell_define_Type();};
+        const typename Type::PtrGeoPointType& getVertex_PtrPoint(const size_t vertex_id) const;
+
+        const typename Type::PtrGeoPointType& getCell_Center_PtrPoint(const size_t cell_id) const;
+        const typename Type::GeoCellType::CellDefineType& getCell_CellDefineType(const size_t cell_id) const { return total_cell[cell_id]->getCell_define_Type();};
 
         double test{0.0};
-
-        // check edge
-        const typename Type::PtrGeoVertexType &getVertex_PtrVertex(const size_t vertex_id){
-            return this->total_vertex[vertex_id];
-        }
 
     protected:
         typename Type::VecPtrGeoVertexType total_vertex;
         typename Type::VecPtrGeoCellType total_cell;
-        typename Type::VecPtrGeoEdgeType total_edge;
+
+    };
+
+
+    template<typename Dimension, typename CoordinateBasis>
+    const typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::PtrGeoPointType&
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getVertex_PtrPoint(const size_t vertex_id) const {
+        return total_vertex[vertex_id]->getPtr_point();
     };
 
     template<typename Dimension, typename CoordinateBasis>
-    typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getTotal_VecPtrPointOnVertex() const {
-        typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-                reVecPtrGeoPointType;
+    const typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::PtrGeoPointType&
+    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getCell_Center_PtrPoint(const size_t cell_id) const {
+        total_cell[cell_id]->calPtr_cell_center_point();
+        return total_cell[cell_id]->getPtr_cell_center_point();
+    };
 
-        for (size_t i = 0; i < this->getTotal_VertexNum(); ++i) {
-            reVecPtrGeoPointType.push_back(
-                    this->total_vertex[i]->getPtr_point()
-            );
-        }
-
-        return reVecPtrGeoPointType;
-    }
-
-    template<typename Dimension, typename CoordinateBasis>
-    typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-    GeometryData<MeshTypeMethod, Dimension, CoordinateBasis>::getCell_VecPtrPointOnVertex(const size_t cell_id) const {
-        typename GeometryData<art_pde::MeshTypeMethod, Dimension, CoordinateBasis>::Type::VecPtrGeoPointType
-                reVecPtrGeoPointType;
-
-        //ToDo - Range check
-
-        auto vec_ptr_vertex_in_cell_id = this->total_cell[cell_id]->getVec_ptr_vetex();
-
-        for (size_t i = 0; i < this->total_cell[cell_id]->getNumVertex(); ++i) {
-            reVecPtrGeoPointType.push_back(
-                    vec_ptr_vertex_in_cell_id[i]->getPtr_point()
-            );
-        }
-
-        return reVecPtrGeoPointType;
-    }
 
 }
 
