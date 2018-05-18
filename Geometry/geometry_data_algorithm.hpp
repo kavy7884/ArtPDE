@@ -10,7 +10,7 @@ namespace art_pde {
     template<class GeometryDataType>
     class GeometryDataAlgorithm : virtual public GeometryDataType{
     public:
-
+		
         GeometryDataAlgorithm() : GeometryDataType() {}
 
         typename GeometryDataType::Type::VecPtrGeoPointType getTotal_VecPtrPointOnCellCenter();

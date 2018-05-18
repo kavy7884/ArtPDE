@@ -9,11 +9,13 @@
 
 namespace art_pde{
 
-	struct FunctionName{};
+	struct FunctionType{};
 
-	struct LagrangePoly :public FunctionName{};
+	struct Lagrange :public FunctionType{};
 
-	struct Multiquadric :public FunctionName{};
+	struct Serendipity :public FunctionType{};
+
+	struct Multiquadric :public FunctionType{};
 }
 
 

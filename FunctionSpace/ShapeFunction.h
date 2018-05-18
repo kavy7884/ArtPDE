@@ -11,7 +11,7 @@
 #include "Typelist.h"
 #include "dimension_utility.hpp"
 #include "numerical_method_utility.hpp"
-#include "shape_function_name_utility.h"
+#include "shape_function_utility.h"
 #include "element_type_utility.h"
 #include "Point.hpp"
 #include "Eigen/Dense"
@@ -31,11 +31,27 @@ namespace art_pde{
 		SingletonHolder& operator=(const SingletonHolder&){}
 	};
 
-	template<class Tlist>
+	template<class ...>
 	class ShapeFunction;
 
-	template<class DimensionT, class ElementTypeT>
-	class ShapeFunction<TypeList3(DimensionT, ElementTypeT, LagrangePoly)>{
+	template<class DimensionT>
+	class ShapeFunction<DimensionT, ElementType, Lagrange>{
+	public:
+		virtual std::vector<double>&
+			evaluate_shape(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_grad(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
+
+	protected:
+		ShapeFunction(){}
+		ShapeFunction(const ShapeFunction&){}
+		ShapeFunction& operator=(const ShapeFunction&){}
+		virtual ~ShapeFunction(){}
+	};
+
+	template<class DimensionT>
+	class ShapeFunction<DimensionT, ElementType, Serendipity>{
 	public:
 		virtual std::vector<double>&
 			evaluate_shape(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
@@ -52,16 +68,19 @@ namespace art_pde{
 
 	};
 
-	template<class DimensionT, class ElementTypeT>
-	using LagrangePolyBase = ShapeFunction<TypeList3(DimensionT, ElementTypeT, LagrangePoly)>;
+	template<class DimensionT>
+	using LagrangeType = ShapeFunction<DimensionT, ElementType, Lagrange>;
+
+	template<class DimensionT>
+	using SerendipityType = ShapeFunction<DimensionT, ElementType, Serendipity>;
 
 	template<>
-	class ShapeFunction< TypeList3(Dim2D, Q4, LagrangePoly) > :
-		public LagrangePolyBase<Dim2D, ElementType>
+	class ShapeFunction< Dim2D, Q4, Lagrange > :
+		public LagrangeType<Dim2D>
 	{
 	public:
 
-		friend class SingletonHolder<ShapeFunction< TypeList3(Dim2D, Q4, LagrangePoly) > >;
+		friend class SingletonHolder<ShapeFunction< Dim2D, Q4, Lagrange > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
@@ -106,12 +125,12 @@ namespace art_pde{
 	};
 
 	template<>
-	class ShapeFunction< TypeList3(Dim2D, Q8, LagrangePoly) > :
-		public LagrangePolyBase<Dim2D, ElementType>
+	class ShapeFunction< Dim2D, Q8, Serendipity > :
+		public SerendipityType<Dim2D>
 	{
 	public:
 
-		friend class SingletonHolder<ShapeFunction< TypeList3(Dim2D, Q8, LagrangePoly) > >;
+		friend class SingletonHolder<ShapeFunction< Dim2D, Q8, Serendipity > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
@@ -169,12 +188,12 @@ namespace art_pde{
 	};
 
 	template<>
-	class ShapeFunction< TypeList3(Dim2D, Q9, LagrangePoly) > :
-		public LagrangePolyBase<Dim2D, ElementType>
+	class ShapeFunction< Dim2D, Q9, Lagrange > :
+		public LagrangeType<Dim2D>
 	{
 	public:
 
-		friend class SingletonHolder<ShapeFunction< TypeList3(Dim2D, Q9, LagrangePoly) > >;
+		friend class SingletonHolder<ShapeFunction< Dim2D, Q9, Lagrange > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
@@ -236,12 +255,12 @@ namespace art_pde{
 	};
 
 	template<>
-	class ShapeFunction< TypeList3(Dim2D, T3, LagrangePoly) > :
-		public LagrangePolyBase<Dim2D, ElementType>
+	class ShapeFunction< Dim2D, T3, Lagrange > :
+		public LagrangeType<Dim2D>
 	{
 	public:
 
-		friend class SingletonHolder < ShapeFunction< TypeList3(Dim2D, T3, LagrangePoly)> >;
+		friend class SingletonHolder < ShapeFunction< Dim2D, T3, Lagrange > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
@@ -283,12 +302,12 @@ namespace art_pde{
 
 
 	template<>
-	class ShapeFunction< TypeList3(Dim3D, Hexa8, LagrangePoly) > :
-		public LagrangePolyBase<Dim3D, ElementType>
+	class ShapeFunction< Dim3D, Hexa8, Lagrange > :
+		public LagrangeType<Dim3D>
 	{
 	public:
 
-		friend class SingletonHolder < ShapeFunction< TypeList3(Dim3D, Hexa8, LagrangePoly)> >;
+		friend class SingletonHolder < ShapeFunction< Dim3D, Hexa8, Lagrange > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const Point<Dim3D, IsoparametricCoordinate>& point) override
@@ -361,7 +380,7 @@ namespace art_pde{
 
 
 	template<class DimensionT>
-	class ShapeFunction<TypeList2(DimensionT, ScatterPoint)>{
+	class ShapeFunction<DimensionT, ScatterPoint>{
 	protected:
 		// some reusable function for RBFs
 
@@ -372,15 +391,15 @@ namespace art_pde{
 	};
 
 	template<class DimensionT>
-	using RBF = ShapeFunction<TypeList2(DimensionT, ScatterPoint)>;
+	using RBF = ShapeFunction<DimensionT, ScatterPoint>;
 
 	template<>
-	class ShapeFunction< TypeList3(Dim2D, ScatterPoint, Multiquadric) > :
+	class ShapeFunction< Dim2D, ScatterPoint, Multiquadric > :
 		public RBF<Dim2D>
 	{
 	public:
 
-		using THIS = ShapeFunction< TypeList3(Dim2D, ScatterPoint, Multiquadric) >;
+		using THIS = ShapeFunction< Dim2D, ScatterPoint, Multiquadric >;
 		using PoinT = Point<Dim2D, CartesianCoordinate>;
 		using PtrPoinT = std::shared_ptr<PoinT>;
 

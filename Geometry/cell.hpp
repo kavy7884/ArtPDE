@@ -53,7 +53,7 @@ namespace art_pde {
 
         void setVec_ptr_vetex(const VecPtrVertexType &ptr_vetex) {
             Cell::vec_ptr_vetex = ptr_vetex;
-        }
+        } 
 
         const size_t getNumVertex() const{ return vec_ptr_vetex.size(); };
 

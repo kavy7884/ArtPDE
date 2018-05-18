@@ -1,14 +1,17 @@
-cmake_minimum_required(VERSION 3.9)
-project(ArtPDE)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
 
-set(CMAKE_CXX_STANDARD 11)
+PROJECT(ArtPDE)
 
-set(EIGEN_DIR "/Users/kavy/Documents/Eigen/")
-include_directories(${EIGEN_DIR})
+SET(CMAKE_CXX_STANDARD 11)
 
-include_directories(Utility)
-include_directories(Geometry)
-include_directories(FunctionSpace)
+SET(EIGEN_DIR "/d/MDXARTIST/Eigen/")
 
-add_executable(ArtPDE main.cpp)
-target_link_libraries(ArtPDE ${EIGEN_DIR})
+INCLUDE_DIRECTORIES(${EIGEN_DIR})
+LINK_DIRECTORIES(${EIGEN_DIR})
+
+INCLUDE_DIRECTORIES(Utility)
+INCLUDE_DIRECTORIES(FunctionSpace)
+
+ADD_EXECUTABLE(ArtPDE main.cpp)
+
+TARGET_LINK_LIBRARIES(ArtPDE ${EIGEN_DIR})
