@@ -35,10 +35,9 @@ namespace art_pde {
 
             ImplementClass im(this);
             im.setPtr_artpde_project(ptr_artpde_project);
-            if(im.load()){
+            if(im.load()) {
                 this->is_read_success = true;
-            }else{
-                this->is_read_success = false;
+                this->setLoad_fundamental_data(true);
             }
 
             std::cout << ">> ( End ) Reading ArtPDE project format files..." << std::endl;

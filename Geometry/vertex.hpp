@@ -40,13 +40,7 @@ namespace art_pde {
 
         void eraseEdge(const PtrEdgeType &ptr_edge);
 
-        template <typename PointType_>
-        friend std::ostream &operator<<(std::ostream &os, const Vertex<PointType_> &vertex){
-            os << vertex.getPoint();
-            return os;
-        }
-
-    private:
+            private:
         PtrPointType ptr_point{nullptr};
         VecPtrCellType vec_ptr_neighbor_cell;
         ListPtrEdgeType list_ptr_neighbor_edge;
