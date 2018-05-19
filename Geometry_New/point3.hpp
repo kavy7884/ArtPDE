@@ -2,8 +2,8 @@
 // Created by Chingkai Chou on 5/17/18.
 //
 
-#ifndef ARTPDE_MARVIN_POINT3_HPP
-#define ARTPDE_MARVIN_POINT3_HPP
+#ifndef ARTPDE_POINT3_HPP
+#define ARTPDE_POINT3_HPP
 
 #include <ostream>
 
@@ -19,4 +19,4 @@ public:
     }
 };
 
-#endif //ARTPDE_MARVIN_POINT3_HPP
+#endif //ARTPDE_POINT3_HPP
