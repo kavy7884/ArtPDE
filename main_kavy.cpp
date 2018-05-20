@@ -4,21 +4,13 @@
 
 #include "Geometry_New/GeoTest2D.hpp"
 
-
-
-
 int main() {
     GeoTest2D test;
 
-    test.MergeEdge();
-
-
-
-
-
-
-
-
+    std::cout << "<Start> Merge Edge " << std::endl;
+    test.mergeEdge();
+    std::cout << "< End > Merge Edge " << std::endl;
+    test.checkOut();
 
     return 0;
 }
