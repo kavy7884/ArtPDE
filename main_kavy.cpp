@@ -5,12 +5,12 @@
 #include "Geometry_New/GeoTest2D.hpp"
 
 int main() {
-    GeoTest2D test;
+    GeoTest2D test2D;
 
     std::cout << "<Start> Merge Edge " << std::endl;
-    test.mergeEdge();
+    test2D.mergeEdge();
     std::cout << "< End > Merge Edge " << std::endl;
-    test.checkOut();
+    test2D.checkOut();
 
     return 0;
 }

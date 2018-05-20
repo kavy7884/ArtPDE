@@ -16,16 +16,43 @@ template <typename Data> class Vertex;
 
 
 template <typename Data>
-class Face:
+class Cell:
         public GeoTree,
-        public GeoTree_Child<Edge<Data>>{
+        public GeoTree_Child<Face<Data>>{
 public:
-    Face() :
+    Cell() :
             GeoTree(TreeType::TreeHead),
-            GeoTree_Child<Edge<Data>>() {}
+            GeoTree_Child<Face<Data>>() {}
 
 };
 
+template <typename Data>
+class Face:
+        public GeoTree,
+        public GeoTree_Parent<Cell<Data>>,
+        public GeoTree_Child<Edge<Data>>{
+public:
+    using PtrEdgeType = std::shared_ptr<Edge<Data>>;
+    Face() :
+            GeoTree(TreeType::TreeConnect),
+            GeoTree_Parent<Cell<Data>>(),
+            GeoTree_Child<Edge<Data>>() {}
+
+    bool operator==(Face &rhs){
+        if(this->c_getPtr_list_ptr_childs()->size() != rhs.c_getPtr_list_ptr_childs()->size()) return false;
+        else{
+            std::set<PtrEdgeType> set_self(this->c_getPtr_list_ptr_childs()->cbegin(), this->c_getPtr_list_ptr_childs()->cend());
+            std::set<PtrEdgeType> set_rhs(rhs.c_getPtr_list_ptr_childs()->cbegin(), rhs.c_getPtr_list_ptr_childs()->cend());
+            if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
+            else return false;
+        }
+    }
+
+    bool operator!=(const Face &rhs) {
+        return !(rhs == *this);
+    }
+
+};
 
 template <typename Data>
 class Edge:
@@ -42,9 +69,9 @@ public:
     bool operator==(Edge &rhs){
         if(this->c_getPtr_list_ptr_childs()->size() != rhs.c_getPtr_list_ptr_childs()->size()) return false;
         else{
-            std::set<PtrVertexType> set_self_vertex(this->c_getPtr_list_ptr_childs()->cbegin(), this->c_getPtr_list_ptr_childs()->cend());
-            std::set<PtrVertexType> set_rhs_vertex(rhs.c_getPtr_list_ptr_childs()->cbegin(), rhs.c_getPtr_list_ptr_childs()->cend());
-            if ( std::equal(set_self_vertex.cbegin(), set_self_vertex.cend(), set_rhs_vertex.cbegin() ))return true;
+            std::set<PtrVertexType> set_self(this->c_getPtr_list_ptr_childs()->cbegin(), this->c_getPtr_list_ptr_childs()->cend());
+            std::set<PtrVertexType> set_rhs(rhs.c_getPtr_list_ptr_childs()->cbegin(), rhs.c_getPtr_list_ptr_childs()->cend());
+            if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
             else return false;
         }
     }

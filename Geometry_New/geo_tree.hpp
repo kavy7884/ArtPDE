@@ -86,19 +86,10 @@ public:
         }
     }
 
-//    bool isMerged_parent() const {
-//        return this->merged_parent;
-//    }
-//
-//    void setMerged_parent(bool merged_parent) {
-//        this->merged_parent = merged_parent;
-//    }
-
 protected:
     typename
     type::PtrListPtrParentType ptr_list_ptr_parents{nullptr};
 
-//    bool merged_parent{false};
 };
 
 template <typename ChildType>
@@ -108,10 +99,12 @@ public:
         using PtrChildType = std::shared_ptr<ChildType>;
         using ListPtrChildType = std::list<PtrChildType>;
         using PtrListPtrChildType = std::shared_ptr<ListPtrChildType>;
+        using PtrListChildOrien = std::shared_ptr<std::list<bool>>;
     };
 
     GeoTree_Child() {
         ptr_list_ptr_childs = std::make_shared<typename type::ListPtrChildType>();
+        ptr_list_child_orien = std::make_shared<std::list<bool>>();
     }
 
     const typename type::PtrListPtrChildType &c_getPtr_list_ptr_childs() const {
@@ -124,51 +117,30 @@ public:
 
     void addChild(const typename type::PtrChildType &ptr_child){
         this->ptr_list_ptr_childs->push_back(ptr_child);
+        this->ptr_list_child_orien->push_back(true);
     }
 
-    void eraseChild(const typename type::PtrChildType &ptr_child){
+    void replaceChild(const typename type::PtrChildType &ptr_child_old, const typename type::PtrChildType &ptr_child_new, bool orien_new){
         auto it = this->ptr_list_ptr_childs->begin();
-        while (it != this->ptr_list_ptr_childs->end()){
-            if(*it == ptr_child){
-                it = this->ptr_list_ptr_childs->erase(it);
-            }else{
-                ++it;
-            }
-        }
-    }
-
-    void replaceChild(const typename type::PtrChildType &ptr_child_old, const typename type::PtrChildType &ptr_child_new){
-        auto it = this->ptr_list_ptr_childs->begin();
+        auto it_orien = this->ptr_list_child_orien->begin();
         while (it != this->ptr_list_ptr_childs->end()) {
             if(*it == ptr_child_old){
                 *it = ptr_child_new;
+                *it_orien = orien_new;
             }
             ++it;
+            ++it_orien;
         }
     }
-
-    void mergeChild(const GeoTree_Child<ChildType> &rhs){
-        auto rhs_ptr_list_ptr_childs = rhs.c_getPtr_list_ptr_childs();
-        auto it = rhs_ptr_list_ptr_childs->begin();
-        while (it != rhs_ptr_list_ptr_childs->end()){
-            this->ptr_list_ptr_childs->push_back(*it);
-            ++it;
-        }
-    }
-
-//    bool isMerged_child() const {
-//        return this->merged_child;
-//    }
-//
-//    void setMerged_child(bool merged_child) {
-//        this->merged_child = merged_child;
-//    }
 
 protected:
     typename
     type::PtrListPtrChildType ptr_list_ptr_childs{nullptr};
 
-//    bool merged_child{false};
+    typename
+    type::PtrListChildOrien ptr_list_child_orien{nullptr};
+
+
 };
 
 template <typename BaseLayerType, typename MergeLayerType>
@@ -202,14 +174,17 @@ public:
                         (*it_master)->mergeParent(*(*it_slave));
 
                         for(auto & replace_parent : *(*it_slave)->getPtr_list_ptr_parents()){
-                            replace_parent->replaceChild((*it_slave), (*it_master));
+                            replace_parent->replaceChild((*it_slave), (*it_master), true);
                         }
 
                         for(auto & replace_child : *(*it_slave)->getPtr_list_ptr_childs()){
                             replace_child->eraseParent((*it_slave));
                         }
-                        (*it_master)->setMerged(true);
-                        vec_ptr_merged_layer.push_back(*it_master);
+
+                        if(!(*it_master)->isMerged()){
+                            (*it_master)->setMerged(true);
+                            vec_ptr_merged_layer.push_back(*it_master);
+                        }
                         it_slave = it_master;
                     }
                     ++it_slave;
