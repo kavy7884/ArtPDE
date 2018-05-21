@@ -31,7 +31,6 @@ public:
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 2.0, 0.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.0, 1.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.0, 1.0));
-
     }
 
 

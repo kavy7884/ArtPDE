@@ -38,6 +38,7 @@ public:
         edge->addParent(face);
         this->addChild(edge);
 
+        this->setNum_childs_per_group(4);
     }
 
 private:

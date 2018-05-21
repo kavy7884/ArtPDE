@@ -60,11 +60,14 @@ public:
             std::cout << *ptr_vertex << std::endl;
         }
 
+        auto vec_ptr_vertex = vec_ptr_face[0]->getVertex();
         std::cout << "List Face's Vertex: " << std::endl;
         for (size_t i = 0;  i < vec_ptr_face.size(); ++i) {
             std::cout << "Face " << i << " is : ";
-            for (auto &ptr_edge: *vec_ptr_face[i]->c_getPtr_list_ptr_childs()){
-                std::cout << *(*ptr_edge->c_getPtr_list_ptr_childs()->begin()) ;
+            auto vec_ptr_vertex = vec_ptr_face[i]->getVertex();
+
+            for (auto &ptr_vertex: vec_ptr_vertex){
+                std::cout << *ptr_vertex ;
             }
             std::cout << std::endl;
         }
