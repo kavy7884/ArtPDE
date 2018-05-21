@@ -9,7 +9,7 @@
 #include "geo_data.hpp"
 #include "geo_data_factory.hpp"
 
-class GeoTest2D{
+class GeoTest3D{
 public:
     using VertexType = Vertex<Point3>;
     using VecPtrVertex = std::vector<std::shared_ptr<VertexType>>;
@@ -20,7 +20,7 @@ public:
     using CellType = Cell<Point3>;
     using VecPtrCell = std::vector<std::shared_ptr<CellType>>;
 
-    GeoTest2D() {
+    GeoTest3D() {
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.0, 0.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 0.0, 0.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(2.0, 0.0, 0.0));
