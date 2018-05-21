@@ -33,18 +33,21 @@ public:
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 1.0, 0.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 1.0, 0.0));
 
-        vec_ptr_face.push_back(std::make_shared<QuadFace<Point3>>(
-                vec_ptr_vertex[0], vec_ptr_vertex[1], vec_ptr_vertex[4], vec_ptr_vertex[3])
-        );
-        vec_ptr_face.push_back(std::make_shared<QuadFace<Point3>>(
-                vec_ptr_vertex[1], vec_ptr_vertex[2], vec_ptr_vertex[5], vec_ptr_vertex[4])
-        );
-        vec_ptr_face.push_back(std::make_shared<QuadFace<Point3>>(
-                vec_ptr_vertex[3], vec_ptr_vertex[4], vec_ptr_vertex[7], vec_ptr_vertex[6])
-        );
-        vec_ptr_face.push_back(std::make_shared<QuadFace<Point3>>(
-                vec_ptr_vertex[4], vec_ptr_vertex[5], vec_ptr_vertex[8], vec_ptr_vertex[7])
-        );
+        auto face = std::make_shared<QuadFace<Point3>>();
+        face->create(vec_ptr_vertex[0], vec_ptr_vertex[1], vec_ptr_vertex[4], vec_ptr_vertex[3]);
+        vec_ptr_face.push_back(face);
+
+        face = std::make_shared<QuadFace<Point3>>();
+        face->create(vec_ptr_vertex[1], vec_ptr_vertex[2], vec_ptr_vertex[5], vec_ptr_vertex[4]);
+        vec_ptr_face.push_back(face);
+
+        face = std::make_shared<QuadFace<Point3>>();
+        face->create(vec_ptr_vertex[3], vec_ptr_vertex[4], vec_ptr_vertex[7], vec_ptr_vertex[6]);
+        vec_ptr_face.push_back(face);
+
+        face = std::make_shared<QuadFace<Point3>>();
+        face->create(vec_ptr_vertex[4], vec_ptr_vertex[5], vec_ptr_vertex[8], vec_ptr_vertex[7]);
+        vec_ptr_face.push_back(face);
 
     }
 

@@ -58,7 +58,9 @@ public:
 
     VecPtrVertexType getVertex(){
         VecPtrVertexType re_ptr_vertex;
-        std::shared_ptr<Face<Data>> ptr_this_face = this->shared_from_this();
+
+        auto ptr_this_face = this->shared_from_this();
+
         auto it_edge = this->getPtr_list_ptr_childs()->begin();
         while(it_edge != this->getPtr_list_ptr_childs()->end()){
             if((*it_edge)->isMerged())
