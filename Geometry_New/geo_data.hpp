@@ -9,7 +9,7 @@
 #include <set>
 #include "geo_tree.hpp"
 
-
+template <typename Data> class Cell;
 template <typename Data> class Face;
 template <typename Data> class Edge;
 template <typename Data> class Vertex;
@@ -18,7 +18,8 @@ template <typename Data> class Vertex;
 template <typename Data>
 class Cell:
         public GeoTree,
-        public GeoTree_Child<Face<Data>>{
+        public GeoTree_Child<Face<Data>>,
+        public std::enable_shared_from_this<Cell<Data>>{
 public:
     Cell() :
             GeoTree(TreeType::TreeHead),
@@ -42,11 +43,21 @@ public:
             GeoTree_Parent<Cell<Data>>(),
             GeoTree_Child<Edge<Data>>() {}
 
+    const std::shared_ptr<const Face<Data>> getLinked_to() const {
+        if(this->isLinked()) return std::static_pointer_cast<Face<Data>>(this->linked_to);
+        else return this->shared_from_this();
+    }
+
     bool operator==(Face &rhs){
-        if(this->c_getPtr_list_ptr_childs()->size() != rhs.c_getPtr_list_ptr_childs()->size()) return false;
+        if(this->getVec_ptr_childs().size() != rhs.getVec_ptr_childs().size())  return false;
         else{
-            std::set<PtrEdgeType> set_self(this->c_getPtr_list_ptr_childs()->cbegin(), this->c_getPtr_list_ptr_childs()->cend());
-            std::set<PtrEdgeType> set_rhs(rhs.c_getPtr_list_ptr_childs()->cbegin(), rhs.c_getPtr_list_ptr_childs()->cend());
+            std::set<const std::shared_ptr<const Edge<Data>>> set_self, set_rhs;
+            for (auto &ptr_edge: this->getVec_ptr_childs()) {
+                set_self.insert(ptr_edge->getLinked_to());
+            }
+            for (auto &ptr_edge: rhs.getVec_ptr_childs()) {
+                set_rhs.insert(ptr_edge->getLinked_to());
+            }
             if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
             else return false;
         }
@@ -56,25 +67,25 @@ public:
         return !(rhs == *this);
     }
 
-    VecPtrVertexType getVertex(){
-        VecPtrVertexType re_ptr_vertex;
-
-        auto ptr_this_face = this->shared_from_this();
-
-        auto it_edge = this->getPtr_list_ptr_childs()->begin();
-        while(it_edge != this->getPtr_list_ptr_childs()->end()){
-            if((*it_edge)->isMerged())
-            {
-                auto iter_vertex = (*it_edge)->getMergedGroup(ptr_this_face);
-                re_ptr_vertex.push_back(*iter_vertex);
-            }else{
-                re_ptr_vertex.push_back(*(*it_edge)->c_getPtr_list_ptr_childs()->cbegin());
-            }
-
-            ++it_edge;
-        }
-        return re_ptr_vertex;
-    }
+//    VecPtrVertexType getVertex(){
+//        VecPtrVertexType re_ptr_vertex;
+//
+//        auto ptr_this_face = this->shared_from_this();
+//
+//        auto it_edge = this->getPtr_list_ptr_childs()->begin();
+//        while(it_edge != this->getPtr_list_ptr_childs()->end()){
+//            if((*it_edge)->isMerged())
+//            {
+//                auto iter_vertex = (*it_edge)->getMergedGroup(ptr_this_face);
+//                re_ptr_vertex.push_back(*iter_vertex);
+//            }else{
+//                re_ptr_vertex.push_back(*(*it_edge)->c_getPtr_list_ptr_childs()->cbegin());
+//            }
+//
+//            ++it_edge;
+//        }
+//        return re_ptr_vertex;
+//    }
 
 };
 
@@ -82,7 +93,8 @@ template <typename Data>
 class Edge:
         public GeoTree,
         public GeoTree_Parent<Face<Data>>,
-        public GeoTree_Child<Vertex<Data>>{
+        public GeoTree_Child<Vertex<Data>>,
+        public std::enable_shared_from_this<Edge<Data>>{
 public:
     using PtrVertexType = std::shared_ptr<Vertex<Data>>;
     using VecPtrVertexType = std::vector<PtrVertexType>;
@@ -91,16 +103,21 @@ public:
             GeoTree(TreeType::TreeConnect),
             GeoTree_Parent<Face<Data>>(),
             GeoTree_Child<Vertex<Data>>() {
-        this->setNum_childs_per_group(2);
+    }
+
+    const std::shared_ptr<const Edge<Data>> getLinked_to() const {
+        if(this->isLinked()) return std::static_pointer_cast<Edge<Data>>(this->linked_to);
+        else return this->shared_from_this();
     }
 
     bool operator==(Edge &rhs){
-        if(this->c_getPtr_list_ptr_childs()->size() != rhs.c_getPtr_list_ptr_childs()->size()) return false;
+        if(this->getVec_ptr_childs().size() != rhs.getVec_ptr_childs().size())  return false;
         else{
-            std::set<PtrVertexType> set_self(this->c_getPtr_list_ptr_childs()->cbegin(), this->c_getPtr_list_ptr_childs()->cend());
-            std::set<PtrVertexType> set_rhs(rhs.c_getPtr_list_ptr_childs()->cbegin(), rhs.c_getPtr_list_ptr_childs()->cend());
+            std::set<PtrVertexType> set_self(this->getVec_ptr_childs().cbegin(), this->getVec_ptr_childs().cend());
+            std::set<PtrVertexType> set_rhs(rhs.getVec_ptr_childs().cbegin(), rhs.getVec_ptr_childs().cend());
             if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
             else return false;
+            return true;
         }
     }
 
@@ -108,29 +125,39 @@ public:
         return !(rhs == *this);
     }
 
-    typename
-    std::list<PtrVertexType>::const_iterator getMergedGroup(const PtrFaceType &ptr_face){
-        typename std::list<PtrVertexType>::const_iterator iter_child = this->c_getPtr_list_ptr_childs()->cbegin();
-
-        size_t counter = 0;
-        auto it_face = this->c_getPtr_list_ptr_parents()->cbegin();
-        while(it_face != this->c_getPtr_list_ptr_parents()->cend()){
-            if(*it_face == ptr_face){
-                //std::cout << "Get" << std::endl;
-                break;
+    size_t getNum_ConnectedFace(){
+        size_t re_num = 0;
+        for (auto &ptr_face : this->getVec_ptr_parents()) {
+            if(!ptr_face->isLinked()){
+                ++re_num;
             }
-            ++it_face;
-            ++counter;
         }
-
-        counter *= this->getNum_childs_per_group();
-
-        for (size_t i = 0; i < counter; ++i) {
-            ++iter_child;
-        }
-
-        return iter_child;
+        return re_num;
     }
+//
+//    typename
+//    std::list<PtrVertexType>::const_iterator getMergedGroup(const PtrFaceType &ptr_face){
+//        typename std::list<PtrVertexType>::const_iterator iter_child = this->c_getPtr_list_ptr_childs()->cbegin();
+//
+//        size_t counter = 0;
+//        auto it_face = this->c_getPtr_list_ptr_parents()->cbegin();
+//        while(it_face != this->c_getPtr_list_ptr_parents()->cend()){
+//            if(*it_face == ptr_face){
+//                //std::cout << "Get" << std::endl;
+//                break;
+//            }
+//            ++it_face;
+//            ++counter;
+//        }
+//
+//        counter *= this->getNum_childs_per_group();
+//
+//        for (size_t i = 0; i < counter; ++i) {
+//            ++iter_child;
+//        }
+//
+//        return iter_child;
+//    }
 
 };
 
@@ -162,6 +189,16 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Vertex<Data> &vertex) {
         os << *vertex.getPtr_data() ;
         return os;
+    }
+
+    size_t getNum_ConnectedEdge(){
+        size_t re_num = 0;
+        for (auto &ptr_edge : this->getVec_ptr_parents()) {
+            if(!ptr_edge->isLinked()){
+                ++re_num;
+            }
+        }
+        return re_num;
     }
 
 private:
