@@ -114,17 +114,21 @@ public:
             auto it_master = vec_ptr_parents.begin();
 
             while( it_master != vec_ptr_parents.end()){
+
                 if((*it_master)->isLinked()){
                     ++it_master;
                     continue;
                 }
+
                 auto it_slave = it_master;
                 ++it_slave;
                 while( it_slave != vec_ptr_parents.end()) {
+
                     if((*it_slave)->isLinked()){
                         ++it_slave;
                         continue;
                     }
+
                     if((*(*it_master)) == (*(*it_slave))) {
                         std::cout << "Merge" << std::endl;
                         (*it_slave)->setLinked_to((*it_master));

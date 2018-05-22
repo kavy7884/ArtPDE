@@ -43,7 +43,7 @@ public:
             GeoTree_Parent<Cell<Data>>(),
             GeoTree_Child<Edge<Data>>() {}
 
-    const std::shared_ptr<const Face<Data>> getLinked_to() const {
+    const std::shared_ptr<Face<Data>> getLinked_to() {
         if(this->isLinked()) return std::static_pointer_cast<Face<Data>>(this->linked_to);
         else return this->shared_from_this();
     }
@@ -51,7 +51,7 @@ public:
     bool operator==(Face &rhs){
         if(this->getVec_ptr_childs().size() != rhs.getVec_ptr_childs().size())  return false;
         else{
-            std::set<const std::shared_ptr<const Edge<Data>>> set_self, set_rhs;
+            std::set<PtrEdgeType> set_self, set_rhs;
             for (auto &ptr_edge: this->getVec_ptr_childs()) {
                 set_self.insert(ptr_edge->getLinked_to());
             }
@@ -66,26 +66,6 @@ public:
     bool operator!=(const Face &rhs) {
         return !(rhs == *this);
     }
-
-//    VecPtrVertexType getVertex(){
-//        VecPtrVertexType re_ptr_vertex;
-//
-//        auto ptr_this_face = this->shared_from_this();
-//
-//        auto it_edge = this->getPtr_list_ptr_childs()->begin();
-//        while(it_edge != this->getPtr_list_ptr_childs()->end()){
-//            if((*it_edge)->isMerged())
-//            {
-//                auto iter_vertex = (*it_edge)->getMergedGroup(ptr_this_face);
-//                re_ptr_vertex.push_back(*iter_vertex);
-//            }else{
-//                re_ptr_vertex.push_back(*(*it_edge)->c_getPtr_list_ptr_childs()->cbegin());
-//            }
-//
-//            ++it_edge;
-//        }
-//        return re_ptr_vertex;
-//    }
 
 };
 
@@ -105,7 +85,7 @@ public:
             GeoTree_Child<Vertex<Data>>() {
     }
 
-    const std::shared_ptr<const Edge<Data>> getLinked_to() const {
+    const std::shared_ptr<Edge<Data>> getLinked_to() {
         if(this->isLinked()) return std::static_pointer_cast<Edge<Data>>(this->linked_to);
         else return this->shared_from_this();
     }
@@ -134,6 +114,7 @@ public:
         }
         return re_num;
     }
+
 //
 //    typename
 //    std::list<PtrVertexType>::const_iterator getMergedGroup(const PtrFaceType &ptr_face){

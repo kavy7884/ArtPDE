@@ -3,27 +3,21 @@
 //
 
 #include "Geometry_New/GeoTest2D.hpp"
-//#include "Geometry_New/GeoTest3D.hpp"
+#include "Geometry_New/GeoTest3D.hpp"
 
 int main() {
-    GeoTest2D test2D;
-
-    std::cout << "<Start> Merge Edge " << std::endl;
-    test2D.mergeEdge();
-    std::cout << "< End > Merge Edge " << std::endl;
-
-    std::cout << "<Start> Merge Face " << std::endl;
-    test2D.mergeFace();
-    std::cout << "< End > Merge Face " << std::endl;
-
-    test2D.checkOut();
-
-
-//    GeoTest3D test3D;
+//    GeoTest2D test2D;
 //
-//    test3D.merge();
+//    test2D.merge();
 //
-//    test3D.checkOut();
+//    test2D.checkOut();
+
+
+    GeoTest3D test3D;
+
+    test3D.merge();
+
+    test3D.checkOut();
 
 //    std::list<int> tt{1, 2, 3};
 //

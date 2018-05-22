@@ -53,57 +53,56 @@ private:
         return reEdge;
     }
 };
-//
-//template <typename Data>
-//class HexaCell: public Cell<Data>, public std::enable_shared_from_this<HexaCell<Data>> {
-//public:
-//    using VertexType = Vertex<Data>;
-//    using PtrVertexType = std::shared_ptr<VertexType>;
-//    using FaceType = Face<Data>;
-//    using PtrFaceType = std::shared_ptr<FaceType>;
-//
-//    HexaCell() : Cell<Data>(){
-//        this->setNum_childs_per_group(6);
-//    }
-//
-//    void create(const PtrVertexType& v0, const PtrVertexType& v1, const PtrVertexType& v2, const PtrVertexType& v3,
-//             const PtrVertexType& v4, const PtrVertexType& v5, const PtrVertexType& v6, const PtrVertexType& v7) {
-//
-//        auto cell = this->shared_from_this();
-//
-//        auto face = std::make_shared<QuadFace<Data>>();
-//        face->create(v0, v3, v2, v1);
-//        face->addParent(cell);
-//        this->addChild(face);
-//
-//        face = std::make_shared<QuadFace<Data>>();
-//        face->create(v4, v5, v6, v7);
-//        face->addParent(cell);
-//        this->addChild(face);
-//
-//        face = std::make_shared<QuadFace<Data>>();
-//        face->create(v0, v1, v5, v4);
-//        face->addParent(cell);
-//        this->addChild(face);
-//
-//        face = std::make_shared<QuadFace<Data>>();
-//        face->create(v1, v2, v6, v5);
-//        face->addParent(cell);
-//        this->addChild(face);
-//
-//        face = std::make_shared<QuadFace<Data>>();
-//        face->create(v2, v3, v7, v6);
-//        face->addParent(cell);
-//        this->addChild(face);
-//
-//        face = std::make_shared<QuadFace<Data>>();
-//        face->create(v0, v4, v7, v3);
-//        face->addParent(cell);
-//        this->addChild(face);
-//
-//    }
-//
-//};
+
+template <typename Data>
+class HexaCell: public Cell<Data>{
+public:
+    using VertexType = Vertex<Data>;
+    using PtrVertexType = std::shared_ptr<VertexType>;
+    using FaceType = Face<Data>;
+    using PtrFaceType = std::shared_ptr<FaceType>;
+
+    HexaCell() : Cell<Data>(){
+    }
+
+    void create(const PtrVertexType& v0, const PtrVertexType& v1, const PtrVertexType& v2, const PtrVertexType& v3,
+             const PtrVertexType& v4, const PtrVertexType& v5, const PtrVertexType& v6, const PtrVertexType& v7) {
+
+        auto cell = this->shared_from_this();
+
+        auto face = std::make_shared<QuadFace<Data>>();
+        face->create(v0, v3, v2, v1);
+        face->addParent(cell);
+        this->addChild(face);
+
+        face = std::make_shared<QuadFace<Data>>();
+        face->create(v4, v5, v6, v7);
+        face->addParent(cell);
+        this->addChild(face);
+
+        face = std::make_shared<QuadFace<Data>>();
+        face->create(v0, v1, v5, v4);
+        face->addParent(cell);
+        this->addChild(face);
+
+        face = std::make_shared<QuadFace<Data>>();
+        face->create(v1, v2, v6, v5);
+        face->addParent(cell);
+        this->addChild(face);
+
+        face = std::make_shared<QuadFace<Data>>();
+        face->create(v2, v3, v7, v6);
+        face->addParent(cell);
+        this->addChild(face);
+
+        face = std::make_shared<QuadFace<Data>>();
+        face->create(v0, v4, v7, v3);
+        face->addParent(cell);
+        this->addChild(face);
+
+    }
+
+};
 
 
 #endif //ARTPDE_GEO_DATA_FACTORY_HPP
