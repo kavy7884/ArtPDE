@@ -22,6 +22,10 @@ class Cell:
         public GeoTree_Child<Face<Data>>,
         public std::enable_shared_from_this<Cell<Data>>{
 public:
+    using PtrVertexType = std::shared_ptr<Vertex<Data>>;
+    using VecPtrVertexType = std::vector<PtrVertexType>;
+    using PtrFaceType = std::shared_ptr<Face<Data>>;
+    using VecPtrFaceType = std::vector<PtrFaceType>;
     Cell() :
             GeoTree<Cell<Data>>(TreeType::TreeHead),
             GeoTree_Child<Face<Data>>() {}
@@ -29,6 +33,27 @@ public:
     void link_self() override {
         this->linked_to = this->shared_from_this();
     }
+
+    const VecPtrFaceType& getConnected_Face() const{
+        return this->c_getVec_ptr_childs();
+    }
+
+    const VecPtrVertexType getConnected_Vertex() const{
+        VecPtrVertexType re_vertex;
+
+        // Hexa
+        auto all_face = getConnected_Face();
+        auto face_down_vertex = all_face[0]->getConnected_Vertex();
+        auto face_up_vertex = all_face[1]->getConnected_Vertex();
+
+        re_vertex.insert(re_vertex.end(), face_down_vertex.begin(),face_down_vertex.end());
+        re_vertex.insert(re_vertex.end(), face_up_vertex.begin(),face_up_vertex.end());
+
+        return re_vertex;
+    }
+
+
+
 };
 
 template <typename Data>
@@ -42,6 +67,7 @@ public:
     using VecPtrVertexType = std::vector<PtrVertexType>;
     using PtrEdgeType = std::shared_ptr<Edge<Data>>;
     using VecPtrEdgeType = std::vector<PtrEdgeType>;
+    using ListPtrCellType = std::list<std::shared_ptr<Cell<Data>>>;
 
     Face() :
             GeoTree<Face<Data>>(TreeType::TreeConnect),
@@ -54,6 +80,10 @@ public:
 
     const VecPtrEdgeType& getConnected_Edge() const{
         return this->c_getVec_ptr_childs();
+    }
+
+    const ListPtrCellType& getConnected_Cell() {
+        return this->getLinked_to()->c_getList_ptr_parents();
     }
 
     bool operator==(Face &rhs){
@@ -74,6 +104,14 @@ public:
 
     bool operator!=(const Face &rhs) {
         return !(rhs == *this);
+    }
+
+    const VecPtrVertexType getConnected_Vertex() const{
+        VecPtrVertexType re_vertex;
+        for(auto &ptr_edge: this->getConnected_Edge()){
+            re_vertex.push_back(*ptr_edge->getConnected_Vertex().begin());
+        }
+        return re_vertex;
     }
 
 };
@@ -120,16 +158,6 @@ public:
     bool operator!=(const Edge &rhs) {
         return !(rhs == *this);
     }
-//
-//    size_t getNum_ConnectedFace(){
-//        size_t re_num = 0;
-//        for (auto &ptr_face : this->getVec_ptr_parents()) {
-//            if(!ptr_face->isLinked()){
-//                ++re_num;
-//            }
-//        }
-//        return re_num;
-//    }
 
 };
 
@@ -174,16 +202,6 @@ public:
         os << *vertex.getPtr_data() ;
         return os;
     }
-
-//    size_t getNum_ConnectedEdge(){
-//        size_t re_num = 0;
-//        for (auto &ptr_edge : this->getVec_ptr_parents()) {
-//            if(!ptr_edge->isLinked()){
-//                ++re_num;
-//            }
-//        }
-//        return re_num;
-//    }
 
 private:
     PtrDataType ptr_data{nullptr};

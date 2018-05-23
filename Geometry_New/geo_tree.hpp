@@ -130,8 +130,6 @@ public:
         for (size_t i = 0; i < vec_ptr_base_layer_seed.size(); ++i) {
             auto & list_ptr_parents = this->vec_ptr_base_layer_seed[i]->getLinked_to()->getList_ptr_parents();
 
-            //std::cout << list_ptr_parents.size() << std::endl;
-
             auto it_master = list_ptr_parents.begin();
 
             while( it_master != list_ptr_parents.end()){

@@ -94,9 +94,17 @@ public:
             std::cout << *ptr_vertex << ", connect edge num: "<< ptr_vertex->getConnected_Edge().size()<< std::endl;
         }
 
-//        for(auto &ptr_edge: vec_ptr_merged_edge){
-//            std::cout << "Edge connected Face num: " << ptr_edge->getConnected_Face().size() << std::endl;
-//        }
+        for(auto &ptr_edge: vec_ptr_merged_edge){
+            std::cout << "Edge connected Face num: " << ptr_edge->getConnected_Face().size() << std::endl;
+        }
+
+        for(size_t i = 0; i < vec_ptr_cell.size(); ++i){
+            std::cout << "Cell "<< i << " vertex : " << std::endl;
+            for(auto &ptr_vertex:vec_ptr_cell[i]->getConnected_Vertex()){
+                std::cout << *ptr_vertex << "\t";
+            }
+            std::cout <<  std::endl;
+        }
 
     }
 
@@ -125,7 +133,6 @@ protected:
 
 private:
     VecPtrVertex vec_ptr_vertex;
-    VecPtrEdge vec_ptr_edge;
     VecPtrCell vec_ptr_cell;
 
     VecPtrEdge vec_ptr_merged_edge;

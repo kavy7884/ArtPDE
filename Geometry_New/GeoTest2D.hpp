@@ -23,46 +23,46 @@ class GeoTest2D{
 
 public:
     GeoTest2D() {
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.0, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 0.0, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 0.0, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.5, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 0.5, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 0.5, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 1.0, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 1.0, 0.0));
-//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 1.0, 0.0));
-//
-//        auto face = std::make_shared<QuadFace<Point3>>();
-//        face->create(vec_ptr_vertex[0], vec_ptr_vertex[1], vec_ptr_vertex[4], vec_ptr_vertex[3]);
-//        vec_ptr_face.push_back(face);
-//
-//        face = std::make_shared<QuadFace<Point3>>();
-//        face->create(vec_ptr_vertex[1], vec_ptr_vertex[2], vec_ptr_vertex[5], vec_ptr_vertex[4]);
-//        vec_ptr_face.push_back(face);
-//
-//        face = std::make_shared<QuadFace<Point3>>();
-//        face->create(vec_ptr_vertex[3], vec_ptr_vertex[4], vec_ptr_vertex[7], vec_ptr_vertex[6]);
-//        vec_ptr_face.push_back(face);
-//
-//        face = std::make_shared<QuadFace<Point3>>();
-//        face->create(vec_ptr_vertex[4], vec_ptr_vertex[5], vec_ptr_vertex[8], vec_ptr_vertex[7]);
-//        vec_ptr_face.push_back(face);
-
-
-
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.0, 0.0));
+        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 0.0, 0.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 0.0, 0.0));
-        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 1.0, 0.0));
+        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.5, 0.0));
+        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 0.5, 0.0));
+        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 0.5, 0.0));
         vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 1.0, 0.0));
+        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.5, 1.0, 0.0));
+        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 1.0, 0.0));
 
         auto face = std::make_shared<QuadFace<Point3>>();
-        face->create(vec_ptr_vertex[0], vec_ptr_vertex[1], vec_ptr_vertex[2], vec_ptr_vertex[3]);
+        face->create(vec_ptr_vertex[0], vec_ptr_vertex[1], vec_ptr_vertex[4], vec_ptr_vertex[3]);
         vec_ptr_face.push_back(face);
 
         face = std::make_shared<QuadFace<Point3>>();
-        face->create(vec_ptr_vertex[0], vec_ptr_vertex[3], vec_ptr_vertex[2], vec_ptr_vertex[1]);
+        face->create(vec_ptr_vertex[1], vec_ptr_vertex[2], vec_ptr_vertex[5], vec_ptr_vertex[4]);
         vec_ptr_face.push_back(face);
+
+        face = std::make_shared<QuadFace<Point3>>();
+        face->create(vec_ptr_vertex[3], vec_ptr_vertex[4], vec_ptr_vertex[7], vec_ptr_vertex[6]);
+        vec_ptr_face.push_back(face);
+
+        face = std::make_shared<QuadFace<Point3>>();
+        face->create(vec_ptr_vertex[4], vec_ptr_vertex[5], vec_ptr_vertex[8], vec_ptr_vertex[7]);
+        vec_ptr_face.push_back(face);
+
+
+
+//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 0.0, 0.0));
+//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 0.0, 0.0));
+//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(1.0, 1.0, 0.0));
+//        vec_ptr_vertex.push_back(std::make_shared<VertexType>(0.0, 1.0, 0.0));
+//
+//        auto face = std::make_shared<QuadFace<Point3>>();
+//        face->create(vec_ptr_vertex[0], vec_ptr_vertex[1], vec_ptr_vertex[2], vec_ptr_vertex[3]);
+//        vec_ptr_face.push_back(face);
+//
+//        face = std::make_shared<QuadFace<Point3>>();
+//        face->create(vec_ptr_vertex[0], vec_ptr_vertex[3], vec_ptr_vertex[2], vec_ptr_vertex[1]);
+//        vec_ptr_face.push_back(face);
     }
 
     void merge(){
@@ -88,24 +88,13 @@ public:
             std::cout << "Edge connected Face num: " << ptr_edge->getConnected_Face().size() << std::endl;
         }
 
-
-
-
-//
-//        auto vec_ptr_vertex = vec_ptr_face[0]->getVertex();
-//        std::cout << "List Face's Vertex: " << std::endl;
-//        for (size_t i = 0;  i < vec_ptr_face.size(); ++i) {
-//            std::cout << "Face " << i << " is : ";
-//            auto vec_ptr_vertex = vec_ptr_face[i]->getVertex();
-//
-//            for (auto &ptr_vertex: vec_ptr_vertex){
-//                std::cout << *ptr_vertex ;
-//            }
-//            std::cout << std::endl;
-//        }
-//
-//        std::cout << "Merged Edge Num: " << std::endl;
-//        std::cout << vec_ptr_merged_edge.size() << std::endl;
+        for(size_t i = 0; i < vec_ptr_face.size(); ++i){
+            std::cout << "Face "<< i << " vertex : " << std::endl;
+            for(auto &ptr_vertex:vec_ptr_face[i]->getConnected_Vertex()){
+                std::cout << *ptr_vertex << "\t";
+            }
+            std::cout <<  std::endl;
+        }
 
     }
 
