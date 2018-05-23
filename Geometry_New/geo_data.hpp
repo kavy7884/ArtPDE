@@ -8,6 +8,7 @@
 #include <ostream>
 #include <set>
 #include "geo_tree.hpp"
+#include "point3.hpp"
 
 template <typename Data> class Cell;
 template <typename Data> class Face;
@@ -17,19 +18,22 @@ template <typename Data> class Vertex;
 
 template <typename Data>
 class Cell:
-        public GeoTree,
+        public GeoTree<Cell<Data>>,
         public GeoTree_Child<Face<Data>>,
         public std::enable_shared_from_this<Cell<Data>>{
 public:
     Cell() :
-            GeoTree(TreeType::TreeHead),
+            GeoTree<Cell<Data>>(TreeType::TreeHead),
             GeoTree_Child<Face<Data>>() {}
 
+    void link_self() override {
+        this->linked_to = this->shared_from_this();
+    }
 };
 
 template <typename Data>
 class Face:
-        public GeoTree,
+        public GeoTree<Face<Data>>,
         public GeoTree_Parent<Cell<Data>>,
         public GeoTree_Child<Edge<Data>>,
         public std::enable_shared_from_this<Face<Data>>{
@@ -37,30 +41,35 @@ public:
     using PtrVertexType = std::shared_ptr<Vertex<Data>>;
     using VecPtrVertexType = std::vector<PtrVertexType>;
     using PtrEdgeType = std::shared_ptr<Edge<Data>>;
+    using VecPtrEdgeType = std::vector<PtrEdgeType>;
 
     Face() :
-            GeoTree(TreeType::TreeConnect),
+            GeoTree<Face<Data>>(TreeType::TreeConnect),
             GeoTree_Parent<Cell<Data>>(),
             GeoTree_Child<Edge<Data>>() {}
 
-    const std::shared_ptr<Face<Data>> getLinked_to() {
-        if(this->isLinked()) return std::static_pointer_cast<Face<Data>>(this->linked_to);
-        else return this->shared_from_this();
+    void link_self() override {
+        this->linked_to = this->shared_from_this();
+    }
+
+    const VecPtrEdgeType& getConnected_Edge() const{
+        return this->c_getVec_ptr_childs();
     }
 
     bool operator==(Face &rhs){
-        if(this->getVec_ptr_childs().size() != rhs.getVec_ptr_childs().size())  return false;
+        if(this->getConnected_Edge().size() != rhs.getConnected_Edge().size())  return false;
         else{
             std::set<PtrEdgeType> set_self, set_rhs;
-            for (auto &ptr_edge: this->getVec_ptr_childs()) {
+            for (auto &ptr_edge: this->getConnected_Edge()) {
                 set_self.insert(ptr_edge->getLinked_to());
             }
-            for (auto &ptr_edge: rhs.getVec_ptr_childs()) {
+            for (auto &ptr_edge: rhs.getConnected_Edge()) {
                 set_rhs.insert(ptr_edge->getLinked_to());
             }
             if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
             else return false;
         }
+        return true;
     }
 
     bool operator!=(const Face &rhs) {
@@ -71,7 +80,7 @@ public:
 
 template <typename Data>
 class Edge:
-        public GeoTree,
+        public GeoTree<Edge<Data>>,
         public GeoTree_Parent<Face<Data>>,
         public GeoTree_Child<Vertex<Data>>,
         public std::enable_shared_from_this<Edge<Data>>{
@@ -79,65 +88,47 @@ public:
     using PtrVertexType = std::shared_ptr<Vertex<Data>>;
     using VecPtrVertexType = std::vector<PtrVertexType>;
     using PtrFaceType = std::shared_ptr<Face<Data>>;
+    using ListPtrFaceType = std::list<PtrFaceType>;
     Edge() :
-            GeoTree(TreeType::TreeConnect),
+            GeoTree<Edge<Data>>(TreeType::TreeConnect),
             GeoTree_Parent<Face<Data>>(),
             GeoTree_Child<Vertex<Data>>() {
     }
 
-    const std::shared_ptr<Edge<Data>> getLinked_to() {
-        if(this->isLinked()) return std::static_pointer_cast<Edge<Data>>(this->linked_to);
-        else return this->shared_from_this();
+    void link_self() override {
+        this->linked_to = this->shared_from_this();
+    }
+
+    const VecPtrVertexType& getConnected_Vertex() const{
+        return this->c_getVec_ptr_childs();
+    }
+
+    const ListPtrFaceType& getConnected_Face() {
+        return this->getLinked_to()->c_getList_ptr_parents();
     }
 
     bool operator==(Edge &rhs){
-        if(this->getVec_ptr_childs().size() != rhs.getVec_ptr_childs().size())  return false;
+        if(this->getConnected_Vertex().size() != rhs.getConnected_Vertex().size())  return false;
         else{
-            std::set<PtrVertexType> set_self(this->getVec_ptr_childs().cbegin(), this->getVec_ptr_childs().cend());
-            std::set<PtrVertexType> set_rhs(rhs.getVec_ptr_childs().cbegin(), rhs.getVec_ptr_childs().cend());
+            std::set<PtrVertexType> set_self(this->getConnected_Vertex().cbegin(), this->getConnected_Vertex().cend());
+            std::set<PtrVertexType> set_rhs(rhs.getConnected_Vertex().cbegin(), rhs.getConnected_Vertex().cend());
             if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
             else return false;
-            return true;
         }
     }
 
     bool operator!=(const Edge &rhs) {
         return !(rhs == *this);
     }
-
-    size_t getNum_ConnectedFace(){
-        size_t re_num = 0;
-        for (auto &ptr_face : this->getVec_ptr_parents()) {
-            if(!ptr_face->isLinked()){
-                ++re_num;
-            }
-        }
-        return re_num;
-    }
-
 //
-//    typename
-//    std::list<PtrVertexType>::const_iterator getMergedGroup(const PtrFaceType &ptr_face){
-//        typename std::list<PtrVertexType>::const_iterator iter_child = this->c_getPtr_list_ptr_childs()->cbegin();
-//
-//        size_t counter = 0;
-//        auto it_face = this->c_getPtr_list_ptr_parents()->cbegin();
-//        while(it_face != this->c_getPtr_list_ptr_parents()->cend()){
-//            if(*it_face == ptr_face){
-//                //std::cout << "Get" << std::endl;
-//                break;
+//    size_t getNum_ConnectedFace(){
+//        size_t re_num = 0;
+//        for (auto &ptr_face : this->getVec_ptr_parents()) {
+//            if(!ptr_face->isLinked()){
+//                ++re_num;
 //            }
-//            ++it_face;
-//            ++counter;
 //        }
-//
-//        counter *= this->getNum_childs_per_group();
-//
-//        for (size_t i = 0; i < counter; ++i) {
-//            ++iter_child;
-//        }
-//
-//        return iter_child;
+//        return re_num;
 //    }
 
 };
@@ -145,25 +136,37 @@ public:
 
 template <typename Data>
 class Vertex :
-        public GeoTree,
-        public GeoTree_Parent<Edge<Data>>{
+        public GeoTree<Vertex<Data>>,
+        public GeoTree_Parent<Edge<Data>>,
+        public std::enable_shared_from_this<Vertex<Data>>{
 public:
-    using PtrData = std::shared_ptr<Data>;
+    using PtrDataType = std::shared_ptr<Data>;
+    using PtrEdgeType = std::shared_ptr<Edge<Data>>;
+    using ListPtrEdgeType = std::list<PtrEdgeType>;
     Vertex() :
-            GeoTree(TreeType::TreeEnd),
-            GeoTree_Parent<Edge<Data>>(){}
+            GeoTree<Vertex<Data>>(TreeType::TreeEnd),
+            GeoTree_Parent<Edge<Data>>(){
+    }
 
     Vertex(double x, double y, double z) :
-            GeoTree(TreeType::TreeEnd),
+            GeoTree<Vertex<Data>>(TreeType::TreeEnd),
             GeoTree_Parent<Edge<Data>>(){
         ptr_data = std::make_shared<Point3>(x, y, z);
     }
 
-    const PtrData &getPtr_data() const {
+    void link_self() override {
+        this->linked_to = this->shared_from_this();
+    }
+
+    const ListPtrEdgeType& getConnected_Edge(){
+        return this->getLinked_to()->c_getList_ptr_parents();
+    }
+
+    const PtrDataType &getPtr_data() const {
         return ptr_data;
     }
 
-    void setPtr_data(const PtrData &ptr_data) {
+    void setPtr_data(const PtrDataType &ptr_data) {
         Vertex::ptr_data = ptr_data;
     }
 
@@ -172,18 +175,18 @@ public:
         return os;
     }
 
-    size_t getNum_ConnectedEdge(){
-        size_t re_num = 0;
-        for (auto &ptr_edge : this->getVec_ptr_parents()) {
-            if(!ptr_edge->isLinked()){
-                ++re_num;
-            }
-        }
-        return re_num;
-    }
+//    size_t getNum_ConnectedEdge(){
+//        size_t re_num = 0;
+//        for (auto &ptr_edge : this->getVec_ptr_parents()) {
+//            if(!ptr_edge->isLinked()){
+//                ++re_num;
+//            }
+//        }
+//        return re_num;
+//    }
 
 private:
-    PtrData ptr_data{nullptr};
+    PtrDataType ptr_data{nullptr};
 };
 
 

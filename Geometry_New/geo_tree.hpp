@@ -9,28 +9,31 @@
 #include <vector>
 #include <list>
 
+enum class TreeType{TreeHead, TreeConnect, TreeEnd};
+
+template <typename SelfType>
 class GeoTree{
 public:
-    enum class TreeType{TreeHead, TreeConnect, TreeEnd};
     GeoTree(TreeType tree_type) : tree_type(tree_type) {}
 
     TreeType getTree_type() const {
         return tree_type;
     }
 
-    bool isLinked() const {
-        return linked;
+    void setLinked_to(const std::shared_ptr<SelfType> &linked_to) {
+        this->linked_to = linked_to;
     }
 
-    void setLinked_to(const std::shared_ptr <GeoTree> &linked_to) {
-        this->linked = true;
-        GeoTree::linked_to = linked_to;
+    virtual void link_self() = 0;
+
+    const std::shared_ptr<SelfType> &getLinked_to() {
+        if(linked_to == nullptr) link_self();
+        return linked_to;
     }
 
 protected:
     TreeType tree_type;
-    bool linked{false};
-    std::shared_ptr<GeoTree> linked_to{nullptr};
+    std::shared_ptr<SelfType> linked_to{nullptr};
 };
 
 template <typename ParentType>
@@ -38,32 +41,48 @@ class GeoTree_Parent{
 public:
     struct type{
         using PtrParentType = std::shared_ptr<ParentType>;
-        using VecPtrParentType = std::vector<PtrParentType>;
+        using ListPtrParentType = std::list<PtrParentType>;
     };
 
     GeoTree_Parent() {}
 
-    const typename type::VecPtrParentType &c_getVec_ptr_parents() const {
-        return vec_ptr_parents;
-    }
-
-    const typename type::VecPtrParentType &getVec_ptr_parents() {
-        return vec_ptr_parents;
-    }
-
     void addParent(const typename type::PtrParentType &ptr_parent){
-        vec_ptr_parents.push_back(ptr_parent);
+        list_ptr_parents.push_back(ptr_parent);
     }
 
-    void mergeParents(const GeoTree_Parent<ParentType> &rhs){
-        for (auto $ptr_parent : rhs.c_getVec_ptr_parents()) {
-            this->addParent($ptr_parent);
+    void clearParent(){
+        list_ptr_parents.clear();
+    }
+
+    void eraseParent(const typename type::PtrParentType &ptr_parent){
+        auto it = list_ptr_parents.begin();
+        while (it != list_ptr_parents.end()){
+            if(*it == ptr_parent){
+                it = list_ptr_parents.erase(it);
+            }else{
+                ++it;
+            }
         }
+    }
+
+    const typename type::ListPtrParentType &c_getList_ptr_parents() const {
+        return list_ptr_parents;
+    }
+
+    typename type::ListPtrParentType &getList_ptr_parents() {
+        return list_ptr_parents;
+    }
+
+    void mergeParents(GeoTree_Parent& rhs){
+        for(auto &ptr_parent: rhs.c_getList_ptr_parents()){
+            list_ptr_parents.push_back(ptr_parent);
+        }
+        rhs.clearParent();
     }
 
 protected:
     typename
-    type::VecPtrParentType vec_ptr_parents;
+    type::ListPtrParentType list_ptr_parents;
 
 };
 
@@ -81,14 +100,13 @@ public:
         return vec_ptr_childs;
     }
 
-    const typename type::VecPtrChildType &getVec_ptr_childs() {
+    typename type::VecPtrChildType &getVec_ptr_childs() {
         return vec_ptr_childs;
     }
 
     void addChild(const typename type::PtrChildType &ptr_child){
         vec_ptr_childs.push_back(ptr_child);
     }
-
 
 protected:
     typename
@@ -107,36 +125,37 @@ public:
             vec_ptr_base_layer_seed) {}
 
     VecPtrMergeLayerType merge(){
+        bool merged = false;
 
         for (size_t i = 0; i < vec_ptr_base_layer_seed.size(); ++i) {
-            auto & vec_ptr_parents = this->vec_ptr_base_layer_seed[i]->getVec_ptr_parents();
+            auto & list_ptr_parents = this->vec_ptr_base_layer_seed[i]->getLinked_to()->getList_ptr_parents();
 
-            auto it_master = vec_ptr_parents.begin();
+            //std::cout << list_ptr_parents.size() << std::endl;
 
-            while( it_master != vec_ptr_parents.end()){
+            auto it_master = list_ptr_parents.begin();
 
-                if((*it_master)->isLinked()){
-                    ++it_master;
-                    continue;
-                }
+            while( it_master != list_ptr_parents.end()){
 
                 auto it_slave = it_master;
                 ++it_slave;
-                while( it_slave != vec_ptr_parents.end()) {
-
-                    if((*it_slave)->isLinked()){
-                        ++it_slave;
-                        continue;
-                    }
-
+                merged = false;
+                while( it_slave != list_ptr_parents.end()) {
                     if((*(*it_master)) == (*(*it_slave))) {
                         std::cout << "Merge" << std::endl;
+                        merged = true;
                         (*it_slave)->setLinked_to((*it_master));
                         (*it_master)->mergeParents(*(*it_slave));
-                        vec_ptr_merged_layer.push_back((*it_master));
+                        for (auto &ptr_child: (*it_slave)->getVec_ptr_childs()) {
+                            ptr_child->getLinked_to()->eraseParent((*it_slave));
+                        }
+                        it_slave = it_master;
                     }
                     ++it_slave;
                 }
+                if(merged){
+                    vec_ptr_merged_layer.push_back((*it_master));
+                }
+
                 ++it_master;
             }
         }

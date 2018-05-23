@@ -2,10 +2,15 @@
 // Created by Chingkai Chou on 5/2/18.
 //
 
+#include <iostream>
 #include "Geometry_New/GeoTest2D.hpp"
 #include "Geometry_New/GeoTest3D.hpp"
 
+#include "Geometry_New/geo_data.hpp"
+
 int main() {
+
+
 //    GeoTest2D test2D;
 //
 //    test2D.merge();
@@ -23,6 +28,13 @@ int main() {
 //
 //    auto it_1 = tt.begin();
 //    auto it_2 = tt.end();
+//
+//    ++it_1;
+//    ++it_1;
+//    ++it_1;
+//    std::cout << *it_1 << std::endl;
+//    std::cout << *it_2 << std::endl;
+
 //
 //    std::cout << it_2 - it_1 << std::endl;
 
