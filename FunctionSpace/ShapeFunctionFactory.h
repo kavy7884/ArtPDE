@@ -8,6 +8,9 @@
 // ArtPDE Lib Include Zone
 
 #include "ShapeFunction.h"
+#include "lagrange2d_shape_function.h"
+#include "lagrange3d_shape_function.h"
+#include "serendipity2d_shape_function.h"
 
 namespace art_pde{
 

@@ -8,7 +8,6 @@
 #include <cmath>
 
 // ArtPDE Lib Include Zone
-#include "Typelist.h"
 #include "dimension_utility.hpp"
 #include "numerical_method_utility.hpp"
 #include "shape_function_utility.h"
@@ -36,12 +35,25 @@ namespace art_pde{
 
 	template<class DimensionT>
 	class ShapeFunction<DimensionT, ElementType, Lagrange>{
+		using PointType = Point<DimensionT, CartesianCoordinate>;
 	public:
-		virtual std::vector<double>&
-			evaluate_shape(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
+		virtual std::vector<double>& 
+			N(const PointType& iso_point) = 0;
+
+		virtual std::vector<std::vector<double>>& 
+			dNdxi(const PointType& iso_point) = 0;
+
+		virtual std::vector<std::vector<double>>& 
+			dNdx (const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
+			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual double
+			detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 	protected:
 		ShapeFunction(){}
@@ -52,12 +64,25 @@ namespace art_pde{
 
 	template<class DimensionT>
 	class ShapeFunction<DimensionT, ElementType, Serendipity>{
+		using PointType = Point<DimensionT, CartesianCoordinate>;
 	public:
 		virtual std::vector<double>&
-			evaluate_shape(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
+			N(const PointType& iso_point) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<DimensionT, IsoparametricCoordinate>& point) = 0;
+			dNdxi(const PointType& iso_point) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual double
+			detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 	protected:
 
@@ -73,307 +98,6 @@ namespace art_pde{
 
 	template<class DimensionT>
 	using SerendipityType = ShapeFunction<DimensionT, ElementType, Serendipity>;
-
-	template<>
-	class ShapeFunction< Dim2D, Q4, Lagrange > :
-		public LagrangeType<Dim2D>
-	{
-	public:
-
-		friend class SingletonHolder<ShapeFunction< Dim2D, Q4, Lagrange > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-			shape_[0] = 0.25*(1 - xi)*(1 - eta);
-			shape_[1] = 0.25*(1 + xi)*(1 - eta);
-			shape_[2] = 0.25*(1 + xi)*(1 + eta);
-			shape_[3] = 0.25*(1 - xi)*(1 + eta);
-
-			return shape_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-			grad_[0][0] = -0.25*(1 - eta);
-			grad_[0][1] = 0.25*(1 - eta);
-			grad_[0][2] = 0.25*(1 + eta);
-			grad_[0][3] = -0.25*(1 + eta);
-
-			grad_[1][0] = -0.25*(1 - xi);
-			grad_[1][1] = -0.25*(1 + xi);
-			grad_[1][2] = 0.25*(1 + xi);
-			grad_[1][3] = 0.25*(1 - xi);
-
-			return grad_;
-		}
-
-	private:
-		double xi;
-		double eta;
-		std::vector<double> shape_;
-		std::vector<std::vector<double>> grad_;
-
-		ShapeFunction() :shape_(4), grad_(2, std::vector<double>(4)){}
-		ShapeFunction(const ShapeFunction&){}
-		ShapeFunction& operator=(const ShapeFunction&){}
-	};
-
-	template<>
-	class ShapeFunction< Dim2D, Q8, Serendipity > :
-		public SerendipityType<Dim2D>
-	{
-	public:
-
-		friend class SingletonHolder<ShapeFunction< Dim2D, Q8, Serendipity > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-			shape_[0] = 0.25*(1. - xi)*(1. - eta)*(-xi - eta - 1.);
-			shape_[1] = 0.25*(1. + xi)*(1. - eta)*(xi - eta - 1.);
-			shape_[2] = 0.25*(1. + xi)*(1. + eta)*(xi + eta - 1.);
-			shape_[3] = 0.25*(1. - xi)*(1. + eta)*(eta - xi - 1.);
-			shape_[4] = 0.5 * (1. - xi * xi)*(1. - eta);
-			shape_[5] = 0.5 * (1. + xi)*(1. - eta * eta);
-			shape_[6] = 0.5 * (1. - xi * xi)*(1. + eta);
-			shape_[7] = 0.5 * (1. - xi)*(1. - eta * eta);
-
-			return shape_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-
-			grad_[0][0] = 0.25*(-eta * eta + eta - 2. * xi*eta + 2. * xi);
-			grad_[0][1] = 0.25*(-eta + 2. * xi - 2. * xi*eta + eta * eta);
-			grad_[0][2] = 0.25*(eta + 2. * xi + 2. * xi*eta + eta * eta);
-			grad_[0][3] = 0.25*(-eta + 2. * xi + 2. * xi*eta - eta * eta);
-			grad_[0][4] = -xi*(1. - eta);
-			grad_[0][5] = 0.5 * (1. - eta * eta);
-			grad_[0][6] = -xi*(1. + eta);
-			grad_[0][7] = -0.5 * (1. - eta * eta);
-
-			grad_[1][0] = 0.25*(2. * eta - 2. * xi*eta + xi - xi * xi);
-			grad_[1][1] = 0.25*(-xi + 2. * eta - xi * xi + 2. * xi*eta);
-			grad_[1][2] = 0.25*(xi + 2. * eta + xi * xi + 2. * xi*eta);
-			grad_[1][3] = 0.25*(-xi + 2. * eta + xi * xi - 2. * xi*eta);
-			grad_[1][4] = -0.5 * (1. - xi * xi);
-			grad_[1][5] = -eta*(1. + xi);
-			grad_[1][6] = 0.5 * (1. - xi * xi);
-			grad_[1][7] = -eta*(1. - xi);
-
-			return grad_;
-		}
-
-	private:
-		double xi;
-		double eta;
-		std::vector<double> shape_;
-		std::vector<std::vector<double>> grad_;
-
-		ShapeFunction() :shape_(8), grad_(2, std::vector<double>(8)){}
-		ShapeFunction(const ShapeFunction&){}
-		ShapeFunction& operator=(const ShapeFunction&){}
-	};
-
-	template<>
-	class ShapeFunction< Dim2D, Q9, Lagrange > :
-		public LagrangeType<Dim2D>
-	{
-	public:
-
-		friend class SingletonHolder<ShapeFunction< Dim2D, Q9, Lagrange > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-			shape_[0] = 0.25 * (1. - xi)*(1. - eta)*xi*eta;
-			shape_[1] = 0.25*(1. + xi)*(1. - eta)*(-xi*eta);
-			shape_[2] = 0.25*(1. + xi)*(1. + eta)*xi*eta;
-			shape_[3] = 0.25*(1. - xi)*(1. + eta)*(-xi*eta);
-			shape_[4] = 0.5* (1. - xi * xi)*(1. - eta)*(-eta);
-			shape_[5] = 0.5* (1. + xi)*(1. - eta * eta)*(xi);
-			shape_[6] = 0.5* (1. - xi * xi)*(1. + eta)*eta;
-			shape_[7] = 0.5* (1. - xi)*(1. - eta * eta)*(-xi);
-			shape_[8] = (1. - xi * xi)*(1. - eta * eta);
-
-			return shape_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-
-			grad_[0][0] = 0.25*(eta - eta * eta - 2. * xi*eta + 2. * xi*eta * eta);
-			grad_[0][1] = 0.25*(-eta + eta * eta - 2. * xi*eta + 2. * xi*eta * eta);
-			grad_[0][2] = 0.25*(eta + eta * eta + 2. * xi*eta + 2. * xi*eta * eta);
-			grad_[0][3] = 0.25*(-eta - eta * eta + 2. * xi*eta + 2. * xi*eta * eta);
-			grad_[0][4] = 0.5 * (2. * xi*eta - 2. * xi*eta * eta);
-			grad_[0][5] = 0.5 * (1. - eta * eta + 2. * xi - 2. * xi*eta * eta);
-			grad_[0][6] = 0.5 * (-2. * xi*eta - 2. * xi*eta * eta);
-			grad_[0][7] = 0.5 * (-1. + 2. * xi + eta * eta - 2. * xi*eta * eta);
-			grad_[0][8] = -2.0 * xi*(1. - eta * eta);
-
-				
-			grad_[1][0] = 0.25*(xi - xi * xi - 2. * xi*eta + 2. * eta*xi * xi);
-			grad_[1][1] = 0.25*(-xi - xi * xi + 2. * xi*eta + 2. * eta*xi * xi);
-			grad_[1][2] = 0.25*(xi + xi * xi + 2. * xi*eta + 2. * eta*xi * xi);
-			grad_[1][3] = 0.25*(-xi + xi * xi - 2. * xi*eta + 2. * eta*xi * xi);
-			grad_[1][4] = 0.5 * (-1. + xi * xi + 2. * eta - 2. * eta*xi * xi);
-			grad_[1][5] = 0.5 * (-2. * xi*eta - 2. * eta*xi * xi);
-			grad_[1][6] = 0.5 * (1. - xi * xi + 2. * eta - 2. * eta*xi * xi);
-			grad_[1][7] = 0.5 * (2. * xi*eta - 2. * eta*xi * xi);
-			grad_[1][8] = -2.0 * eta*(1. - xi * xi);
-
-			return grad_;
-		}
-
-	private:
-		double xi;
-		double eta;
-		std::vector<double> shape_;
-		std::vector<std::vector<double>> grad_;
-
-		ShapeFunction() :shape_(9), grad_(2, std::vector<double>(9)){}
-		ShapeFunction(const ShapeFunction&){}
-		ShapeFunction& operator=(const ShapeFunction&){}
-	};
-
-	template<>
-	class ShapeFunction< Dim2D, T3, Lagrange > :
-		public LagrangeType<Dim2D>
-	{
-	public:
-
-		friend class SingletonHolder < ShapeFunction< Dim2D, T3, Lagrange > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-			shape_[0] = 1 - xi - eta;
-			shape_[1] = xi;
-			shape_[2] = eta;
-
-			return shape_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<Dim2D, IsoparametricCoordinate>& point) override
-		{
-			grad_[0][0] = -1.0;
-			grad_[0][1] = 1.0;
-			grad_[0][2] = 0.0;
-
-			grad_[1][0] = -1.0;
-			grad_[1][1] = 0.0;
-			grad_[1][2] = 1.0;
-
-			return grad_;
-		}
-
-	private:
-
-		double xi;
-		double eta;
-		std::vector<double> shape_;
-		std::vector<std::vector<double>> grad_;
-
-		ShapeFunction() :shape_(3), grad_(2, std::vector<double>(3)){}
-		ShapeFunction(const ShapeFunction&){}
-		ShapeFunction& operator=(const ShapeFunction&){}
-	};
-
-
-	template<>
-	class ShapeFunction< Dim3D, Hexa8, Lagrange > :
-		public LagrangeType<Dim3D>
-	{
-	public:
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Hexa8, Lagrange > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const Point<Dim3D, IsoparametricCoordinate>& point) override
-		{
-			xi = point.getXi();
-			eta = point.getEta();
-			zeta = point.getZeta();
-
-			shape_[0] = (1 / 8.)*(1 - xi)*(1 - eta)*(1 - zeta);
-			shape_[1] = (1 / 8.)*(1 + xi)*(1 - eta)*(1 - zeta);
-			shape_[2] = (1 / 8.)*(1 + xi)*(1 + eta)*(1 - zeta);
-			shape_[3] = (1 / 8.)*(1 - xi)*(1 + eta)*(1 - zeta);
-			shape_[4] = (1 / 8.)*(1 - xi)*(1 - eta)*(1 + zeta);
-			shape_[5] = (1 / 8.)*(1 + xi)*(1 - eta)*(1 + zeta);
-			shape_[6] = (1 / 8.)*(1 + xi)*(1 + eta)*(1 + zeta);
-			shape_[7] = (1 / 8.)*(1 - xi)*(1 + eta)*(1 + zeta);
-
-			return shape_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_grad(const Point<Dim3D, IsoparametricCoordinate>& point) override
-		{
-			grad_[0][0] = -(1 / 8.)*(1 - eta)*(1 - zeta);
-			grad_[0][1] = (1 / 8.)*(1 - eta)*(1 - zeta);
-			grad_[0][2] = (1 / 8.)*(1 + eta)*(1 - zeta);
-			grad_[0][3] = -(1 / 8.)*(1 + eta)*(1 - zeta);
-			grad_[0][4] = -(1 / 8.)*(1 - eta)*(1 + zeta);
-			grad_[0][5] = (1 / 8.)*(1 - eta)*(1 + zeta);
-			grad_[0][6] = (1 / 8.)*(1 + eta)*(1 + zeta);
-			grad_[0][7] = -(1 / 8.)*(1 + eta)*(1 + zeta);
-
-			grad_[1][0] = -(1 / 8.)*(1 - xi)*(1 - zeta);
-			grad_[1][1] = -(1 / 8.)*(1 + xi)*(1 - zeta);
-			grad_[1][2] = (1 / 8.)*(1 + xi)*(1 - zeta);
-			grad_[1][3] = (1 / 8.)*(1 - xi)*(1 - zeta);
-			grad_[1][4] = -(1 / 8.)*(1 - xi)*(1 + zeta);
-			grad_[1][5] = -(1 / 8.)*(1 + xi)*(1 + zeta);
-			grad_[1][6] = (1 / 8.)*(1 + xi)*(1 + zeta);
-			grad_[1][7] = (1 / 8.)*(1 - xi)*(1 + zeta);
-
-			grad_[2][0] = -(1 / 8.)*(1 - xi)*(1 - eta);
-			grad_[2][1] = -(1 / 8.)*(1 + xi)*(1 - eta);
-			grad_[2][2] = -(1 / 8.)*(1 + xi)*(1 + eta);
-			grad_[2][3] = -(1 / 8.)*(1 - xi)*(1 + eta);
-			grad_[2][4] = (1 / 8.)*(1 - xi)*(1 - eta);
-			grad_[2][5] = (1 / 8.)*(1 + xi)*(1 - eta);
-			grad_[2][6] = (1 / 8.)*(1 + xi)*(1 + eta);
-			grad_[2][7] = (1 / 8.)*(1 - xi)*(1 + eta);
-
-			return grad_;
-		}
-
-	private:
-
-		double xi;
-		double eta;
-		double zeta;
-		std::vector<double> shape_;
-		std::vector<std::vector<double>> grad_;
-
-		ShapeFunction() :shape_(8), grad_(3, std::vector<double>(8)){}
-		ShapeFunction(const ShapeFunction&){}
-		ShapeFunction& operator=(const ShapeFunction&){}
-	};
-
 
 
 	//////////////////////////////////////////////////////////Meshfreeeee////////////////////////////////////////////////////////////

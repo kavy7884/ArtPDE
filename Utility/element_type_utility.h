@@ -29,7 +29,9 @@ namespace art_pde{
 
 	struct Tetra4 :public ElementType{ static const int NUM = 4; };
 
-	struct Prism5 :public ElementType{ static const int NUM = 5; };
+	struct Pyramid5 :public ElementType{ static const int NUM = 5; };
+
+	struct Prism6 :public ElementType{ static const int NUM = 6; };
 
 	struct ScatterPoint{};
 
