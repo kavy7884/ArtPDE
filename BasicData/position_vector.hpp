@@ -25,12 +25,13 @@ namespace art_pde {
             template <size_t Dimension_>
             friend std::ostream &operator<<(std::ostream &os, const PointData<Dimension_> &point_data);
 
-            void addDataByList(const std::initializer_list<double> &v);
-
         protected:
             PointData(){ this->newData(); }
+            PointData(const std::initializer_list<double> &v){ this->newData(); this->addDataByList(v);}
             void newData();
-            PtrArrayType data{nullptr};
+            void addDataByList(const std::initializer_list<double> &v);
+            
+            PtrArrayType data{nullptr}; //real data storage
         };
         #include "./src/position_vector_pointdata_impl.cpp"
         // -------- PointData <End> -----------
@@ -46,6 +47,7 @@ namespace art_pde {
                 public CartesianAPI<Dimension, false>{
         public:
             ViewPositionVector(): PointData<Dimension>(){}
+            ViewPositionVector(const std::initializer_list<double> &v): PointData<Dimension>(v){}
         };
 
         template <size_t Dimension>
@@ -53,6 +55,7 @@ namespace art_pde {
                 public CartesianAPI<Dimension, true>{
         public:
             ComputePositionVector(): PointData<Dimension>(){}
+            ComputePositionVector(const std::initializer_list<double> &v): PointData<Dimension>(v){}
 
             ComputePositionVector<Dimension>& operator=(const ViewPositionVector<Dimension>& other)
             {
@@ -70,10 +73,9 @@ namespace art_pde {
                 re_ptr = std::make_shared<ViewPositionVector<Dimension>>();
                 return re_ptr;
             }
-            static std::shared_ptr<ViewPositionVector<Dimension>> createViewPoint(std::initializer_list<double> input_list){
+            static std::shared_ptr<ViewPositionVector<Dimension>> createViewPoint(const std::initializer_list<double> &input_list){
                 std::shared_ptr<ViewPositionVector<Dimension>> re_ptr;
-                re_ptr = std::make_shared<ViewPositionVector<Dimension>>();
-                re_ptr->addDataByList(input_list);
+                re_ptr = std::make_shared<ViewPositionVector<Dimension>>(input_list);
                 return re_ptr;
             }
 
@@ -82,18 +84,15 @@ namespace art_pde {
                 re_ptr = std::make_shared<ComputePositionVector<Dimension>>();
                 return re_ptr;
             }
-            static std::shared_ptr<ComputePositionVector<Dimension>> createComputePoint(std::initializer_list<double> input_list){
+            static std::shared_ptr<ComputePositionVector<Dimension>> createComputePoint(const std::initializer_list<double> &input_list){
                 std::shared_ptr<ComputePositionVector<Dimension>> re_ptr;
-                re_ptr = std::make_shared<ComputePositionVector<Dimension>>();
-                re_ptr->addDataByList(input_list);
+                re_ptr = std::make_shared<ComputePositionVector<Dimension>>(input_list);
                 return re_ptr;
             }
 
         private:
             PositionVector() {}
         };
-
-
     }
 }
 

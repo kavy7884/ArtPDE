@@ -36,24 +36,24 @@
 
         template <size_t Dimension>
         struct CartesianAPI<Dimension, false>:
-                public virtual CartesianAPI_FuncHelper<Dimension, false, PointData<Dimension>> {
+                public virtual CartesianAPI_FuncHelper<Dimension, false, PointData<Dimension>>{
 
-        CartesianAPI<Dimension, false>& operator=(const CartesianAPI<Dimension, false>& other)
+            CartesianAPI<Dimension, false>& operator=(const CartesianAPI<Dimension, false>& other)
+            {
+                PointData<Dimension>::operator=(other);
+                return *this;
+            }
+        };
+
+        template <size_t Dimension>
+        struct CartesianAPI<Dimension, true>:
+            public virtual CartesianAPI_FuncHelper<Dimension, true, PointData<Dimension>>{
+
+        CartesianAPI<Dimension, true>& operator=(const CartesianAPI<Dimension, true>& other)
         {
             PointData<Dimension>::operator=(other);
             return *this;
         }
-    };
-
-    template <size_t Dimension>
-    struct CartesianAPI<Dimension, true>:
-            public virtual CartesianAPI_FuncHelper<Dimension, true, PointData<Dimension>>{
-
-    CartesianAPI<Dimension, true>& operator=(const CartesianAPI<Dimension, true>& other)
-    {
-        PointData<Dimension>::operator=(other);
-        return *this;
-    }
 
 };
 
