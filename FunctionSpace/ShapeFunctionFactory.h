@@ -71,6 +71,9 @@ namespace art_pde{
 		std::unordered_map<ElementType3D, ReturnFunc&> table;
 		ShapeFunctionFactory(){
 			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Hexa8, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Tetra4, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Prism6, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Pyramid5, Lagrange> >::instance() });
 			// ...
 		}
 		ShapeFunctionFactory(const ShapeFunctionFactory&){};
@@ -115,7 +118,7 @@ namespace art_pde{
 //	std::vector<std::string> name{ "Q4", "Q8", "T3", "Q9" };
 //	for (int i = 0; i < table.size(); ++i){
 //		auto& func = fem_shape.getInstance(table[i]);
-//		std::cout << "=====" << name[i] << " N value" << "=====" << "\n";
+//		std::cout << "=====" << name[i] << " evaluate_shape value" << "=====" << "\n";
 //		disp(func.evaluate_shape(Point<Dim2D, IsoparametricCoordinate>(1.0, 1.0)));
 //
 //		std::cout << "=====" << name[i] << " Nx value" << "=====" << "\n";

@@ -21,7 +21,7 @@ namespace art_pde{
 		friend class SingletonHolder<ShapeFunction< Dim2D, Q4, Lagrange > >;
 
 		virtual std::vector<double>&
-			N(const PointType& iso_point) override
+			evaluate_shape(const PointType& iso_point) override
 		{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
@@ -34,7 +34,7 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			dNdxi(const PointType& iso_point) override
+			evaluate_dNdxi(const PointType& iso_point) override
 		{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
@@ -52,10 +52,10 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			dNdxi(iso_point);
-			invJacobian(iso_point, elem_nodes);
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
 			for (int j = 0; j < 4; ++j){
 				for (int i = 0; i < 2; ++i){
 					dNdx_[i][j] =
@@ -68,7 +68,7 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
@@ -89,18 +89,18 @@ namespace art_pde{
 			Jacobian_[1][1] = 0.25*((1 - xi)*(y4 - y1) + (1 + xi)*(y3 - y2));
 		}
 
-		virtual double detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			Jacobian(iso_point, elem_nodes);
+			evaluate_Jacobian(iso_point, elem_nodes);
 			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] - 
 				            Jacobian_[0][1] * Jacobian_[1][0];
 			return det_Jacobian_;
 		}
 
 		virtual std::vector<std::vector<double>>&
-			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			detJacobian(iso_point, elem_nodes);
+			evaluate_detJacobian(iso_point, elem_nodes);
 			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
 			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
 			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
@@ -137,7 +137,7 @@ namespace art_pde{
 		friend class SingletonHolder<ShapeFunction< Dim2D, Q9, Lagrange > >;
 
 		virtual std::vector<double>&
-			N(const PointType& iso_point) override
+			evaluate_shape(const PointType& iso_point) override
 		{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
@@ -155,7 +155,7 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			dNdxi(const PointType& iso_point) override
+			evaluate_dNdxi(const PointType& iso_point) override
 		{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
@@ -184,10 +184,10 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			dNdxi(iso_point);
-			invJacobian(iso_point, elem_nodes);
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
 			for (int j = 0; j < 9; ++j){
 				for (int i = 0; i < 2; ++i){
 					dNdx_[i][j] =
@@ -200,10 +200,10 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
 
-			dNdxi(iso_point);
+			evaluate_dNdxi(iso_point);
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
 
@@ -270,18 +270,18 @@ namespace art_pde{
 				eta*xi*y8*(xi - 1.);
 		}
 
-		virtual double detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			Jacobian(iso_point, elem_nodes);
+			evaluate_Jacobian(iso_point, elem_nodes);
 			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] -
 				Jacobian_[0][1] * Jacobian_[1][0];
 			return det_Jacobian_;
 		}
 
 		virtual std::vector<std::vector<double>>&
-			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			detJacobian(iso_point, elem_nodes);
+			evaluate_detJacobian(iso_point, elem_nodes);
 			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
 			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
 			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
@@ -318,7 +318,7 @@ namespace art_pde{
 		friend class SingletonHolder < ShapeFunction< Dim2D, T3, Lagrange > >;
 
 		virtual std::vector<double>&
-			N(const PointType& iso_point) override
+			evaluate_shape(const PointType& iso_point) override
 		{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
@@ -330,7 +330,7 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			dNdxi(const PointType& iso_point) override
+			evaluate_dNdxi(const PointType& iso_point) override
 		{
 			dNdxi_[0][0] = -1.0;
 			dNdxi_[0][1] = 1.0;
@@ -344,10 +344,10 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			dNdxi(iso_point);
-			invJacobian(iso_point, elem_nodes);
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
 			for (int j = 0; j < 3; ++j){
 				for (int i = 0; i < 2; ++i){
 					dNdx_[i][j] =
@@ -359,10 +359,10 @@ namespace art_pde{
 		}
 
 		virtual std::vector<std::vector<double>>&
-			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
 
-			dNdxi(iso_point);
+			evaluate_dNdxi(iso_point);
 
 			const double& x1 = elem_nodes[0].getX();
 			const double& x2 = elem_nodes[1].getX();
@@ -380,18 +380,18 @@ namespace art_pde{
 			return Jacobian_;
 		}
 
-		virtual double detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			Jacobian(iso_point, elem_nodes);
+			evaluate_Jacobian(iso_point, elem_nodes);
 			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] -
 				Jacobian_[0][1] * Jacobian_[1][0];
 			return det_Jacobian_;
 		}
 
 		virtual std::vector<std::vector<double>>&
-			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
 		{
-			detJacobian(iso_point, elem_nodes);
+			evaluate_detJacobian(iso_point, elem_nodes);
 			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
 			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
 			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];

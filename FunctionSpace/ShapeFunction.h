@@ -38,22 +38,22 @@ namespace art_pde{
 		using PointType = Point<DimensionT, CartesianCoordinate>;
 	public:
 		virtual std::vector<double>& 
-			N(const PointType& iso_point) = 0;
+			evaluate_shape(const PointType& iso_point) = 0;
 
 		virtual std::vector<std::vector<double>>& 
-			dNdxi(const PointType& iso_point) = 0;
+			evaluate_dNdxi(const PointType& iso_point) = 0;
 
 		virtual std::vector<std::vector<double>>& 
-			dNdx (const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_dNdx (const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual double
-			detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 	protected:
 		ShapeFunction(){}
@@ -67,22 +67,22 @@ namespace art_pde{
 		using PointType = Point<DimensionT, CartesianCoordinate>;
 	public:
 		virtual std::vector<double>&
-			N(const PointType& iso_point) = 0;
+			evaluate_shape(const PointType& iso_point) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			dNdxi(const PointType& iso_point) = 0;
+			evaluate_dNdxi(const PointType& iso_point) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual double
-			detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 		virtual std::vector<std::vector<double>>&
-			invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
 
 	protected:
 

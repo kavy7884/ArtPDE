@@ -27,11 +27,19 @@ namespace art_pde{
 
 	struct Hexa8 :public ElementType{ static const int NUM = 8; };
 
+	struct Hexa20 :public ElementType{ static const int NUM = 20; };
+
 	struct Tetra4 :public ElementType{ static const int NUM = 4; };
+
+	struct Tetra10 :public ElementType{ static const int NUM = 10; };
 
 	struct Pyramid5 :public ElementType{ static const int NUM = 5; };
 
+	struct Pyramid13 :public ElementType{ static const int NUM = 13; };
+
 	struct Prism6 :public ElementType{ static const int NUM = 6; };
+
+	struct Prism15 :public ElementType{ static const int NUM = 15; };
 
 	struct ScatterPoint{};
 
