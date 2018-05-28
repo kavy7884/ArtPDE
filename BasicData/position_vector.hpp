@@ -25,10 +25,11 @@ namespace art_pde {
             template <size_t Dimension_>
             friend std::ostream &operator<<(std::ostream &os, const PointData<Dimension_> &point_data);
 
+            void addDataByList(const std::initializer_list<double> &v);
+
         protected:
             PointData(){ this->newData(); }
             void newData();
-            void addDataByList(std::initializer_list<double> &v);
             PtrArrayType data{nullptr};
         };
         #include "./src/position_vector_pointdata_impl.cpp"
@@ -60,6 +61,37 @@ namespace art_pde {
             }
         };
         // -------- Real apply class <End> -----------
+
+        template <size_t Dimension>
+        class PositionVector{
+        public:
+            static std::shared_ptr<ViewPositionVector<Dimension>> createViewPoint(){
+                std::shared_ptr<ViewPositionVector<Dimension>> re_ptr;
+                re_ptr = std::make_shared<ViewPositionVector<Dimension>>();
+                return re_ptr;
+            }
+            static std::shared_ptr<ViewPositionVector<Dimension>> createViewPoint(std::initializer_list<double> input_list){
+                std::shared_ptr<ViewPositionVector<Dimension>> re_ptr;
+                re_ptr = std::make_shared<ViewPositionVector<Dimension>>();
+                re_ptr->addDataByList(input_list);
+                return re_ptr;
+            }
+
+            static std::shared_ptr<ComputePositionVector<Dimension>> createComputePoint(){
+                std::shared_ptr<ComputePositionVector<Dimension>> re_ptr;
+                re_ptr = std::make_shared<ComputePositionVector<Dimension>>();
+                return re_ptr;
+            }
+            static std::shared_ptr<ComputePositionVector<Dimension>> createComputePoint(std::initializer_list<double> input_list){
+                std::shared_ptr<ComputePositionVector<Dimension>> re_ptr;
+                re_ptr = std::make_shared<ComputePositionVector<Dimension>>();
+                re_ptr->addDataByList(input_list);
+                return re_ptr;
+            }
+
+        private:
+            PositionVector() {}
+        };
 
 
     }

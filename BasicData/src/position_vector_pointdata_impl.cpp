@@ -10,7 +10,7 @@ void PointData<Dimension>::newData(){
 }
 
 template <size_t Dimension>
-void PointData<Dimension>::addDataByList(std::initializer_list<double> &v){
+void PointData<Dimension>::addDataByList(const std::initializer_list<double> &v){
     assert(v.size() <= Dimension);
     std::copy(v.begin(), v.end(), data->begin());
 }
