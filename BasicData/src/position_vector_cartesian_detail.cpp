@@ -85,21 +85,42 @@ public:
 template <unsigned Dimension, typename T>
 class CartesianReadable : public CartesianWrap<Dimension, false, T>{
 public:
+    static_assert(std::is_base_of<PositionVector<Dimension>, T>::value,
+                  "The template argument must include a PositionVector with the same dimension.");
+
     template <typename ...Args>
     CartesianReadable(Args&& ...args) : CartesianWrap<Dimension, false, T>(std::forward<Args>(args)...){}
 
     template <typename ...Args>
     CartesianReadable(std::initializer_list<double> input_list, Args&& ...args) : CartesianWrap<Dimension, false, T>(std::forward<Args>(args)...){
         this->addDataByList(input_list); }
+
+    template <typename ...Args>
+    CartesianReadable( CartesianReadable<Dimension, T>& other, Args&& ...args ) : CartesianWrap<Dimension, false, T>(std::forward<Args>(args)...){
+        this->operator=(other);
+    };
 };
 
 template <unsigned Dimension, typename T>
 class CartesianWritable : public CartesianWrap<Dimension, true, T>, public CartesianWrap<Dimension, false, T>{
 public:
+    static_assert(std::is_base_of<PositionVector<Dimension>, T>::value,
+                  "The template argument must include a PositionVector with the same dimension.");
+
     template <typename ...Args>
     CartesianWritable(Args&& ...args): CartesianWrap<Dimension, true, T>(std::forward<Args>(args)...) {}
 
     template <typename ...Args>
     CartesianWritable(std::initializer_list<double> input_list, Args&& ...args): CartesianWrap<Dimension, true, T>(std::forward<Args>(args)...){
         this->addDataByList(input_list); }
+
+    template <typename ...Args>
+    CartesianWritable( CartesianWritable<Dimension, T>& other, Args&& ...args ) : CartesianWrap<Dimension, true, T>(std::forward<Args>(args)...){
+        this->operator=(other);
+    };
+
+//    template <typename ...Args>
+//    CartesianWritable( CartesianReadable<Dimension, T>& other, Args&& ...args ) : CartesianWrap<Dimension, true, T>(std::forward<Args>(args)...){
+//        this->operator=(other);
+//    };
 };

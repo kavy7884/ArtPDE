@@ -10,10 +10,10 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 #file(GLOB GeometrySource "Geometry/*.hpp")
 file(GLOB GeometrySource "BasicData/*.hpp")
-file(GLOB GeometrySource "Geometry_New/*.hpp")
-file(GLOB FunctionSpaceSource "FunctionSpace/*.hpp")
+#file(GLOB GeometrySource "Geometry_New/*.hpp")
+#file(GLOB FunctionSpaceSource "FunctionSpace/*.hpp")
 
-set(AllSource ${GeometrySource} ${FunctionSpaceSource})
+set(AllSource ${GeometrySource} ${FunctionSpaceSource} )
 
 add_executable(ArtPDE_jeting main_Jeting.cpp ${AllSource})
 add_executable(ArtPDE_marvin main_marvin.cpp ${AllSource})

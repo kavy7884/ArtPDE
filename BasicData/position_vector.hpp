@@ -13,48 +13,54 @@
 namespace art_pde {
     namespace PositionVector{
 
-        template <unsigned Dimension>
-        class PositionVector{
+        // -------- PointData <Start> -----------
+        template <size_t Dimension>
+        class PointData{
+        public:
             typedef std::array<double,Dimension> ArrayType;
             typedef std::shared_ptr<ArrayType> PtrArrayType;
-        public:
-            PositionVector<Dimension>() {
-                newData();
-            }
 
-            PositionVector<Dimension>(std::initializer_list<double> &input_list) {
-                newData();
-                addDataByList(input_list);
-            }
+            PointData<Dimension>& operator=(const PointData<Dimension>& other);
 
-            friend std::ostream &operator<<(std::ostream &os, const PositionVector<Dimension> &vector) {
-                os << "[ ";
-                for (size_t i = 0; i < vector.data->size() - 1; ++i) {
-                    os << vector.data->at(i) << " ";
-                }
-                os << vector.data->at(vector.data->size() - 1);
-                os << " ] ";
-                return os;
-            }
+            template <size_t Dimension_>
+            friend std::ostream &operator<<(std::ostream &os, const PointData<Dimension_> &point_data);
 
         protected:
+            PointData(){ this->newData(); }
+            void newData();
+            void addDataByList(std::initializer_list<double> &v);
             PtrArrayType data{nullptr};
+        };
+        #include "./src/position_vector_pointdata_impl.cpp"
+        // -------- PointData <End> -----------
 
-            void newData(){
-                this->data = nullptr;
-                this->data = std::make_shared<ArrayType>();
-            }
+        // -------- CartesianAPI <Start> -----------
+        template <size_t Dimension, bool Authority> class CartesianAPI;
+        #include "./src/position_vector_cartesian_impl.cpp"
+        // -------- CartesianAPI <End> -----------
 
-            void addDataByList(std::initializer_list<double> &v){
-                assert(v.size() <= Dimension);
-                std::copy(v.begin(), v.end(), data->begin());
-            }
+        // -------- Real apply class <Start> -----------
+        template <size_t Dimension>
+        class ViewPositionVector:
+                public CartesianAPI<Dimension, false>{
+        public:
+            ViewPositionVector(): PointData<Dimension>(){}
         };
 
-        template <unsigned Dimension, typename T> class CartesianReadable;
-        template <unsigned Dimension, typename T> class CartesianWritable;
+        template <size_t Dimension>
+        class ComputePositionVector:
+                public CartesianAPI<Dimension, true>{
+        public:
+            ComputePositionVector(): PointData<Dimension>(){}
 
-        #include "./position_vector_cartesian_detail.cpp"
+            ComputePositionVector<Dimension>& operator=(const ViewPositionVector<Dimension>& other)
+            {
+                PointData<Dimension>::operator=(other);
+                return *this;
+            }
+        };
+        // -------- Real apply class <End> -----------
+
 
     }
 }

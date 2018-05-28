@@ -18,13 +18,36 @@ int main() {
     const unsigned Dim2 = 2;
     const unsigned Dim3 = 3;
 ////
-    using ViewPoint3 = CartesianReadable<Dim3,PositionVector<Dim3>>;
-//    using CompPoint3 = CartesianWritable<Dim3,PositionVector<Dim3>>;
-////
-//    ViewPoint3 view_pt3(1.0, 2.0, 3.0);
+//    using ViewPoint3 = CartesianReadable<Dim3,PositionVector<Dim3>>;
+////    using CompPoint3 = CartesianWritable<Dim3,PositionVector<Dim3>>;
+//////
+////    ViewPoint3 view_pt3({1.0, 2.0, 3.0});
+////    ViewPoint3 view_pt3_1(view_pt3);
+////    std::cout << view_pt3_1 << std::endl;
+//
+////    CartesianReadable<Dim3,PositionVector<Dim3>> a({1.0, 2.0, 3.0});
+////    CartesianReadable<Dim3,PositionVector<Dim3>> b(a);
+////    std::cout << b << std::endl;
+//
+//    Test<Dim3> tt;
+//    std::cout << tt.a <<  std::endl;
+//    tt.haha1();
+//    std::cout << tt.a <<  std::endl;
+//    tt.haha2();
+//    std::cout << tt.a <<  std::endl;
 
-    CartesianWritable<Dim3,PositionVector<Dim3>> tt({1.0, 2.0});
-    std::cout << tt << std::endl;
+    ViewPositionVector<Dim3> view_pt;
+    std::cout << view_pt<<  std::endl;
+
+    ComputePositionVector<Dim3> comp_pt, comp_pt_1;
+    comp_pt.setX(1.0);
+    std::cout << comp_pt <<  std::endl;
+    comp_pt_1 = comp_pt;
+    std::cout << comp_pt_1 <<  std::endl;
+    comp_pt_1 = view_pt;
+    std::cout << comp_pt_1 <<  std::endl;
+
+
 
 //    CompPoint3 comp_pt3;
 //
