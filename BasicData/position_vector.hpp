@@ -37,7 +37,6 @@ namespace art_pde {
         // -------- PointData <End> -----------
 
         // -------- CartesianAPI <Start> -----------
-        template <size_t Dimension, bool Authority> class CartesianAPI;
         #include "./src/position_vector_cartesian_impl.cpp"
         // -------- CartesianAPI <End> -----------
 
