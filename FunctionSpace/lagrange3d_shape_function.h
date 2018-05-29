@@ -603,12 +603,12 @@ namespace art_pde{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
 			const double& zeta = iso_point.getZ();
-			N_[0] = (1 - xi)*(1 - eta - zeta);
-			N_[1] = (1 - xi)*zeta;
-			N_[2] = (1 - xi)*eta;
-			N_[3] = xi*(1 - eta - zeta);
-			N_[4] = xi*zeta;
-			N_[5] = xi*eta;
+			N_[0] = 0.5*(1 - xi)*(1 - eta - zeta);
+			N_[1] = 0.5*(1 - xi)*eta;
+			N_[2] = 0.5*(1 - xi)*zeta;
+			N_[3] = 0.5*(1 + xi)*(1 - eta - zeta);
+			N_[4] = 0.5*(1 + xi)*eta;
+			N_[5] = 0.5*(1 + xi)*zeta;
 
 			return N_;
 		}
@@ -619,26 +619,26 @@ namespace art_pde{
 			const double& xi = iso_point.getX();
 			const double& eta = iso_point.getY();
 			const double& zeta = iso_point.getZ();
-			dNdxi_[0][0] = eta + zeta - 1;
-			dNdxi_[0][1] = -zeta;
-			dNdxi_[0][2] = -eta;
-			dNdxi_[0][3] = 1 - eta - zeta;
-			dNdxi_[0][4] = zeta;
-			dNdxi_[0][5] = eta;
+			dNdxi_[0][0] = 0.5*(eta + zeta - 1);
+			dNdxi_[0][1] = 0.5*eta;
+			dNdxi_[0][2] = -0.5*zeta;
+			dNdxi_[0][3] = 0.5*(1 - eta - zeta);
+			dNdxi_[0][4] = 0.5*eta;
+			dNdxi_[0][5] = 0.5*zeta;
 
-			dNdxi_[1][0] = xi - 1;
-			dNdxi_[1][1] = 0.0;
-			dNdxi_[1][2] = 1 - xi;
-			dNdxi_[1][3] = -xi;
-			dNdxi_[1][4] = 0.0;
-			dNdxi_[1][5] = xi;
+			dNdxi_[1][0] = 0.5*(xi - 1);
+			dNdxi_[1][1] = 0.5*(1 - xi);
+			dNdxi_[1][2] = 0.0;
+			dNdxi_[1][3] = -0.5*(1 + xi);
+			dNdxi_[1][4] = 0.5*(1 + xi);
+			dNdxi_[1][5] = 0.0;
 
-			dNdxi_[2][0] = xi - 1;
-			dNdxi_[2][1] = 1 - xi;
-			dNdxi_[2][2] = 0.0;
-			dNdxi_[2][3] = -xi;
-			dNdxi_[2][4] = xi;
-			dNdxi_[2][5] = 0.0;
+			dNdxi_[2][0] = 0.5*(xi - 1);
+			dNdxi_[2][1] = 0;
+			dNdxi_[2][2] = 0.5*(1 - xi);
+			dNdxi_[2][3] = -0.5*(1 + xi);
+			dNdxi_[2][4] = 0.0;
+			dNdxi_[2][5] = 0.5*(1 + xi);
 
 			return dNdxi_;
 		}
@@ -688,15 +688,18 @@ namespace art_pde{
 			const double& z5 = elem_nodes[4].getZ();
 			const double& z6 = elem_nodes[5].getZ();
 
-			Jacobian_[0][0] = (x1 - x4)*(eta + zeta - 1) + (x6 - x3)*eta + (x5 - x2)*zeta;
-			Jacobian_[1][0] = (y1 - y4)*(eta + zeta - 1) + (y6 - y3)*eta + (y5 - y2)*zeta;
-			Jacobian_[2][0] = (z1 - z4)*(eta + zeta - 1) + (z6 - z3)*eta + (z5 - z2)*zeta;
-			Jacobian_[0][1] = (x6 - x4)*xi + (x1 - x3)*(xi - 1);
-			Jacobian_[1][1] = (y6 - y4)*xi + (y1 - y3)*(xi - 1);
-			Jacobian_[2][1] = (z6 - z4)*xi + (z1 - z3)*(xi - 1);
-			Jacobian_[0][2] = (x5 - x4)*xi + (x1 - x2)*(xi - 1);
-			Jacobian_[1][2] = (y5 - y4)*xi + (y1 - y2)*(xi - 1);
-			Jacobian_[2][2] = (z5 - z4)*xi + (z1 - z2)*(xi - 1);
+			Jacobian_[0][0] = 0.5*((x2 + x5)*eta + (x6 - x3)*zeta + (x1 - x4)*(eta + zeta - 1.0));
+			Jacobian_[1][0] = 0.5*((y2 + y5)*eta + (y6 - y3)*zeta + (y1 - y4)*(eta + zeta - 1.0));
+			Jacobian_[2][0] = 0.5*((z2 + z5)*eta + (z6 - z3)*zeta + (z1 - z4)*(eta + zeta - 1.0));
+			
+			Jacobian_[0][1] = 0.5*((x1 - x2)*(xi - 1.) + (x5 - x4)*(xi + 1.));
+			Jacobian_[1][1] = 0.5*((y1 - y2)*(xi - 1.) + (y5 - y4)*(xi + 1.));
+			Jacobian_[2][1] = 0.5*((z1 - z2)*(xi - 1.) + (z5 - z4)*(xi + 1.));
+
+			
+			Jacobian_[0][2] = 0.5*((x1 - x3)*(xi - 1.) + (x6 - x4)*(xi + 1.));
+			Jacobian_[1][2] = 0.5*((y1 - y3)*(xi - 1.) + (y6 - y4)*(xi + 1.));
+			Jacobian_[2][2] = 0.5*((z1 - z3)*(xi - 1.) + (z6 - z4)*(xi + 1.));
 			return Jacobian_;
 		}
 
@@ -768,14 +771,14 @@ namespace art_pde{
 	};
 
 	template<>
-	class ShapeFunction< Dim3D, Tetra10, Lagrange > :
-		public LagrangeType<Dim3D>
+	class ShapeFunction< Dim3D, Tetra10, Serendipity > :
+		public SerendipityType<Dim3D>
 	{
 	public:
 
 		using PointType = Point<Dim3D, CartesianCoordinate>;
 
-		friend class SingletonHolder < ShapeFunction< Dim3D, Tetra10, Lagrange > >;
+		friend class SingletonHolder < ShapeFunction< Dim3D, Tetra10, Serendipity > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
@@ -980,14 +983,14 @@ namespace art_pde{
 	};
 	
 	template<>
-	class ShapeFunction< Dim3D, Hexa20, Lagrange > :
-		public LagrangeType<Dim3D>
+	class ShapeFunction< Dim3D, Hexa20, Serendipity > :
+		public SerendipityType<Dim3D>
 	{
 	public:
 
 		using PointType = Point<Dim3D, CartesianCoordinate>;
 
-		friend class SingletonHolder < ShapeFunction< Dim3D, Hexa20, Lagrange > >;
+		friend class SingletonHolder < ShapeFunction< Dim3D, Hexa20, Serendipity > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
@@ -1410,14 +1413,14 @@ namespace art_pde{
 	};
 
 	template<>
-	class ShapeFunction< Dim3D, Pyramid13, Lagrange > :
-		public LagrangeType<Dim3D>
+	class ShapeFunction< Dim3D, Pyramid13, Serendipity > :
+		public SerendipityType<Dim3D>
 	{
 	public:
 
 		using PointType = Point<Dim3D, CartesianCoordinate>;
 
-		friend class SingletonHolder < ShapeFunction< Dim3D, Pyramid13, Lagrange > >;
+		friend class SingletonHolder < ShapeFunction< Dim3D, Pyramid13, Serendipity > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
@@ -1750,14 +1753,14 @@ namespace art_pde{
 	};
 
 	template<>
-	class ShapeFunction< Dim3D, Prism15, Lagrange > :
-		public LagrangeType<Dim3D>
+	class ShapeFunction< Dim3D, Prism15, Serendipity > :
+		public SerendipityType<Dim3D>
 	{
 	public:
 
 		using PointType = Point<Dim3D, CartesianCoordinate>;
 
-		friend class SingletonHolder < ShapeFunction< Dim3D, Prism15, Lagrange > >;
+		friend class SingletonHolder < ShapeFunction< Dim3D, Prism15, Serendipity > >;
 
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
