@@ -6,6 +6,7 @@ template <size_t Dimension, bool Authority> class CartesianAPI;
 template <size_t Dimension, bool Authority, typename T> struct CartesianAPI_FuncHelper;
 template <size_t Dimension, bool Authority, typename T> struct CartesianAPI_FuncWrap;
 
+// -------- CartesianAPI <Start> -----------
 template <size_t Dimension>
 struct CartesianAPI<Dimension, true>:
         public CartesianAPI_FuncWrap<Dimension, true, PointData<Dimension>>{
@@ -27,8 +28,10 @@ struct CartesianAPI<Dimension, false>:
     }
 };
 
+// -------- CartesianAPI <End> -----------
 
 
+// -------- CartesianAPI_FuncHelper <Start> -----------
 template<typename T> struct CartesianAPI_FuncHelper<1, false, T> :
         public virtual T{
     const double &getX() const { return this->data->at(0); }
@@ -56,8 +59,9 @@ template<typename T> struct CartesianAPI_FuncHelper<3, true, T> :
     void setZ(const double &z){ this->data->at(2) = z; }
     void setZ(double &z){ this->data->at(2) = z; }
 };
+// -------- CartesianAPI_FuncHelper <End> -----------
 
-
+// -------- CartesianAPI_FuncWrap <Start> -----------
 template <typename T>
 struct CartesianAPI_FuncWrap<1, false, T>:
         public CartesianAPI_FuncHelper<1, false, T>{};
@@ -93,3 +97,4 @@ struct CartesianAPI_FuncWrap<3, true, T>:
         public CartesianAPI_FuncHelper<1, true, T>,
         public CartesianAPI_FuncHelper<2, true, T>,
         public CartesianAPI_FuncHelper<3, true, T>{};
+// -------- CartesianAPI_FuncWrap <End> -----------

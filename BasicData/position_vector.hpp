@@ -89,8 +89,7 @@ namespace art_pde {
                 return re_ptr;
             }
 
-        private:
-            PositionVector() {}
+            PositionVector() = delete;
         };
     }
 }
