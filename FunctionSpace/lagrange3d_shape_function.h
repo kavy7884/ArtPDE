@@ -165,9 +165,6 @@ namespace art_pde{
 
 	private:
 
-		
-
-		
 		std::vector<double> N_;
 		std::vector<std::vector<double>> dNdxi_; // 3x4
 		std::vector<std::vector<double>> dNdx_;  // 3x4
@@ -648,7 +645,7 @@ namespace art_pde{
 		{
 			evaluate_dNdxi(iso_point);
 			evaluate_invJacobian(iso_point, elem_nodes);
-			for (int j = 0; j < 5; ++j){
+			for (int j = 0; j < 6; ++j){
 				for (int i = 0; i < 3; ++i){
 					dNdx_[i][j] =
 						dNdxi_[0][j] * inv_Jacobian_[i][0] +
@@ -1101,7 +1098,7 @@ namespace art_pde{
 		{
 			evaluate_dNdxi(iso_point);
 			evaluate_invJacobian(iso_point, elem_nodes);
-			for (int j = 0; j < 10; ++j){
+			for (int j = 0; j < 20; ++j){
 				for (int i = 0; i < 3; ++i){
 					dNdx_[i][j] =
 						dNdxi_[0][j] * inv_Jacobian_[i][0] +
@@ -1504,7 +1501,7 @@ namespace art_pde{
 		{
 			evaluate_dNdxi(iso_point);
 			evaluate_invJacobian(iso_point, elem_nodes);
-			for (int j = 0; j < 10; ++j) {
+			for (int j = 0; j < 13; ++j) {
 				for (int i = 0; i < 3; ++i) {
 					dNdx_[i][j] =
 						dNdxi_[0][j] * inv_Jacobian_[i][0] +
@@ -1852,7 +1849,7 @@ namespace art_pde{
 		{
 			evaluate_dNdxi(iso_point);
 			evaluate_invJacobian(iso_point, elem_nodes);
-			for (int j = 0; j < 10; ++j) {
+			for (int j = 0; j < 15; ++j) {
 				for (int i = 0; i < 3; ++i) {
 					dNdx_[i][j] =
 						dNdxi_[0][j] * inv_Jacobian_[i][0] +

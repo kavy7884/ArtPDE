@@ -87,6 +87,8 @@ namespace art_pde{
 			Jacobian_[1][0] = 0.25*((1 - xi)*(x4 - x1) + (1 + xi)*(x3 - x2));
 			Jacobian_[0][1] = 0.25*((1 - eta)*(y2 - y1) + (1 + eta)*(y3 - y4));
 			Jacobian_[1][1] = 0.25*((1 - xi)*(y4 - y1) + (1 + xi)*(y3 - y2));
+
+			return Jacobian_;
 		}
 
 		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
@@ -105,6 +107,8 @@ namespace art_pde{
 			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
 			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
 			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+
+			return inv_Jacobian_;
 		}
 
 	private:
@@ -268,6 +272,7 @@ namespace art_pde{
 				(xi*y4*(2. * eta + 1.)*(xi - 1.)) / 4. - 
 				eta*xi*y6*(xi + 1.) - 
 				eta*xi*y8*(xi - 1.);
+			return Jacobian_;
 		}
 
 		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
@@ -286,6 +291,8 @@ namespace art_pde{
 			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
 			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
 			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+
+			return inv_Jacobian_;
 		}
 
 	private:
@@ -396,6 +403,8 @@ namespace art_pde{
 			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
 			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
 			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+
+			return inv_Jacobian_;
 		}
 
 	private:

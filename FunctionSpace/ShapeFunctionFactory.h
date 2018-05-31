@@ -15,7 +15,7 @@
 namespace art_pde{
 
 	enum class ElementType2D{ Q4, Q8, Q9, T3 };
-	enum class ElementType3D{ Hexa8 };
+	enum class ElementType3D{ Hexa8, Hexa20, Prism6, Prism15, Tetra4, Tetra10, Pyramid5, Pyramid13 };
 
 	template<class ShapeFunctionType, class Identifier = Nulltype>
 	class ShapeFunctionFactory{
@@ -40,7 +40,7 @@ namespace art_pde{
 		using THIS = ShapeFunctionFactory<LagrangeType<Dim2D>, ElementType2D>;
 		using ReturnFunc = LagrangeType<Dim2D>;
 		friend class SingletonHolder<THIS>;
-		ReturnFunc& getInstance(ElementType2D& key){
+		ReturnFunc& getInstance(ElementType2D key){
 			return table.at(key);
 		}
 	private:
@@ -64,16 +64,42 @@ namespace art_pde{
 		using THIS = ShapeFunctionFactory<LagrangeType<Dim3D>, ElementType3D>;
 		using ReturnFunc = LagrangeType<Dim3D>;
 		friend class SingletonHolder<THIS>;
-		ReturnFunc& getInstance(ElementType3D& key){
+		ReturnFunc& getInstance(ElementType3D key){
+			return table.at(key);
+		}
+	private:
+		
+		std::unordered_map<ElementType3D, ReturnFunc&> table;
+		ShapeFunctionFactory(){
+			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Hexa8, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Prism6, SingletonHolder<ShapeFunction< Dim3D, Prism6, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Tetra4, SingletonHolder<ShapeFunction< Dim3D, Tetra4, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Pyramid5, SingletonHolder<ShapeFunction< Dim3D, Pyramid5, Lagrange> >::instance() });
+			// ...
+		}
+		ShapeFunctionFactory(const ShapeFunctionFactory&){};
+		ShapeFunctionFactory& operator=(const ShapeFunctionFactory&){};
+
+	};
+
+	template<>
+	class ShapeFunctionFactory<
+		SerendipityType<Dim3D>, ElementType3D>
+	{
+	public:
+		using THIS = ShapeFunctionFactory<SerendipityType<Dim3D>, ElementType3D>;
+		using ReturnFunc = SerendipityType<Dim3D>;
+		friend class SingletonHolder<THIS>;
+		ReturnFunc& getInstance(ElementType3D key){
 			return table.at(key);
 		}
 	private:
 		std::unordered_map<ElementType3D, ReturnFunc&> table;
 		ShapeFunctionFactory(){
-			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Hexa8, Lagrange> >::instance() });
-			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Tetra4, Lagrange> >::instance() });
-			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Prism6, Lagrange> >::instance() });
-			table.insert({ ElementType3D::Hexa8, SingletonHolder<ShapeFunction< Dim3D, Pyramid5, Lagrange> >::instance() });
+			table.insert({ ElementType3D::Hexa20, SingletonHolder<ShapeFunction< Dim3D, Hexa20, Serendipity> >::instance() });
+			table.insert({ ElementType3D::Prism15, SingletonHolder<ShapeFunction< Dim3D, Prism15, Serendipity> >::instance() });
+			table.insert({ ElementType3D::Tetra10, SingletonHolder<ShapeFunction< Dim3D, Tetra10, Serendipity> >::instance() });
+			table.insert({ ElementType3D::Pyramid13, SingletonHolder<ShapeFunction< Dim3D, Pyramid13, Serendipity> >::instance() });
 			// ...
 		}
 		ShapeFunctionFactory(const ShapeFunctionFactory&){};
