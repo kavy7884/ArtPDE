@@ -4,7 +4,7 @@
 
 #include "BasicData/position_vector.hpp"
 
-int main() {
+void DemoPositionVector() {
 
     using namespace art_pde::PositionVector;
     const unsigned Dim = 3;
@@ -41,5 +41,4 @@ int main() {
     (*ptr_compute_pt_2) = (*ptr_view_pt_2);
     std::cout << *ptr_compute_pt_2 <<  std::endl;
 
-    return 0;
 }
