@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
 
 project(ArtPDE_jeting)
-project(ArtPDE_kavy)
 project(ArtPDE_marvin)
+project(ArtPDE_kavy)
 
 set(CMAKE_CXX_STANDARD 11)
 
