@@ -90,13 +90,13 @@ namespace art_pde{
 			const double& z4 = elem_nodes[3].getZ();
 
 			Jacobian_[0][0] = x1 - x4;
-			Jacobian_[1][0] = y1 - y4;
-			Jacobian_[2][0] = z1 - z4;
-			Jacobian_[0][1] = x2 - x4;
+			Jacobian_[0][1] = y1 - y4;
+			Jacobian_[0][2] = z1 - z4;
+			Jacobian_[1][0] = x2 - x4;
 			Jacobian_[1][1] = y2 - y4;
-			Jacobian_[2][1] = z2 - z4;
-			Jacobian_[0][2] = x3 - x4;
-			Jacobian_[1][2] = y3 - y4;
+			Jacobian_[1][2] = z2 - z4;
+			Jacobian_[2][0] = x3 - x4;
+			Jacobian_[2][1] = y3 - y4;
 			Jacobian_[2][2] = z3 - z4;
 			return Jacobian_;
 		}
@@ -151,13 +151,13 @@ namespace art_pde{
 			const double& z4 = elem_nodes[3].getZ();
 			evaluate_detJacobian(iso_point, elem_nodes);
 			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*((y2 - y4)*(z3 - z4) - (y3 - y4)*(z2 - z4));
-			inv_Jacobian_[1][0] = (1. / det_Jacobian_)*((y3 - y4)*(z1 - z4) - (y1 - y4)*(z3 - z4));
-			inv_Jacobian_[2][0] = (1. / det_Jacobian_)*((y1 - y4)*(z2 - z4) - (y2 - y4)*(z1 - z4));
-			inv_Jacobian_[0][1] = (1. / det_Jacobian_)*((x3 - x4)*(z2 - z4) - (x2 - x4)*(z3 - z4));
+			inv_Jacobian_[1][0] = (1. / det_Jacobian_)*((x3 - x4)*(z2 - z4) - (x2 - x4)*(z3 - z4));
+			inv_Jacobian_[2][0] = (1. / det_Jacobian_)*((x2 - x4)*(y3 - y4) - (x3 - x4)*(y2 - y4));
+			inv_Jacobian_[0][1] = (1. / det_Jacobian_)*((y3 - y4)*(z1 - z4) - (y1 - y4)*(z3 - z4));
 			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*((x1 - x4)*(z3 - z4) - (x3 - x4)*(z1 - z4));
-			inv_Jacobian_[2][1] = (1. / det_Jacobian_)*((x2 - x4)*(z1 - z4) - (x1 - x4)*(z2 - z4));
-			inv_Jacobian_[0][2] = (1. / det_Jacobian_)*((x2 - x4)*(y3 - y4) - (x3 - x4)*(y2 - y4));
-			inv_Jacobian_[1][2] = (1. / det_Jacobian_)*((x3 - x4)*(y1 - y4) - (x1 - x4)*(y3 - y4));
+			inv_Jacobian_[2][1] = (1. / det_Jacobian_)*((x3 - x4)*(y1 - y4) - (x1 - x4)*(y3 - y4));
+			inv_Jacobian_[0][2] = (1. / det_Jacobian_)*((y1 - y4)*(z2 - z4) - (y2 - y4)*(z1 - z4));
+			inv_Jacobian_[1][2] = (1. / det_Jacobian_)*((x2 - x4)*(z1 - z4) - (x1 - x4)*(z2 - z4));
 			inv_Jacobian_[2][2] = (1. / det_Jacobian_)*((x1 - x4)*(y2 - y4) - (x2 - x4)*(y1 - y4));
 
 			return inv_Jacobian_;
