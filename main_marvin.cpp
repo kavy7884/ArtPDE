@@ -135,10 +135,11 @@ public:
 
 		auto& dNdx = basis.evaluate_dNdx(trial_iso, elem_phy_coor);
 
-		double approx = 0.0;
+		std::vector<double> approx(2, 0.0);
 
 		for (int i = 0; i < NUM; ++i){
-			approx += dNdx[i] * polyValue
+			approx[0] += dNdx[0][i] * polyValue(trial_phy);
+			approx[1] += dNdx[1][i] * polyValue(trial_phy);
 		}
 
 		auto exact = polyGrad(trial_phy);
