@@ -1,36 +1,23 @@
 //
-// Created by Chingkai Chou on 5/2/18.
+// Created by Chingkai Chou on 5/30/18.
 //
 
-#ifndef ARTCFD_GEOMESH_HPP
-#define ARTCFD_GEOMESH_HPP
+#ifndef ARTPDE_KAVY_GEOMETRY_HPP
+#define ARTPDE_KAVY_GEOMETRY_HPP
 
-#include "numerical_method_utility.hpp"
-#include "geometry_data.hpp"
-#include "geometry_data_reader.hpp"
-#include "geometry_data_reader_artpde.hpp"
-#include "geometry_data_algorithm.hpp"
+#include "geometry_algorithm.hpp"
+#include "geometry_reader.hpp"
 
-namespace art_pde {
+namespace art_pde{ namespace geometry {
 
-    template<class GeometryDataType, template<class> class GeometryDataReaderType>
-    class Geometry:
-            virtual public GeometryDataType,
-            public GeometryDataReaderType<GeometryDataType>,
-            public GeometryDataAlgorithm<GeometryDataType>{
+    template<typename AlgorithmType, typename ReaderType>
+    class Geometry: public AlgorithmType, public ReaderType{
     public:
-        Geometry() :
-                GeometryDataType(),
-                GeometryDataReaderType<GeometryDataType>(),
-                GeometryDataAlgorithm<GeometryDataType>(){}
+        Geometry() : AlgorithmType(), ReaderType(){}
 
-        bool read(const std::shared_ptr<ArtProject>& art_project){
-            GeometryDataReaderType<GeometryDataType>::read(art_project);
-            return GeometryDataReaderType<GeometryDataType>::getStatus();
-        }
 
     };
+}}
 
-}
 
-#endif //ARTCFD_GEOMESH_HPP
+#endif //ARTPDE_KAVY_GEOMETRY_HPP

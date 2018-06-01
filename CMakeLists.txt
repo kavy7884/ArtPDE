@@ -1,17 +1,20 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
+cmake_minimum_required(VERSION 3.9)
 
-PROJECT(ArtPDE)
+project(ArtPDE_jeting)
+project(ArtPDE_marvin)
+project(ArtPDE_kavy)
 
-SET(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
 
-SET(EIGEN_DIR "/d/MDXARTIST/Eigen/")
+include_directories(${CMAKE_SOURCE_DIR})
 
-INCLUDE_DIRECTORIES(${EIGEN_DIR})
-LINK_DIRECTORIES(${EIGEN_DIR})
+file(GLOB GeometrySource "BasicData/*.hpp")
+file(GLOB GeometrySource "Geometry/*.hpp")
+#file(GLOB GeometrySource "Geometry_New/*.hpp")
+#file(GLOB FunctionSpaceSource "FunctionSpace/*.hpp")
 
-INCLUDE_DIRECTORIES(Utility)
-INCLUDE_DIRECTORIES(FunctionSpace)
+set(AllSource ${GeometrySource} ${FunctionSpaceSource} )
 
-ADD_EXECUTABLE(ArtPDE main.cpp)
-
-TARGET_LINK_LIBRARIES(ArtPDE ${EIGEN_DIR})
+add_executable(ArtPDE_jeting main_Jeting.cpp ${AllSource})
+add_executable(ArtPDE_marvin main_marvin.cpp ${AllSource})
+add_executable(ArtPDE_kavy main_kavy.cxx ${AllSource})
