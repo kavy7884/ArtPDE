@@ -11,11 +11,14 @@
 void DemoGeometry() {
     using namespace art_pde;
 
-    using MeshDataType = geometry::mesh_type::Data<3, PositionVector::ComputePositionVector>;
-    using GeoType = geometry::Geometry<geometry::Algorithm<MeshDataType>, geometry::Reader<MeshDataType>>;
+    const size_t Dim = 3;
+    using MeshDataType = geometry::mesh_type::Data<Dim, PositionVector::ComputePositionVector>;
+    using GeoType = geometry::Geometry<geometry::Algorithm<Dim, MeshDataType>, geometry::Reader<MeshDataType>>;
     GeoType geo;
 
-    std::cout<< geo.vertex << std::endl;
+    std::cout<< geo.getTotalNum_Vertex() << std::endl;
+
+    std::cout<< geo.getTotalNum_Cell() << std::endl;
 }
 
 #endif //ARTPDE_KAVY_DEMOGEOMETRY_HPP

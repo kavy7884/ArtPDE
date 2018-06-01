@@ -3,6 +3,7 @@
 //
 
 #include "BasicData/position_vector.hpp"
+#include <vector>
 
 void DemoPositionVector() {
 
@@ -37,8 +38,22 @@ void DemoPositionVector() {
     std::cout << *ptr_compute_pt <<  std::endl;
     std::cout << *ptr_compute_pt_2 <<  std::endl;
 
+    ptr_compute_pt_2->setDataById(0, 1.0);
+    ptr_compute_pt_2->setDataById(1, 2.0);
+    ptr_compute_pt_2->setDataById(2, 3.0);
+
+    std::cout << *ptr_compute_pt <<  std::endl;
+    std::cout << *ptr_compute_pt_2 <<  std::endl;
+
+
     auto ptr_view_pt_2 = PositionVector<Dim>::createViewPoint({9.0, 9.0, 9.0});
     (*ptr_compute_pt_2) = (*ptr_view_pt_2);
     std::cout << *ptr_compute_pt_2 <<  std::endl;
+
+    std::cout << ptr_compute_pt_2->getDataById(0) <<  std::endl;
+    std::cout << ptr_compute_pt_2->getDataById(1) <<  std::endl;
+    std::cout << ptr_compute_pt_2->getDataById(2) <<  std::endl;
+
+
 
 }

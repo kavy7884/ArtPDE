@@ -15,6 +15,7 @@ struct CartesianAPI<Dimension, true>:
         PointData<Dimension>::operator=(other);
         return *this;
     }
+
 };
 
 template <size_t Dimension>
@@ -25,6 +26,10 @@ struct CartesianAPI<Dimension, false>:
     {
         PointData<Dimension>::operator=(other);
         return *this;
+    }
+
+    const double &getDataById(const size_t id) const{
+        return PointData<Dimension>::getDataById(id);
     }
 };
 

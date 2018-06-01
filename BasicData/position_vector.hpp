@@ -29,6 +29,9 @@ namespace art_pde{ namespace PositionVector{
         PointData(const std::initializer_list<double> &v){ this->newData(); this->addDataByList(v);}
         void newData();
         void addDataByList(const std::initializer_list<double> &v);
+        const double &getDataById(const size_t &id) const;
+        void setDataById(const size_t &id, const double &value);
+        void setDataById(const size_t &id, double &value);
 
         PtrArrayType data{nullptr}; //real data storage
     };
@@ -46,6 +49,11 @@ namespace art_pde{ namespace PositionVector{
     public:
         ViewPositionVector(): PointData<Dimension>(){}
         ViewPositionVector(const std::initializer_list<double> &v): PointData<Dimension>(v){}
+
+        const double &getDataById(const size_t id) const{
+            return PointData<Dimension>::getDataById(id);
+        }
+
     };
 
     template <size_t Dimension>
@@ -60,6 +68,19 @@ namespace art_pde{ namespace PositionVector{
             PointData<Dimension>::operator=(other);
             return *this;
         }
+
+        const double &getDataById(const size_t id) const{
+            return PointData<Dimension>::getDataById(id);
+        }
+
+        void setDataById(const size_t id, const double &value){
+            return PointData<Dimension>::setDataById(id, value);
+        }
+
+        void setDataById(const size_t id, double &value){
+            return PointData<Dimension>::setDataById(id, value);
+        }
+
     };
     // -------- Real apply class <End> -----------
 
