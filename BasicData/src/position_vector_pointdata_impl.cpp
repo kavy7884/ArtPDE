@@ -37,3 +37,21 @@ std::ostream &operator<<(std::ostream &os, const PointData<Dimension> &point_dat
     os << " ] ";
     return os;
 };
+
+template <size_t Dimension>
+const double &PointData<Dimension>::getDataById(const size_t &id) const{
+    assert(id < Dimension);
+    return this->data->at(id);
+};
+
+template <size_t Dimension>
+void PointData<Dimension>::setDataById(const size_t &id, const double &value){
+    assert(id < Dimension);
+    this->data->at(id) = value;
+}
+
+template <size_t Dimension>
+void PointData<Dimension>::setDataById(const size_t &id, double &value){
+    assert(id < Dimension);
+    this->data->at(id) = value;
+}
