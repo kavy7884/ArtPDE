@@ -11,6 +11,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 file(GLOB GeometrySource "Project/*.hpp")
 file(GLOB GeometrySource "BasicData/*.hpp")
 file(GLOB GeometrySource "Geometry/*.hpp")
+file(GLOB GeometrySource "Geometry/inc/*/*.hpp")
 #file(GLOB GeometrySource "Geometry_New/*.hpp")
 #file(GLOB FunctionSpaceSource "FunctionSpace/*.hpp")
 

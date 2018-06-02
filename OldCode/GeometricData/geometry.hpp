@@ -25,8 +25,7 @@ namespace art_pde {
                 GeometryDataAlgorithm<GeometryDataType>(){}
 
         bool read(const std::shared_ptr<ArtProject>& art_project){
-            GeometryDataReaderType<GeometryDataType>::read(art_project);
-            return GeometryDataReaderType<GeometryDataType>::getStatus();
+            return GeometryDataReaderType<GeometryDataType>::read(art_project);
         }
 
     };

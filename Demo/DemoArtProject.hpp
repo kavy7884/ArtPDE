@@ -5,7 +5,7 @@
 #ifndef ARTPDE_KAVY_DEMOARTPROJECT_HPP
 #define ARTPDE_KAVY_DEMOARTPROJECT_HPP
 
-#include "Project/project.hpp"
+#include "Project/art_project.hpp"
 
 void DemoArtProject() {
     using namespace art_pde::project;

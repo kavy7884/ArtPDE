@@ -2,7 +2,7 @@
 // Created by Chingkai Chou on 6/1/18.
 //
 
-#include "../project.hpp"
+#include "../art_project.hpp"
 
 ArtProjectBuilder ArtProject::create(const std::string & projectName){
     return ArtProjectBuilder(projectName);

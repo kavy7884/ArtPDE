@@ -5,8 +5,9 @@
 #ifndef ARTPDE_KAVY_GEOMETRY_HPP
 #define ARTPDE_KAVY_GEOMETRY_HPP
 
-#include "geometry_algorithm.hpp"
-#include "geometry_reader.hpp"
+#include "Project/art_project.hpp"
+#include "Geometry/inc/GeometricAlgorithm/geometric_algorithm.hpp"
+#include "Geometry/inc/GeometricReader/geometric_reader.hpp"
 
 namespace art_pde{ namespace geometry {
 
@@ -15,7 +16,10 @@ namespace art_pde{ namespace geometry {
     public:
         Geometry() : AlgorithmType(), ReaderType(){}
 
-
+//        bool read(const std::shared_ptr<project::ArtProject>& art_project){
+//            ReaderType::read(art_project);
+//            return true;
+//        }
     };
 }}
 

@@ -7,10 +7,10 @@ using namespace art_pde;
 int main() {
 //    DemoPositionVector();
 
-    DemoArtProject();
+//    DemoArtProject();
 
 
-//    DemoGeometry();
+    DemoGeometry();
 
 
     return 0;
