@@ -11,20 +11,22 @@
 
 void DemoGeometry() {
     using namespace art_pde;
+    using namespace PositionVector;
+    using namespace project;
+    using namespace geometry::mesh_type::Dim2;
 
-    auto proj = project::ArtProject::create("TestProj").build();
+    auto proj = ArtProject::create("TestProj").build();
 
-    const size_t Dim = 3;
-    using MeshDataType = geometry::mesh_type::Data<Dim, PositionVector::ComputePositionVector<Dim>>;
+    using MeshDataType = GeometricData<ComputePositionVector<2>>;
 
-    using GeoType = geometry::Geometry<geometry::Algorithm<Dim, MeshDataType>, geometry::Reader<Dim, MeshDataType>>;
-    GeoType geo;
+    using GeoType = Geometry<GeometricAlgorithm<MeshDataType>, GeometricReader<MeshDataType>>;
 
-    std::cout<< geo.getTotalNum_Vertex() << std::endl;
+    auto geo = GeoType::create();
 
-    std::cout<< geo.getTotalNum_Cell() << std::endl;
+    assert(geo->read(proj)); // Check loading status.
 
-    geo.read(proj);
+
+    std::cout<< geo->getTotalNum_Vertex() << std::endl;
 }
 
 #endif //ARTPDE_KAVY_DEMOGEOMETRY_HPP

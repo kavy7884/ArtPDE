@@ -5,23 +5,33 @@
 #ifndef ARTPDE_KAVY_GEOMETRY_HPP
 #define ARTPDE_KAVY_GEOMETRY_HPP
 
+#include <memory>
 #include "Project/art_project.hpp"
-#include "Geometry/inc/GeometricAlgorithm/geometric_algorithm.hpp"
-#include "Geometry/inc/GeometricReader/geometric_reader.hpp"
+#include "geometric_data.hpp"
+#include "geometric_algorithm.hpp"
+#include "geometric_reader.hpp"
 
-namespace art_pde{ namespace geometry {
+namespace art_pde{
 
-    template<typename AlgorithmType, typename ReaderType>
-    class Geometry: public AlgorithmType, public ReaderType{
+    template<typename ...T>
+    class Geometry: public virtual T...{
+        struct GeometryDummy {};
     public:
-        Geometry() : AlgorithmType(), ReaderType(){}
+        explicit Geometry(GeometryDummy): T()...{};
 
-//        bool read(const std::shared_ptr<project::ArtProject>& art_project){
-//            ReaderType::read(art_project);
-//            return true;
-//        }
+        static std::shared_ptr<Geometry> create(){
+            return make_shared_ArtProject();
+        }
+
+    protected:
+        static std::shared_ptr<Geometry> make_shared_ArtProject() {
+            return std::make_shared<Geometry>(GeometryDummy());
+        }
+
+    private:
+        Geometry() = delete;
     };
-}}
+}
 
 
 #endif //ARTPDE_KAVY_GEOMETRY_HPP
