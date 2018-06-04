@@ -5,6 +5,7 @@
 #ifndef ARTPDE_KAVY_PROJECT_HPP
 #define ARTPDE_KAVY_PROJECT_HPP
 
+#include <iostream>
 #include <string>
 #include <memory>
 #include <unistd.h>

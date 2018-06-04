@@ -17,6 +17,8 @@ namespace art_pde{ namespace geometry {
                     GeometricAlgorithm():GeometricDataType(){
                         std::cout << "Dim2::GeometricAlgorithm" << std::endl;
                     }
+
+                    void mergeTest(){}
                 };
 
             }
