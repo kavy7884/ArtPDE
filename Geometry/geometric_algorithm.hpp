@@ -24,7 +24,7 @@ namespace art_pde{ namespace geometry {
             namespace Dim3 {
 
                 template <typename GeometricDataType>
-                class GeometricAlgorithm: public GeometricDataType{
+                class GeometricAlgorithm: public virtual GeometricDataType{
                 public:
                     GeometricAlgorithm():GeometricDataType(){
                         std::cout << "Dim3::GeometricAlgorithm" << std::endl;

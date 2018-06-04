@@ -25,8 +25,10 @@ void DemoGeometry() {
 
     assert(geo->read(proj)); // Check loading status.
 
-
-    std::cout<< geo->getTotalNum_Vertex() << std::endl;
+    std::cout << "Listing all vertex" << "\n";
+    for(auto &ptr_vertex: geo->c_getTotalVec_PtrVertex()){
+        std::cout << *ptr_vertex << "\n";
+    }
 }
 
 #endif //ARTPDE_KAVY_DEMOGEOMETRY_HPP

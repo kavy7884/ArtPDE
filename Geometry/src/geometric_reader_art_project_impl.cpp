@@ -41,6 +41,7 @@ bool ArtProjectReader<GeometricReaderType, Dimension>::readPosition() {
     double temp_pt[Dimension];
     PtrPointType ptr_point;
     PtrVertexType ptr_vertex;
+    auto &vec_ptr_vertex = ptr_data->getTotalVec_PtrVertex();
 
     fs.open(file_name);
     if(fs.is_open()){
@@ -50,13 +51,15 @@ bool ArtProjectReader<GeometricReaderType, Dimension>::readPosition() {
             for(size_t i = 0; i< Dimension; ++i)
                 w >> temp_pt[i];
 
-            ptr_point = std::make_shared<PointType>();
             ptr_vertex = std::make_shared<VertexType>();
+            ptr_point = std::make_shared<PointType>();
 
-            for(size_t i = 0; i< Dimension; ++i)
-                ptr_point->setDataById(0, temp_pt[i]);
+            for(size_t i = 0; i< Dimension; ++i){
+                ptr_point->setDataById(i, temp_pt[i]);
+            }
+            ptr_vertex->setPtr_data(ptr_point);
 
-            ptr_data->getTotalVec_PtrVertex().push_back(ptr_vertex);
+            vec_ptr_vertex.push_back(ptr_vertex);
         }
     }else
         return false;

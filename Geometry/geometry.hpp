@@ -23,6 +23,13 @@ namespace art_pde{
             return make_shared_ArtProject();
         }
 
+        void debugFunc(){
+                //std::cout<< geo->c_getTotalVec_PtrVertex()[0]->getPtr_data()<<std::endl;
+//            for(auto &ptr_vertex: this->getTotalVec_PtrVertex()){
+//                std::cout << ptr_vertex->getPtr_data() << std::endl;
+//            }
+        };
+
     protected:
         static std::shared_ptr<Geometry> make_shared_ArtProject() {
             return std::make_shared<Geometry>(GeometryDummy());
