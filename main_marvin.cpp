@@ -475,7 +475,7 @@ protected:
 	}
 };
 
-// problem in Pyramid5
+
 class TestPyra5 :public TestBase<Dim3D, LagrangeType> {
 
 public:
@@ -487,18 +487,18 @@ protected:
 	void init() {
 		NUM = 5;
 		elem_iso_coor = {
-			PointType(-1, -1, -1),
-			PointType(+1, -1, -1),
-			PointType(+1, +1, -1),
-			PointType(-1, +1, -1),
+			PointType(+1, 0, 0),
+			PointType(0, +1, 0),
+			PointType(-1, 0, 0),
+			PointType(0, -1, 0),
 			PointType(0, 0, +1)
 		};
 		elem_phy_coor = {
-			PointType(0.2*rand1(), 0.2*rand1(), 0.2*rand1()),
-			PointType(0.5 + 0.2*rand1(), 0.2*rand1(), 0.2*rand1()),
-			PointType(0.5 + 0.2*rand1(), 0.5 + 0.2*rand1(), 0.2*rand1()),
-			PointType(0.2*rand1(), 0.5 + 0.2*rand1(), 0.2*rand1()),
-			PointType(0.5*rand1(), 0.5*rand1(), rand1())
+			PointType(10+2*rand2(), 2*rand2(), 2*rand2()),
+			PointType(2*rand2(), 10+2*rand2(), 2*rand2()),
+			PointType(-10+2*rand2(), 2*rand2(), 2*rand2()),
+			PointType(2*rand2(), -10+2*rand2(), 2*rand2()),
+			PointType(2*rand2(), 2*rand2(), 10+2*rand2())
 		};
 		for (size_t i = 0; i < NUM; ++i) {
 			coeff.push_back(100.0*rand2());
@@ -527,7 +527,7 @@ protected:
 		return grad;
 	}
 	virtual PointType getIsoPoint() override {
-		return PointType(0, 0, 0);
+		return PointType(0, 0, 0.33);
 	}
 };
 
@@ -868,7 +868,7 @@ protected:
 	}
 };
 
-// problem in Pyramid13
+// grad problem in Pyramid13
 class TestPyra13 :public TestBase<Dim3D, SerendipityType> {
 
 public:
@@ -880,39 +880,34 @@ protected:
 	void init() {
 		NUM = 13;
 		elem_iso_coor = {
-			PointType(-1, -1, -1),
-			PointType(+1, -1, -1),
-			PointType(+1, +1, -1),
-			PointType(-1, +1, -1),
-			PointType(0, 0, +1),
-
-			PointType(0, -1, -1),
-			PointType(1, 0, -1),
-			PointType(0, +1, -1),
-			PointType(-1, 0, -1),
-
-			//???????????????????
+			PointType(1, 0, 0),
+			PointType(0, 1, 0),
+			PointType(-1, 0, 0),
+			PointType(0, -1, 0),
+			PointType(0 ,0 ,1),
+			PointType(0.5,  0.5, 0),
+			PointType(-0.5, 0.5, 0),
 			PointType(-0.5, -0.5, 0),
 			PointType(0.5, -0.5, 0),
-			PointType(0.5, 0.5, 0),
-			PointType(-0.5, 0.5, 0)
+			PointType(0.5,   0, 0.5),
+			PointType(0, 0.5, 0.5),
+			PointType(-0.5, 0, 0.5),
+			PointType(0, -0.5, 0.5),
 		};
 		elem_phy_coor = {
-			PointType(-10+2*rand2(), -10+2*rand2(), -10+2*rand2()),
-			PointType(+10+2*rand2(), -10+2*rand2(), -10+2*rand2()),
-			PointType(+10+2*rand2(), +10+2*rand2(), -10+2*rand2()),
-			PointType(-10+2*rand2(), +10+2*rand2(), -10+2*rand2()),
-			PointType(2*rand2(), 2*rand2(), +10+2*rand2()),
-
-			PointType(2*rand2(), -10+2*rand2(), -10+2*rand2()),
-			PointType(10+2*rand2(), 2*rand2(), -10+2*rand2()),
-			PointType(2*rand2(), +10+2*rand2(), -10+2*rand2()),
-			PointType(-10+2*rand2(), 2*rand2(), -10+2*rand2()),
-
-			PointType(-5+rand2(), -5+rand2(), 2*rand2()),
-			PointType(5+rand2(), -5+rand2(), 2*rand2()),
-			PointType(5+rand2(), 5+rand2(), 2*rand2()),
-			PointType(-5+rand2(), 5+rand2(), 2*rand2())
+			PointType(10 + 2 * rand2(), 2 * rand2(), 2 * rand2()),
+			PointType(2 * rand2(), 10 + 2 * rand2(), 2 * rand2()),
+			PointType(-10 + 2 * rand2(), 2 * rand2(), 2 * rand2()),
+			PointType(2 * rand2(), -10 + 2 * rand2(), 2 * rand2()),
+			PointType(2 * rand2() ,2 * rand2() ,10 + 2 * rand2()),
+			PointType(5 + rand2(),  5 + rand2(), 2 * rand2()),
+			PointType(-5 + rand2(), 5 + rand2(), 2 * rand2()),
+			PointType(-5 + rand2(), -5 + rand2(), 2 * rand2()),
+			PointType(5 + rand2(), -5 + rand2(), 2 * rand2()),
+			PointType(5 + rand2(),   2 * rand2(), 5 + rand2()),
+			PointType(2 * rand2(), 5 + rand2(), 5 + rand2()),
+			PointType(-5 + rand2(), 2 * rand2(), 5 + rand2()),
+			PointType(2 * rand2(), -5 + rand2(), 5 + rand2()),
 		};
 		for (size_t i = 0; i < NUM; ++i) {
 			coeff.push_back(100.0*rand2());
@@ -948,7 +943,7 @@ protected:
 		return grad;
 	}
 	virtual PointType getIsoPoint() override {
-		return PointType(0, 0, -0.6);
+		return PointType(0, 0, 0.33);
 	}
 };
 
@@ -962,6 +957,8 @@ int main() {
 	trial.testJacobian();
 	trial.testInvJ();
 	trial.testdetJ();
+
+	
 
 
 	system("pause");
