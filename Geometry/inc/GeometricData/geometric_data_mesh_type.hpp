@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "../GeometricTree/geometric_tree_units.hpp"
+#include "Geometry/inc/GeometricTree/geometric_tree_units_face_factory.hpp"
 namespace art_pde { namespace geometry { namespace mesh_type {
             namespace geometric_data{
 
@@ -21,7 +22,7 @@ namespace art_pde { namespace geometry { namespace mesh_type {
                         using VecPtrVertexType = std::vector<PtrVertexType>;
                     };
                     MeshTypeData_Vertex(){
-                        std::cout << "MeshTypeData_Vertex" << std::endl;
+                        //std::cout << "MeshTypeData_Vertex" << std::endl;
                     }
 
                     const size_t getTotalNum_Vertex() const {
@@ -49,7 +50,7 @@ namespace art_pde { namespace geometry { namespace mesh_type {
                         using VecPtrEdgeType = std::vector<PtrEdgeType>;
                     };
                     MeshTypeData_Edge(){
-                        std::cout << "MeshTypeData_Edge" << std::endl;
+                        //std::cout << "MeshTypeData_Edge" << std::endl;
                     }
 
                     const size_t getTotalNum_Edge() const {
@@ -58,6 +59,12 @@ namespace art_pde { namespace geometry { namespace mesh_type {
 
                     const typename type::VecPtrEdgeType &c_getTotalVec_PtrEdge() const {
                         return this->vec_ptr_edge;
+                    }
+
+                    bool mergeEdge(typename MeshTypeData_Vertex<PointType>::type::VecPtrVertexType &vec_ptr_vertex_seed){
+                        GeometricTreeLayerMerge<typename type::EdgeType, typename MeshTypeData_Vertex<PointType>::type::VertexType>
+                                merge_algo(vec_ptr_vertex_seed);
+                        return merge_algo.merge(this->vec_ptr_edge);
                     }
 
                 protected:
@@ -77,7 +84,7 @@ namespace art_pde { namespace geometry { namespace mesh_type {
                         using VecPtrFaceType = std::vector<PtrFaceType>;
                     };
                     MeshTypeData_Face(){
-                        std::cout << "MeshTypeData_Face" << std::endl;
+                        //std::cout << "MeshTypeData_Face" << std::endl;
                     }
 
                     const size_t getTotalNum_Face() const {
@@ -105,7 +112,7 @@ namespace art_pde { namespace geometry { namespace mesh_type {
                         using VecPtrCellType = std::vector<PtrCellType>;
                     };
                     MeshTypeData_Cell(){
-                        std::cout << "MeshTypeData_Cell" << std::endl;
+                        //std::cout << "MeshTypeData_Cell" << std::endl;
                     }
 
                     const size_t getTotalNum_Cell() const {

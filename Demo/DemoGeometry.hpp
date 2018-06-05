@@ -48,22 +48,50 @@ void DemoGeometry() {
     using namespace project;
     using namespace geometry::mesh_type::Dim2;
 
+//    auto proj = ArtProject::create("TestProj_SpecialCase").build();
     auto proj = ArtProject::create("TestProj").build();
 
     using MeshDataType = GeometricData<ComputePositionVector<2>>;
 
+//    using GeoType = Geometry<MeshDataType>;
     using GeoType = Geometry<GeometricAlgorithm<MeshDataType>, GeometricReader<MeshDataType>>;
 //    using GeoType = Geometry<GeometricAlgorithm<MeshDataType>, UserDefineReader<MeshDataType>>;
 
     auto geo = GeoType::create();
-    
-    assert(geo->read(proj)); // Check loading status.
-    //    geo->read();
 
-    std::cout << "Listing all vertex" << "\n";
+    assert(geo->read(proj)); // Check loading status.
+//        geo->read();
+
+    geo->merge();
+
+    std::cout << ">> # of Vertex : ";
+    std::cout << geo->getTotalNum_Vertex() << "\n";
+
+    std::cout << ">> # of Edge : ";
+    std::cout << geo->getTotalNum_Edge() << "\n";
+
+    std::cout << ">> # of Face : ";
+    std::cout << geo->getTotalNum_Face() << "\n";
+
+    std::cout << ">> Listing all vertex" << "\n";
     for(auto &ptr_vertex: geo->c_getTotalVec_PtrVertex()){
+        std::cout << "GeoType is " << ptr_vertex->getGeometric_Type() << " ; ";
         std::cout << *ptr_vertex << "\n";
     }
+
+    std::cout << ">> Listing all edge" << "\n";
+    for(auto &ptr_edge: geo->c_getTotalVec_PtrEdge()){
+        std::cout << "GeoType is " << ptr_edge->getGeometric_Type() << " ; ";
+        std::cout << *ptr_edge << "\n";
+    }
+
+    std::cout << ">> Listing all face" << "\n";
+    for(auto &ptr_face: geo->c_getTotalVec_PtrFace()){
+        std::cout << "GeoType is " << ptr_face->getGeometric_Type() << " ; ";
+        std::cout << *ptr_face << "\n";
+    }
+//
+//    std::cout << geo->c_getTotalVec_PtrFace()[1]->getGeometric_Type() << "\n";
 }
 
 #endif //ARTPDE_KAVY_DEMOGEOMETRY_HPP

@@ -15,10 +15,12 @@ namespace art_pde{ namespace geometry {
                 class GeometricAlgorithm: public virtual GeometricDataType{
                 public:
                     GeometricAlgorithm():GeometricDataType(){
-                        std::cout << "Dim2::GeometricAlgorithm" << std::endl;
+                        //std::cout << "Dim2::GeometricAlgorithm" << std::endl;
                     }
 
-                    void mergeTest(){}
+                    bool merge(){
+                        return this->mergeEdge(this->vec_ptr_vertex);
+                    }
                 };
 
             }
@@ -29,7 +31,7 @@ namespace art_pde{ namespace geometry {
                 class GeometricAlgorithm: public virtual GeometricDataType{
                 public:
                     GeometricAlgorithm():GeometricDataType(){
-                        std::cout << "Dim3::GeometricAlgorithm" << std::endl;
+                        //std::cout << "Dim3::GeometricAlgorithm" << std::endl;
                     }
                 };
 

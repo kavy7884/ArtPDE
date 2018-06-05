@@ -16,11 +16,11 @@ namespace art_pde{ namespace geometry {
                 class GeometricReader: public virtual GeometricDataType{
                 public:
                     GeometricReader(): GeometricDataType(){
-                        std::cout << "Dim2::GeometricReader" << std::endl;
+                        //std::cout << "Dim2::GeometricReader" << std::endl;
                     }
 
                     bool read(const std::shared_ptr<project::ArtProject> &input_ptr_proj){
-                        std::cout << "Dim2::GeometricReader->read()" << std::endl;
+                        //std::cout << "Dim2::GeometricReader->read()" << std::endl;
 
                         geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 2> reader(this);
                         reader.setArtProject(input_ptr_proj);
@@ -39,12 +39,12 @@ namespace art_pde{ namespace geometry {
                 class GeometricReader: public virtual GeometricDataType{
                 public:
                     GeometricReader(): GeometricDataType(){
-                        std::cout << "Dim3::GeometricReader" << std::endl;
+                        //std::cout << "Dim3::GeometricReader" << std::endl;
                     }
 
                     bool read(const std::shared_ptr<project::ArtProject> &input_ptr_proj){
-                        std::cout << "Dim3::GeometricReader->read()" << std::endl;
-                        geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 2> reader(this);
+                        //std::cout << "Dim3::GeometricReader->read()" << std::endl;
+                        geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 3> reader(this);
                         reader.setArtProject(input_ptr_proj);
                         return reader.read();
                     }

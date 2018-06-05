@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include "../../../Project/art_project.hpp"
+#include "../GeometricData/geometric_data_mesh_type.hpp"
 
 namespace art_pde{ namespace geometry {
         namespace mesh_type {
@@ -28,12 +29,15 @@ namespace art_pde{ namespace geometry {
 
                 private:
                     bool readPosition();
+                    bool readFace();
 
                     GeometricReaderType *ptr_data;
                     std::shared_ptr<project::ArtProject> art_project{nullptr};
                 };
 
-                #include "../../src/geometric_reader_art_project_impl.cpp"
+
+
+#include "../../src/geometric_reader_art_project_impl.cpp"
             }
         }
 }}

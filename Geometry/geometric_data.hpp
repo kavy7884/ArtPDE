@@ -31,10 +31,8 @@ namespace art_pde{ namespace geometry {
                             MeshTypeData_Vertex<BasicPointType>(),
                             MeshTypeData_Edge<BasicPointType>(),
                             MeshTypeData_Face<BasicPointType>(){
-                        std::cout << "Dim2::GeometricData" << std::endl;
+                        //std::cout << "Dim2::GeometricData" << std::endl;
                     }
-
-
                 };
 
             }
@@ -63,11 +61,9 @@ namespace art_pde{ namespace geometry {
                             MeshTypeData_Edge<BasicPointType>(),
                             MeshTypeData_Face<BasicPointType>(),
                             MeshTypeData_Cell<BasicPointType>(){
-                        std::cout << "Dim3::GeometricData" << std::endl;
+                        //std::cout << "Dim3::GeometricData" << std::endl;
                     }
-
                 };
-
             }
         }
 }}

@@ -32,17 +32,17 @@ namespace art_pde{ namespace geometry {
             };
 
             Vertex() :
-                    GeometricTree<Vertex<DataType>>(TreeType::TreeEnd),
+                    GeometricTree<Vertex<DataType>>(GeometricType::Point),
                     GeometricTreeParent<Edge<DataType>>(){}
 
             Vertex(const std::initializer_list<double> &input_list) :
-                    GeometricTree<Vertex<DataType>>(TreeType::TreeEnd),
+                    GeometricTree<Vertex<DataType>>(GeometricType::Point),
                     GeometricTreeParent<Edge<DataType>>(){
                 this->ptr_data = std::make_shared<DataType>(input_list);
             }
 
             Vertex(const typename type::PtrDataType &ptr_data) :
-                    GeometricTree<Vertex<DataType>>(TreeType::TreeEnd),
+                    GeometricTree<Vertex<DataType>>(GeometricType::Point),
                     GeometricTreeParent<Edge<DataType>>(){
                 this->setPtr_data(ptr_data);
             }
@@ -51,7 +51,7 @@ namespace art_pde{ namespace geometry {
                 this->linked_to = this->shared_from_this();
             }
 
-            const typename type::ListPtrEdgeType& getConnected_Edge(){
+            const typename type::ListPtrEdgeType& c_getConnected_Edge(){
                 return this->getLinked_to()->c_getList_ptr_parents();
             }
 
@@ -89,7 +89,7 @@ namespace art_pde{ namespace geometry {
             };
 
             Edge() :
-                    GeometricTree<Edge<DataType>>(TreeType::TreeConnect),
+                    GeometricTree<Edge<DataType>>(GeometricType::Line),
                     GeometricTreeParent<Face<DataType>>(),
                     GeometricTreeChild<Vertex<DataType>>() {
             }
@@ -98,19 +98,29 @@ namespace art_pde{ namespace geometry {
                 this->linked_to = this->shared_from_this();
             }
 
-            const typename type::VecPtrVertexType& getConnected_Vertex() const{
+            const typename type::VecPtrVertexType& c_getConnected_Vertex() const{
                 return this->c_getVec_ptr_childs();
             }
 
-            const typename type::ListPtrFaceType& getConnected_Face() {
+            const typename type::ListPtrFaceType& c_getConnected_Face() {
                 return this->getLinked_to()->c_getList_ptr_parents();
             }
 
+            friend std::ostream &operator<<(std::ostream &os, const Edge<DataType> &edge) {
+                auto it_ptr_vertex = edge.c_getConnected_Vertex().cbegin();
+                while(it_ptr_vertex !=  (edge.c_getConnected_Vertex().cend() - 1)){
+                    os << **it_ptr_vertex << " , ";
+                    ++it_ptr_vertex;
+                }
+                os << **it_ptr_vertex;
+                return os;
+            }
+
             bool operator==(Edge &rhs){
-                if(this->getConnected_Vertex().size() != rhs.getConnected_Vertex().size())  return false;
+                if(this->c_getConnected_Vertex().size() != rhs.c_getConnected_Vertex().size())  return false;
                 else{
-                    std::set<typename type::PtrVertexType> set_self(this->getConnected_Vertex().cbegin(), this->getConnected_Vertex().cend());
-                    std::set<typename type::PtrVertexType> set_rhs(rhs.getConnected_Vertex().cbegin(), rhs.getConnected_Vertex().cend());
+                    std::set<typename type::PtrVertexType> set_self(this->c_getConnected_Vertex().cbegin(), this->c_getConnected_Vertex().cend());
+                    std::set<typename type::PtrVertexType> set_rhs(rhs.c_getConnected_Vertex().cbegin(), rhs.c_getConnected_Vertex().cend());
                     if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
                     else return false;
                 }
@@ -140,7 +150,12 @@ namespace art_pde{ namespace geometry {
             };
 
             Face() :
-                    GeometricTree<Face<DataType>>(TreeType::TreeConnect),
+                    GeometricTree<Face<DataType>>(GeometricType::None),
+                    GeometricTreeParent<Cell<DataType>>(),
+                    GeometricTreeChild<Edge<DataType>>() {}
+
+            Face(GeometricType geometric_type) :
+                    GeometricTree<Face<DataType>>(geometric_type),
                     GeometricTreeParent<Cell<DataType>>(),
                     GeometricTreeChild<Edge<DataType>>() {}
 
@@ -148,12 +163,31 @@ namespace art_pde{ namespace geometry {
                 this->linked_to = this->shared_from_this();
             }
 
-            const typename type::VecPtrEdgeType& getConnected_Edge() const{
+            const typename type::VecPtrEdgeType& c_getConnected_Edge() const{
                 return this->c_getVec_ptr_childs();
             }
 
-            const typename type::ListPtrCellType& getConnected_Cell() {
+            const typename type::ListPtrCellType& c_getConnected_Cell() {
                 return this->getLinked_to()->c_getList_ptr_parents();
+            }
+
+            const typename type::VecPtrVertexType c_getConnected_Vertex() const{
+                typename type::VecPtrVertexType re_vec_ptr_vertex;
+                for(auto &ptr_edge: this->c_getConnected_Edge()){
+                    re_vec_ptr_vertex.push_back(*ptr_edge->c_getConnected_Vertex().cbegin());
+                }
+                return re_vec_ptr_vertex;
+            }
+
+            friend std::ostream &operator<<(std::ostream &os, const Face<DataType> &face) {
+                auto vec_ptr_vertex = face.c_getConnected_Vertex();
+                auto it_ptr_vertex = vec_ptr_vertex.cbegin();
+                while(it_ptr_vertex !=  (vec_ptr_vertex.cend() - 1)){
+                    os << **it_ptr_vertex << " , ";
+                    ++it_ptr_vertex;
+                }
+                os << **it_ptr_vertex;
+                return os;
             }
 
             bool operator==(Face &rhs){
@@ -175,14 +209,6 @@ namespace art_pde{ namespace geometry {
             bool operator!=(const Face &rhs) {
                 return !(rhs == *this);
             }
-
-            const typename type::VecPtrVertexType getConnected_Vertex() const{
-                typename type::VecPtrVertexType re_vertex;
-                for(auto &ptr_edge: this->getConnected_Edge()){
-                    re_vertex.push_back(*ptr_edge->getConnected_Vertex().begin());
-                }
-                return re_vertex;
-            }
         };
         // -------- Face <End> -----------
 
@@ -201,14 +227,18 @@ namespace art_pde{ namespace geometry {
             };
 
             Cell() :
-                    GeometricTree<Cell<DataType>>(TreeType::TreeHead),
+                    GeometricTree<Cell<DataType>>(GeometricType::None),
+                    GeometricTreeChild<Face<DataType>>() {}
+
+            Cell(GeometricType geometric_type) :
+                    GeometricTree<Cell<DataType>>(geometric_type),
                     GeometricTreeChild<Face<DataType>>() {}
 
             void link_self() override {
                 this->linked_to = this->shared_from_this();
             }
 
-            const typename type::VecPtrFaceType& getConnected_Face() const{
+            const typename type::VecPtrFaceType& c_getConnected_Face() const{
                 return this->c_getVec_ptr_childs();
             }
 
