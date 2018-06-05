@@ -178,7 +178,30 @@ namespace art_pde{ namespace geometry {
             typename type::VecPtrMergeLayerType vec_ptr_merged_layer;
         };
         // -------- GeometricTreeLayerMerge < End > -----------
-    }
+
+
+		// -------- GeometricData <Start> --------
+		class GeometricData{
+
+		public:
+
+			GeometricData() = default;
+
+			size_t getId() const{
+				return id;
+			}
+
+			void setId(std::size_t id_){
+				this->id = id_;
+			}
+
+		private:
+			std::size_t id{ 0 };
+		};
+		// -------- GeometricData <End> --------
+
+    } // End namespace geometric_tree
+
 }}
 
 #endif //ARTPDE_KAVY_GEOMETRIC_TREE_COMPONENTS_HPP
