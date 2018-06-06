@@ -1,23 +1,641 @@
+#ifndef ARTPDE_BASIS_FUNCTION_LAGRANGE_H
+#define ARTPDE_BASIS_FUNCTION_LAGRANGE_H
 
-#ifndef ARTCFD_LAGRANGE3DSHAPEFUNCTION_H
-#define ARTCFD_LAGRANGE3DSHAPEFUNCTION_H
-
+// Std Lib Include Zone
+#include <vector>
+#include <memory>
+#include <cmath>
 
 // ArtPDE Lib Include Zone
-#include "ShapeFunction.h"
+#include "Point.hpp"
+#include "Eigen/Dense"
 
 
-namespace art_pde {
+namespace art_pde{
+namespace function_space{
+namespace isoparametric{
 
-	template<>
-	class ShapeFunction< Dim3D, Tetra4, Lagrange > :
-		public LagrangeType<Dim3D>
-	{
+	template<class PointType>
+	class BasisFunction{
+	public:
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual double
+			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) = 0;
+
+	protected:
+		BasisFunction(){}
+		BasisFunction(const BasisFunction&){}
+		BasisFunction& operator=(const BasisFunction&){}
+		virtual ~BasisFunction(){}
+
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_;
+		std::vector<std::vector<double>> dNdx_;
+		std::vector<std::vector<double>> Jacobian_;
+		std::vector<std::vector<double>> inv_Jacobian_;
+		double det_Jacobian_;
+		static int DIM;
+	};
+
+	
+
+}// namespace isoparametric (imply Lagrange)
+}// namespace function_space 
+}// namespace art_pde
+
+
+namespace art_pde{namespace function_space{namespace isoparametric{namespace Dim2D{
+
+	
+
+	template<class PointType>
+	class LagrangeQ4 :public BasisFunction<PointType>{
 	public:
 
-		using PointType = Point<Dim3D, CartesianCoordinate>;
+		friend class SingletonHolder<LagrangeQ4>;
 
-		friend class SingletonHolder < ShapeFunction< Dim3D, Tetra4, Lagrange > >;
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			N_[0] = 0.25*(1 - xi)*(1 - eta);
+			N_[1] = 0.25*(1 + xi)*(1 - eta);
+			N_[2] = 0.25*(1 + xi)*(1 + eta);
+			N_[3] = 0.25*(1 - xi)*(1 + eta);
+
+			return N_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			dNdxi_[0][0] = -0.25*(1 - eta);
+			dNdxi_[0][1] = 0.25*(1 - eta);
+			dNdxi_[0][2] = 0.25*(1 + eta);
+			dNdxi_[0][3] = -0.25*(1 + eta);
+
+			dNdxi_[1][0] = -0.25*(1 - xi);
+			dNdxi_[1][1] = -0.25*(1 + xi);
+			dNdxi_[1][2] = 0.25*(1 + xi);
+			dNdxi_[1][3] = 0.25*(1 - xi);
+
+			return dNdxi_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
+			for (int j = 0; j < 4; ++j){
+				for (int i = 0; i < 2; ++i){
+					dNdx_[i][j] =
+						dNdxi_[0][j] * inv_Jacobian_[i][0] +
+						dNdxi_[1][j] * inv_Jacobian_[i][1];
+				}
+			}
+
+			return dNdx_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+
+			const double& x1 = elem_nodes[0].getX();
+			const double& x2 = elem_nodes[1].getX();
+			const double& x3 = elem_nodes[2].getX();
+			const double& x4 = elem_nodes[3].getX();
+
+			const double& y1 = elem_nodes[0].getY();
+			const double& y2 = elem_nodes[1].getY();
+			const double& y3 = elem_nodes[2].getY();
+			const double& y4 = elem_nodes[3].getY();
+
+			Jacobian_[0][0] = 0.25*((1 - eta)*(x2 - x1) + (1 + eta)*(x3 - x4));
+			Jacobian_[1][0] = 0.25*((1 - xi)*(x4 - x1) + (1 + xi)*(x3 - x2));
+			Jacobian_[0][1] = 0.25*((1 - eta)*(y2 - y1) + (1 + eta)*(y3 - y4));
+			Jacobian_[1][1] = 0.25*((1 - xi)*(y4 - y1) + (1 + xi)*(y3 - y2));
+
+			return Jacobian_;
+		}
+
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_Jacobian(iso_point, elem_nodes);
+			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] -
+				Jacobian_[0][1] * Jacobian_[1][0];
+			return det_Jacobian_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_detJacobian(iso_point, elem_nodes);
+			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
+			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
+			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
+			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+
+			return inv_Jacobian_;
+		}
+
+	private:
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_; // 2x4
+		std::vector<std::vector<double>> dNdx_;  // 2x4
+		std::vector<std::vector<double>> Jacobian_; // 2x2
+		std::vector<std::vector<double>> inv_Jacobian_; // 2x2
+		double det_Jacobian_;
+
+		LagrangeQ4() :
+			N_(4),
+			dNdxi_(2, std::vector<double>(4)),
+			dNdx_(2, std::vector<double>(4)),
+			Jacobian_(2, std::vector<double>(2)),
+			inv_Jacobian_(2, std::vector<double>(2)){}
+		LagrangeQ4(const LagrangeQ4&){}
+		LagrangeQ4& operator=(const LagrangeQ4&){}
+	};
+
+	template<class PointType>
+	class LagrangeQ9 :public BasisFunction<PointType>{
+	public:
+		friend class SingletonHolder<LagrangeQ9>;
+
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			N_[0] = 0.25 * (1. - xi)*(1. - eta)*xi*eta;
+			N_[1] = 0.25*(1. + xi)*(1. - eta)*(-xi*eta);
+			N_[2] = 0.25*(1. + xi)*(1. + eta)*xi*eta;
+			N_[3] = 0.25*(1. - xi)*(1. + eta)*(-xi*eta);
+			N_[4] = 0.5* (1. - xi * xi)*(1. - eta)*(-eta);
+			N_[5] = 0.5* (1. + xi)*(1. - eta * eta)*(xi);
+			N_[6] = 0.5* (1. - xi * xi)*(1. + eta)*eta;
+			N_[7] = 0.5* (1. - xi)*(1. - eta * eta)*(-xi);
+			N_[8] = (1. - xi * xi)*(1. - eta * eta);
+
+			return N_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			dNdxi_[0][0] = 0.25*(eta - eta * eta - 2. * xi*eta + 2. * xi*eta * eta);
+			dNdxi_[0][1] = 0.25*(-eta + eta * eta - 2. * xi*eta + 2. * xi*eta * eta);
+			dNdxi_[0][2] = 0.25*(eta + eta * eta + 2. * xi*eta + 2. * xi*eta * eta);
+			dNdxi_[0][3] = 0.25*(-eta - eta * eta + 2. * xi*eta + 2. * xi*eta * eta);
+			dNdxi_[0][4] = 0.5 * (2. * xi*eta - 2. * xi*eta * eta);
+			dNdxi_[0][5] = 0.5 * (1. - eta * eta + 2. * xi - 2. * xi*eta * eta);
+			dNdxi_[0][6] = 0.5 * (-2. * xi*eta - 2. * xi*eta * eta);
+			dNdxi_[0][7] = 0.5 * (-1. + 2. * xi + eta * eta - 2. * xi*eta * eta);
+			dNdxi_[0][8] = -2.0 * xi*(1. - eta * eta);
+
+
+			dNdxi_[1][0] = 0.25*(xi - xi * xi - 2. * xi*eta + 2. * eta*xi * xi);
+			dNdxi_[1][1] = 0.25*(-xi - xi * xi + 2. * xi*eta + 2. * eta*xi * xi);
+			dNdxi_[1][2] = 0.25*(xi + xi * xi + 2. * xi*eta + 2. * eta*xi * xi);
+			dNdxi_[1][3] = 0.25*(-xi + xi * xi - 2. * xi*eta + 2. * eta*xi * xi);
+			dNdxi_[1][4] = 0.5 * (-1. + xi * xi + 2. * eta - 2. * eta*xi * xi);
+			dNdxi_[1][5] = 0.5 * (-2. * xi*eta - 2. * eta*xi * xi);
+			dNdxi_[1][6] = 0.5 * (1. - xi * xi + 2. * eta - 2. * eta*xi * xi);
+			dNdxi_[1][7] = 0.5 * (2. * xi*eta - 2. * eta*xi * xi);
+			dNdxi_[1][8] = -2.0 * eta*(1. - xi * xi);
+
+			return dNdxi_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
+			for (int j = 0; j < 9; ++j){
+				for (int i = 0; i < 2; ++i){
+					dNdx_[i][j] =
+						dNdxi_[0][j] * inv_Jacobian_[i][0] +
+						dNdxi_[1][j] * inv_Jacobian_[i][1];
+				}
+			}
+
+			return dNdx_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_dNdxi(iso_point);
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+
+			const double& x1 = elem_nodes[0].getX();
+			const double& x2 = elem_nodes[1].getX();
+			const double& x3 = elem_nodes[2].getX();
+			const double& x4 = elem_nodes[3].getX();
+			const double& x5 = elem_nodes[4].getX();
+			const double& x6 = elem_nodes[5].getX();
+			const double& x7 = elem_nodes[6].getX();
+			const double& x8 = elem_nodes[7].getX();
+			const double& x9 = elem_nodes[8].getX();
+
+			const double& y1 = elem_nodes[0].getY();
+			const double& y2 = elem_nodes[1].getY();
+			const double& y3 = elem_nodes[2].getY();
+			const double& y4 = elem_nodes[3].getY();
+			const double& y5 = elem_nodes[4].getY();
+			const double& y6 = elem_nodes[5].getY();
+			const double& y7 = elem_nodes[6].getY();
+			const double& y8 = elem_nodes[7].getY();
+			const double& y9 = elem_nodes[8].getY();
+
+			Jacobian_[0][0] =
+				2. * x9*xi*(eta * eta - 1.) -
+				(x8*(eta * eta - 1.)*(4. * xi - 2.)) / 4. -
+				(x6*(eta * eta - 1.)*(4. * xi + 2.)) / 4. +
+				(eta*x1*(2. * xi - 1.)*(eta - 1.)) / 4. +
+				(eta*x2*(2. * xi + 1.)*(eta - 1.)) / 4. +
+				(eta*x3*(2. * xi + 1.)*(eta + 1.)) / 4. +
+				(eta*x4*(2. * xi - 1.)*(eta + 1.)) / 4. -
+				eta*x5*xi*(eta - 1.) -
+				eta*x7*xi*(eta + 1.);
+
+			Jacobian_[1][0] =
+				2. * xi*y9*(eta * eta - 1.) -
+				(y8*(eta * eta - 1.)*(4. * xi - 2.)) / 4. -
+				(y6*(eta * eta - 1.)*(4. * xi + 2.)) / 4. +
+				(eta*y1*(2. * xi - 1.)*(eta - 1.)) / 4. +
+				(eta*y2*(2. * xi + 1.)*(eta - 1.)) / 4. +
+				(eta*y3*(2. * xi + 1.)*(eta + 1.)) / 4. +
+				(eta*y4*(2. * xi - 1.)*(eta + 1.)) / 4. -
+				eta*xi*y5*(eta - 1.) -
+				eta*xi*y7*(eta + 1.);
+
+			Jacobian_[0][1] =
+				2. * eta*x9*(xi * xi - 1.) -
+				(x5*(2. * eta - 1.)*(2. * xi * xi - 2.)) / 4. -
+				(x7*(2. * eta + 1.)*(2. * xi * xi - 2.)) / 4. +
+				(x1*xi*(2. * eta - 1.)*(xi - 1.)) / 4. +
+				(x2*xi*(2. * eta - 1.)*(xi + 1.)) / 4. +
+				(x3*xi*(2. * eta + 1.)*(xi + 1.)) / 4. +
+				(x4*xi*(2. * eta + 1.)*(xi - 1.)) / 4. -
+				eta*x6*xi*(xi + 1.) - eta*x8*xi*(xi - 1.);
+
+			Jacobian_[1][1] = 2. * eta*y9*(xi * xi - 1.) -
+				(y5*(2. * eta - 1.)*(2. * xi * xi - 2.)) / 4. -
+				(y7*(2. * eta + 1.)*(2. * xi * xi - 2.)) / 4. +
+				(xi*y1*(2. * eta - 1.)*(xi - 1.)) / 4. +
+				(xi*y2*(2. * eta - 1.)*(xi + 1.)) / 4. +
+				(xi*y3*(2. * eta + 1.)*(xi + 1.)) / 4. +
+				(xi*y4*(2. * eta + 1.)*(xi - 1.)) / 4. -
+				eta*xi*y6*(xi + 1.) -
+				eta*xi*y8*(xi - 1.);
+			return Jacobian_;
+		}
+
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_Jacobian(iso_point, elem_nodes);
+			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] -
+				Jacobian_[0][1] * Jacobian_[1][0];
+			return det_Jacobian_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_detJacobian(iso_point, elem_nodes);
+			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
+			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
+			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
+			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+
+			return inv_Jacobian_;
+		}
+
+	private:
+
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_; // 2x9
+		std::vector<std::vector<double>> dNdx_;  // 2x9
+		std::vector<std::vector<double>> Jacobian_; // 2x2
+		std::vector<std::vector<double>> inv_Jacobian_; // 2x2
+		double det_Jacobian_;
+
+		LagrangeQ9() :
+			N_(9),
+			dNdxi_(2, std::vector<double>(9)),
+			dNdx_(2, std::vector<double>(9)),
+			Jacobian_(2, std::vector<double>(2)),
+			inv_Jacobian_(2, std::vector<double>(2)){}
+		LagrangeQ9(const LagrangeQ9&){}
+		LagrangeQ9& operator=(const LagrangeQ9&){}
+	};
+
+	template<class PointType>
+	class LagrangeT3 : public BasisFunction<PointType>{
+	public:
+		friend class SingletonHolder<LagrangeT3>;
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			N_[0] = 1 - xi - eta;
+			N_[1] = xi;
+			N_[2] = eta;
+
+			return N_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) override
+		{
+			dNdxi_[0][0] = -1.0;
+			dNdxi_[0][1] = 1.0;
+			dNdxi_[0][2] = 0.0;
+
+			dNdxi_[1][0] = -1.0;
+			dNdxi_[1][1] = 0.0;
+			dNdxi_[1][2] = 1.0;
+
+			return dNdxi_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
+			for (int j = 0; j < 3; ++j){
+				for (int i = 0; i < 2; ++i){
+					dNdx_[i][j] =
+						dNdxi_[0][j] * inv_Jacobian_[i][0] +
+						dNdxi_[1][j] * inv_Jacobian_[i][1];
+				}
+			}
+			return dNdx_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_dNdxi(iso_point);
+
+			const double& x1 = elem_nodes[0].getX();
+			const double& x2 = elem_nodes[1].getX();
+			const double& x3 = elem_nodes[2].getX();
+
+			const double& y1 = elem_nodes[0].getY();
+			const double& y2 = elem_nodes[1].getY();
+			const double& y3 = elem_nodes[2].getY();
+
+			Jacobian_[0][0] = x2 - x1;
+			Jacobian_[1][0] = x3 - x1;
+			Jacobian_[0][1] = y2 - y1;
+			Jacobian_[1][1] = y3 - y1;
+
+			return Jacobian_;
+		}
+
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_Jacobian(iso_point, elem_nodes);
+			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] -
+				Jacobian_[0][1] * Jacobian_[1][0];
+			return det_Jacobian_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_detJacobian(iso_point, elem_nodes);
+			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
+			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
+			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
+			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+
+			return inv_Jacobian_;
+		}
+
+	private:
+
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_; // 2x3
+		std::vector<std::vector<double>> dNdx_;  // 2x3
+		std::vector<std::vector<double>> Jacobian_; // 2x2
+		std::vector<std::vector<double>> inv_Jacobian_; // 2x2
+		double det_Jacobian_;
+
+		LagrangeT3() :
+			N_(3),
+			dNdxi_(2, std::vector<double>(3)),
+			dNdx_(2, std::vector<double>(3)),
+			Jacobian_(2, std::vector<double>(2)),
+			inv_Jacobian_(2, std::vector<double>(2)){}
+		LagrangeT3(const LagrangeT3&){}
+		LagrangeT3& operator=(const LagrangeT3&){}
+	};
+
+	template<class PointType>
+	class SerendipityQ8:public BasisFunction<PointType>{
+	public:
+		friend class SingletonHolder<SerendipityQ8>;
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			N_[0] = 0.25*(1. - xi)*(1. - eta)*(-xi - eta - 1.);
+			N_[1] = 0.25*(1. + xi)*(1. - eta)*(xi - eta - 1.);
+			N_[2] = 0.25*(1. + xi)*(1. + eta)*(xi + eta - 1.);
+			N_[3] = 0.25*(1. - xi)*(1. + eta)*(eta - xi - 1.);
+			N_[4] = 0.5 * (1. - xi * xi)*(1. - eta);
+			N_[5] = 0.5 * (1. + xi)*(1. - eta * eta);
+			N_[6] = 0.5 * (1. - xi * xi)*(1. + eta);
+			N_[7] = 0.5 * (1. - xi)*(1. - eta * eta);
+
+			return N_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			dNdxi_[0][0] = 0.25*(-eta * eta + eta - 2. * xi*eta + 2. * xi);
+			dNdxi_[0][1] = 0.25*(-eta + 2. * xi - 2. * xi*eta + eta * eta);
+			dNdxi_[0][2] = 0.25*(eta + 2. * xi + 2. * xi*eta + eta * eta);
+			dNdxi_[0][3] = 0.25*(-eta + 2. * xi + 2. * xi*eta - eta * eta);
+			dNdxi_[0][4] = -xi*(1. - eta);
+			dNdxi_[0][5] = 0.5 * (1. - eta * eta);
+			dNdxi_[0][6] = -xi*(1. + eta);
+			dNdxi_[0][7] = -0.5 * (1. - eta * eta);
+
+			dNdxi_[1][0] = 0.25*(2. * eta - 2. * xi*eta + xi - xi * xi);
+			dNdxi_[1][1] = 0.25*(-xi + 2. * eta - xi * xi + 2. * xi*eta);
+			dNdxi_[1][2] = 0.25*(xi + 2. * eta + xi * xi + 2. * xi*eta);
+			dNdxi_[1][3] = 0.25*(-xi + 2. * eta + xi * xi - 2. * xi*eta);
+			dNdxi_[1][4] = -0.5 * (1. - xi * xi);
+			dNdxi_[1][5] = -eta*(1. + xi);
+			dNdxi_[1][6] = 0.5 * (1. - xi * xi);
+			dNdxi_[1][7] = -eta*(1. - xi);
+
+			return dNdxi_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
+			for (int j = 0; j < 8; ++j){
+				for (int i = 0; i < 2; ++i){
+					dNdx_[i][j] =
+						dNdxi_[0][j] * inv_Jacobian_[i][0] +
+						dNdxi_[1][j] * inv_Jacobian_[i][1];
+				}
+			}
+
+			return dNdx_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_dNdxi(iso_point);
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+
+			const double& x1 = elem_nodes[0].getX();
+			const double& x2 = elem_nodes[1].getX();
+			const double& x3 = elem_nodes[2].getX();
+			const double& x4 = elem_nodes[3].getX();
+			const double& x5 = elem_nodes[4].getX();
+			const double& x6 = elem_nodes[5].getX();
+			const double& x7 = elem_nodes[6].getX();
+			const double& x8 = elem_nodes[7].getX();
+
+			const double& y1 = elem_nodes[0].getY();
+			const double& y2 = elem_nodes[1].getY();
+			const double& y3 = elem_nodes[2].getY();
+			const double& y4 = elem_nodes[3].getY();
+			const double& y5 = elem_nodes[4].getY();
+			const double& y6 = elem_nodes[5].getY();
+			const double& y7 = elem_nodes[6].getY();
+			const double& y8 = elem_nodes[7].getY();
+
+			Jacobian_[0][0] =
+				(x8 - x6)*(eta * eta / 2. - 0.5) +
+				x5*xi*(eta - 1.) -
+				x7*xi*(eta + 1.) -
+				(x1*(eta + 2. * xi)*(eta - 1.)) / 4. +
+				(x2*(eta - 2. * xi)*(eta - 1.)) / 4. +
+				(x3*(eta + 2. * xi)*(eta + 1.)) / 4. -
+				(x4*(eta - 2. * xi)*(eta + 1.)) / 4.;
+
+			Jacobian_[1][0] =
+				(y8 - y6)*(eta * eta / 2. - 0.5) +
+				xi*y5*(eta - 1.) -
+				xi*y7*(eta + 1.) -
+				(y1*(eta + 2. * xi)*(eta - 1.)) / 4. +
+				(y2*(eta - 2. * xi)*(eta - 1.)) / 4. +
+				(y3*(eta + 2. * xi)*(eta + 1.)) / 4. -
+				(y4*(eta - 2. * xi)*(eta + 1.)) / 4.;
+
+			Jacobian_[0][1] =
+				(x5 - x7)*(xi * xi / 2. - 0.5) -
+				eta*x6*(xi + 1.) +
+				eta*x8*(xi - 1.) -
+				(x1*(2. * eta + xi)*(xi - 1.)) / 4. +
+				(x3*(2. * eta + xi)*(xi + 1.)) / 4. +
+				(x2*(xi + 1.)*(2. * eta - xi)) / 4. -
+				(x4*(xi - 1.)*(2. * eta - xi)) / 4.;
+
+			Jacobian_[1][1] =
+				(y5 - y7)*(xi * xi / 2. - 0.5) -
+				eta*y6*(xi + 1.) +
+				eta*y8*(xi - 1.) -
+				(y1*(2. * eta + xi)*(xi - 1.)) / 4. +
+				(y3*(2. * eta + xi)*(xi + 1.)) / 4. +
+				(y2*(xi + 1.)*(2. * eta - xi)) / 4. -
+				(y4*(xi - 1.)*(2. * eta - xi)) / 4.;
+		}
+
+		virtual double evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_Jacobian(iso_point, elem_nodes);
+			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] -
+				Jacobian_[0][1] * Jacobian_[1][0];
+			return det_Jacobian_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_detJacobian(iso_point, elem_nodes);
+			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*Jacobian_[1][1];
+			inv_Jacobian_[0][1] = -(1. / det_Jacobian_)*Jacobian_[0][1];
+			inv_Jacobian_[1][0] = -(1. / det_Jacobian_)*Jacobian_[1][0];
+			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*Jacobian_[0][0];
+		}
+
+	private:
+
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_; // 2x8
+		std::vector<std::vector<double>> dNdx_;  // 2x8
+		std::vector<std::vector<double>> Jacobian_; // 2x2
+		std::vector<std::vector<double>> inv_Jacobian_; // 2x2
+		double det_Jacobian_;
+
+		SerendipityQ8() :
+			N_(8),
+			dNdxi_(2, std::vector<double>(8)),
+			dNdx_(2, std::vector<double>(8)),
+			Jacobian_(2, std::vector<double>(2)),
+			inv_Jacobian_(2, std::vector<double>(2)){}
+		SerendipityQ8(const SerendipityQ8&){}
+		SerendipityQ8& operator=(const SerendipityQ8&){}
+	};
+
+}// namespace Dim2D}// namespace isoparametric}// namespace function_space}// namespace art_pde
+
+namespace art_pde{
+namespace function_space{
+namespace isoparametric{
+namespace Dim3D{
+
+	template<class PointType>
+	class LagrangeTetra4:public BasisFunction<PointType>{
+	public:
+		friend class SingletonHolder<LagrangeTetra4>;
 
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
@@ -172,26 +790,20 @@ namespace art_pde {
 		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
 		double det_Jacobian_;
 
-		ShapeFunction() :
+		LagrangeTetra4() :
 			N_(4),
 			dNdxi_(3, std::vector<double>(4)),
 			dNdx_(3, std::vector<double>(4)),
 			Jacobian_(3, std::vector<double>(3)),
 			inv_Jacobian_(3, std::vector<double>(3)) {}
-		ShapeFunction(const ShapeFunction&) {}
-		ShapeFunction& operator=(const ShapeFunction&) {}
+		LagrangeTetra4(const LagrangeTetra4&) {}
+		LagrangeTetra4& operator=(const LagrangeTetra4&) {}
 	};
 
-	template<>
-	class ShapeFunction< Dim3D, Hexa8, Lagrange > :
-		public LagrangeType<Dim3D>
-	{
+	template<class PointType>
+	class LagrangeHexa8:public BasisFunction<PointType>{
 	public:
-
-		using PointType = Point<Dim3D, CartesianCoordinate>;
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Hexa8, Lagrange > >;
-
+		friend class SingletonHolder<LagrangeHexa8>;
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
 		{
@@ -300,13 +912,13 @@ namespace art_pde {
 			Jacobian_[0][0] = (1 / 8.)*
 				((x2 - x1)*(eta - 1)*(zeta - 1) +
 				(x4 - x3)*(eta + 1)*(zeta - 1) +
-					(x5 - x6)*(eta - 1)*(zeta + 1) +
-					(x7 - x8)*(eta + 1)*(zeta + 1));
+				(x5 - x6)*(eta - 1)*(zeta + 1) +
+				(x7 - x8)*(eta + 1)*(zeta + 1));
 			Jacobian_[1][0] = (1 / 8.)*
 				((y2 - y1)*(eta - 1)*(zeta - 1) +
 				(y4 - y3)*(eta + 1)*(zeta - 1) +
-					(y5 - y6)*(eta - 1)*(zeta + 1) +
-					(y7 - y8)*(eta + 1)*(zeta + 1));
+				(y5 - y6)*(eta - 1)*(zeta + 1) +
+				(y7 - y8)*(eta + 1)*(zeta + 1));
 			Jacobian_[2][0] = (1 / 8.)*(
 				(z2 - z1)*(eta - 1)*(zeta - 1) +
 				(z4 - z3)*(eta + 1)*(zeta - 1) +
@@ -399,201 +1011,22 @@ namespace art_pde {
 		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
 		double det_Jacobian_;
 
-		ShapeFunction() :
+		LagrangeHexa8() :
 			N_(8),
 			dNdxi_(3, std::vector<double>(8)),
 			dNdx_(3, std::vector<double>(8)),
 			Jacobian_(3, std::vector<double>(3)),
 			inv_Jacobian_(3, std::vector<double>(3)) {}
 
-		ShapeFunction(const ShapeFunction&) {}
+		LagrangeHexa8(const LagrangeHexa8&) {}
 
-		ShapeFunction& operator=(const ShapeFunction&) {}
+		LagrangeHexa8& operator=(const LagrangeHexa8&) {}
 	};
 
-	template<>
-	class ShapeFunction< Dim3D, Pyramid5, Lagrange > :
-		public LagrangeType<Dim3D>
-	{
+	template<class PointType>
+	class LagrangePrism6 :public BasisFunction<PointType>{
 	public:
-
-		using PointType = Point<Dim3D, CartesianCoordinate>;
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Pyramid5, Lagrange > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const PointType& iso_point) override
-		{
-			const double& xi = iso_point.getX();
-			const double& eta = iso_point.getY();
-			const double& zeta = iso_point.getZ();
-			N_[0] = 0.25*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.) / (1. - zeta);
-			N_[1] = 0.25*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
-			N_[2] = 0.25*(xi + eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
-			N_[3] = 0.25*(xi + eta + zeta - 1.)*(-xi + eta + zeta - 1.) / (1. - zeta);
-			N_[4] = zeta;
-
-			return N_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_dNdxi(const PointType& iso_point) override
-		{
-			const double& xi = iso_point.getX();
-			const double& eta = iso_point.getY();
-			const double& zeta = iso_point.getZ();
-			dNdxi_[0][0] = 0.5*(-xi + zeta - 1.) / (zeta - 1.);
-			dNdxi_[0][1] = 0.5*xi / (zeta - 1.);
-			dNdxi_[0][2] = 0.5*(-xi - zeta + 1.) / (zeta - 1.);
-			dNdxi_[0][3] = 0.5*xi / (zeta - 1.);
-			dNdxi_[0][4] = 0.0;
-
-			dNdxi_[1][0] = 0.5*eta / (zeta - 1.);
-			dNdxi_[1][1] = 0.5*(-eta + zeta - 1.) / (zeta - 1.);
-			dNdxi_[1][2] = 0.5*eta / (zeta - 1.);
-			dNdxi_[1][3] = 0.5*(-eta - zeta + 1.) / (zeta - 1.);
-			dNdxi_[1][4] = 0.0;
-
-			dNdxi_[2][0] = 0.25*(xi*xi - eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][1] = 0.25*(-xi * xi + eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][2] = 0.25*(xi*xi - eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][3] = 0.25*(-xi * xi + eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][4] = 1.0;
-
-			return dNdxi_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-			evaluate_dNdxi(iso_point);
-			evaluate_invJacobian(iso_point, elem_nodes);
-			for (int j = 0; j < 5; ++j) {
-				for (int i = 0; i < 3; ++i) {
-					dNdx_[i][j] =
-						dNdxi_[0][j] * inv_Jacobian_[i][0] +
-						dNdxi_[1][j] * inv_Jacobian_[i][1] +
-						dNdxi_[2][j] * inv_Jacobian_[i][2];
-				}
-			}
-
-			return dNdx_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-			const double& xi = iso_point.getX();
-			const double& eta = iso_point.getY();
-			const double& zeta = iso_point.getZ();
-
-			const double& x1 = elem_nodes[0].getX();
-			const double& x2 = elem_nodes[1].getX();
-			const double& x3 = elem_nodes[2].getX();
-			const double& x4 = elem_nodes[3].getX();
-			const double& x5 = elem_nodes[4].getX();
-
-			const double& y1 = elem_nodes[0].getY();
-			const double& y2 = elem_nodes[1].getY();
-			const double& y3 = elem_nodes[2].getY();
-			const double& y4 = elem_nodes[3].getY();
-			const double& y5 = elem_nodes[4].getY();
-
-			const double& z1 = elem_nodes[0].getZ();
-			const double& z2 = elem_nodes[1].getZ();
-			const double& z3 = elem_nodes[2].getZ();
-			const double& z4 = elem_nodes[3].getZ();
-			const double& z5 = elem_nodes[4].getZ();
-
-			Jacobian_[0][0] = (x2*xi) / (2. * (zeta - 1.)) - (x3*(xi / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (x1*(xi / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (x4*xi) / (2. * (zeta - 1.));
-			Jacobian_[0][1] = (xi*y2) / (2. * (zeta - 1.)) - (y3*(xi / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (y1*(xi / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (xi*y4) / (2. * (zeta - 1.));
-			Jacobian_[0][2] = (xi*z2) / (2. * (zeta - 1.)) - (z3*(xi / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (z1*(xi / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (xi*z4) / (2. * (zeta - 1.));
-			Jacobian_[1][0] = (eta*x1) / (2. * (zeta - 1.)) - (x4*(eta / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (x2*(eta / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (eta*x3) / (2. * (zeta - 1.));
-			Jacobian_[1][1] = (eta*y1) / (2. * (zeta - 1.)) - (y4*(eta / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (y2*(eta / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (eta*y3) / (2. * (zeta - 1.));
-			Jacobian_[1][2] = (eta*z1) / (2. * (zeta - 1.)) - (z4*(eta / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (z2*(eta / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (eta*z3) / (2. * (zeta - 1.));
-			Jacobian_[2][0] = x5 - (x1*((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. - xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (x2*((zeta - 1.)*(zeta - 1.)  / 4. - eta*eta / 4. + xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (x3*((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. - xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (x4*((zeta - 1.)*(zeta - 1.)  / 4. - eta*eta / 4. + xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.) ;
-			Jacobian_[2][1] = y5 - (y1*((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. - xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (y2*((zeta - 1.)*(zeta - 1.)  / 4. - eta*eta / 4. + xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (y3*((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. - xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (y4*((zeta - 1.)*(zeta - 1.)  / 4. - eta*eta / 4. + xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.) ;
-			Jacobian_[2][2] = z5 - (z1*((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. - xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (z2*((zeta - 1.)*(zeta - 1.)  / 4. - eta*eta / 4. + xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (z3*((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. - xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.)  - (z4*((zeta - 1.)*(zeta - 1.)  / 4. - eta*eta / 4. + xi*xi / 4.)) /(zeta - 1.)/(zeta - 1.) ;
-			return Jacobian_;
-		}
-
-		virtual double
-			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-
-			evaluate_Jacobian(iso_point, elem_nodes);
-
-
-			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] * Jacobian_[2][2] +
-				Jacobian_[1][0] * Jacobian_[2][1] * Jacobian_[0][2] +
-				Jacobian_[0][1] * Jacobian_[1][2] * Jacobian_[2][0] -
-				Jacobian_[0][2] * Jacobian_[1][1] * Jacobian_[2][0] -
-				Jacobian_[0][1] * Jacobian_[1][0] * Jacobian_[2][2] -
-				Jacobian_[1][2] * Jacobian_[2][1] * Jacobian_[0][0];
-
-
-			return det_Jacobian_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-
-			evaluate_detJacobian(iso_point, elem_nodes);
-			double& J11 = Jacobian_[0][0];
-			double& J21 = Jacobian_[1][0];
-			double& J31 = Jacobian_[2][0];
-			double& J12 = Jacobian_[0][1];
-			double& J22 = Jacobian_[1][1];
-			double& J32 = Jacobian_[2][1];
-			double& J13 = Jacobian_[0][2];
-			double& J23 = Jacobian_[1][2];
-			double& J33 = Jacobian_[2][2];
-
-			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*(J22*J33 - J32 * J23);
-			inv_Jacobian_[1][0] = (1. / det_Jacobian_)*(J31*J23 - J21 * J33);
-			inv_Jacobian_[2][0] = (1. / det_Jacobian_)*(J21*J32 - J31 * J22);
-			inv_Jacobian_[0][1] = (1. / det_Jacobian_)*(J32*J13 - J12 * J33);
-			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*(J11*J33 - J31 * J13);
-			inv_Jacobian_[2][1] = (1. / det_Jacobian_)*(J31*J12 - J11 * J32);
-			inv_Jacobian_[0][2] = (1. / det_Jacobian_)*(J12*J23 - J22 * J13);
-			inv_Jacobian_[1][2] = (1. / det_Jacobian_)*(J21*J13 - J11 * J23);
-			inv_Jacobian_[2][2] = (1. / det_Jacobian_)*(J11*J22 - J21 * J12);
-
-			return inv_Jacobian_;
-		}
-
-	private:
-
-		std::vector<double> N_;
-		std::vector<std::vector<double>> dNdxi_; // 3x5
-		std::vector<std::vector<double>> dNdx_;  // 3x5
-		std::vector<std::vector<double>> Jacobian_; // 3x3
-		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
-		double det_Jacobian_;
-
-		ShapeFunction() :
-			N_(5),
-			dNdxi_(3, std::vector<double>(5)),
-			dNdx_(3, std::vector<double>(5)),
-			Jacobian_(3, std::vector<double>(3)),
-			inv_Jacobian_(3, std::vector<double>(3)) {}
-
-		ShapeFunction(const ShapeFunction&) {}
-
-		ShapeFunction& operator=(const ShapeFunction&) {}
-	};
-
-	template<>
-	class ShapeFunction< Dim3D, Prism6, Lagrange > :
-		public LagrangeType<Dim3D>
-	{
-	public:
-
-		using PointType = Point<Dim3D, CartesianCoordinate>;
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Prism6, Lagrange > >;
-
+		friend class SingletonHolder<LagrangePrism6>;
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
 		{
@@ -756,27 +1189,189 @@ namespace art_pde {
 		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
 		double det_Jacobian_;
 
-		ShapeFunction() :
+		LagrangePrism6() :
 			N_(6),
 			dNdxi_(3, std::vector<double>(6)),
 			dNdx_(3, std::vector<double>(6)),
 			Jacobian_(3, std::vector<double>(3)),
 			inv_Jacobian_(3, std::vector<double>(3)) {}
 
-		ShapeFunction(const ShapeFunction&) {}
+		LagrangePrism6(const LagrangePrism6&) {}
 
-		ShapeFunction& operator=(const ShapeFunction&) {}
+		LagrangePrism6& operator=(const LagrangePrism6&) {}
 	};
 
-	template<>
-	class ShapeFunction< Dim3D, Tetra10, Serendipity > :
-		public SerendipityType<Dim3D>
-	{
+	template<class PointType>
+	class LagrangePyramid5 :public BasisFunction<PointType>{
 	public:
+		friend class SingletonHolder<LagrangePyramid5>;
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			const double& zeta = iso_point.getZ();
+			N_[0] = 0.25*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.) / (1. - zeta);
+			N_[1] = 0.25*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
+			N_[2] = 0.25*(xi + eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
+			N_[3] = 0.25*(xi + eta + zeta - 1.)*(-xi + eta + zeta - 1.) / (1. - zeta);
+			N_[4] = zeta;
 
-		using PointType = Point<Dim3D, CartesianCoordinate>;
+			return N_;
+		}
 
-		friend class SingletonHolder < ShapeFunction< Dim3D, Tetra10, Serendipity > >;
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			const double& zeta = iso_point.getZ();
+			dNdxi_[0][0] = 0.5*(-xi + zeta - 1.) / (zeta - 1.);
+			dNdxi_[0][1] = 0.5*xi / (zeta - 1.);
+			dNdxi_[0][2] = 0.5*(-xi - zeta + 1.) / (zeta - 1.);
+			dNdxi_[0][3] = 0.5*xi / (zeta - 1.);
+			dNdxi_[0][4] = 0.0;
+
+			dNdxi_[1][0] = 0.5*eta / (zeta - 1.);
+			dNdxi_[1][1] = 0.5*(-eta + zeta - 1.) / (zeta - 1.);
+			dNdxi_[1][2] = 0.5*eta / (zeta - 1.);
+			dNdxi_[1][3] = 0.5*(-eta - zeta + 1.) / (zeta - 1.);
+			dNdxi_[1][4] = 0.0;
+
+			dNdxi_[2][0] = 0.25*(xi*xi - eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][1] = 0.25*(-xi * xi + eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][2] = 0.25*(xi*xi - eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][3] = 0.25*(-xi * xi + eta * eta - (1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][4] = 1.0;
+
+			return dNdxi_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
+			for (int j = 0; j < 5; ++j) {
+				for (int i = 0; i < 3; ++i) {
+					dNdx_[i][j] =
+						dNdxi_[0][j] * inv_Jacobian_[i][0] +
+						dNdxi_[1][j] * inv_Jacobian_[i][1] +
+						dNdxi_[2][j] * inv_Jacobian_[i][2];
+				}
+			}
+
+			return dNdx_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			const double& zeta = iso_point.getZ();
+
+			const double& x1 = elem_nodes[0].getX();
+			const double& x2 = elem_nodes[1].getX();
+			const double& x3 = elem_nodes[2].getX();
+			const double& x4 = elem_nodes[3].getX();
+			const double& x5 = elem_nodes[4].getX();
+
+			const double& y1 = elem_nodes[0].getY();
+			const double& y2 = elem_nodes[1].getY();
+			const double& y3 = elem_nodes[2].getY();
+			const double& y4 = elem_nodes[3].getY();
+			const double& y5 = elem_nodes[4].getY();
+
+			const double& z1 = elem_nodes[0].getZ();
+			const double& z2 = elem_nodes[1].getZ();
+			const double& z3 = elem_nodes[2].getZ();
+			const double& z4 = elem_nodes[3].getZ();
+			const double& z5 = elem_nodes[4].getZ();
+
+			Jacobian_[0][0] = (x2*xi) / (2. * (zeta - 1.)) - (x3*(xi / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (x1*(xi / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (x4*xi) / (2. * (zeta - 1.));
+			Jacobian_[0][1] = (xi*y2) / (2. * (zeta - 1.)) - (y3*(xi / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (y1*(xi / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (xi*y4) / (2. * (zeta - 1.));
+			Jacobian_[0][2] = (xi*z2) / (2. * (zeta - 1.)) - (z3*(xi / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (z1*(xi / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (xi*z4) / (2. * (zeta - 1.));
+			Jacobian_[1][0] = (eta*x1) / (2. * (zeta - 1.)) - (x4*(eta / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (x2*(eta / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (eta*x3) / (2. * (zeta - 1.));
+			Jacobian_[1][1] = (eta*y1) / (2. * (zeta - 1.)) - (y4*(eta / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (y2*(eta / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (eta*y3) / (2. * (zeta - 1.));
+			Jacobian_[1][2] = (eta*z1) / (2. * (zeta - 1.)) - (z4*(eta / 2. + zeta / 2. - 1. / 2.)) / (zeta - 1.) - (z2*(eta / 2. - zeta / 2. + 1. / 2.)) / (zeta - 1.) + (eta*z3) / (2. * (zeta - 1.));
+			Jacobian_[2][0] = x5 - (x1*((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. - xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (x2*((zeta - 1.)*(zeta - 1.) / 4. - eta*eta / 4. + xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (x3*((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. - xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (x4*((zeta - 1.)*(zeta - 1.) / 4. - eta*eta / 4. + xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.);
+			Jacobian_[2][1] = y5 - (y1*((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. - xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (y2*((zeta - 1.)*(zeta - 1.) / 4. - eta*eta / 4. + xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (y3*((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. - xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (y4*((zeta - 1.)*(zeta - 1.) / 4. - eta*eta / 4. + xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.);
+			Jacobian_[2][2] = z5 - (z1*((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. - xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (z2*((zeta - 1.)*(zeta - 1.) / 4. - eta*eta / 4. + xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (z3*((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. - xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.) - (z4*((zeta - 1.)*(zeta - 1.) / 4. - eta*eta / 4. + xi*xi / 4.)) / (zeta - 1.) / (zeta - 1.);
+			return Jacobian_;
+		}
+
+		virtual double
+			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_Jacobian(iso_point, elem_nodes);
+
+
+			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] * Jacobian_[2][2] +
+				Jacobian_[1][0] * Jacobian_[2][1] * Jacobian_[0][2] +
+				Jacobian_[0][1] * Jacobian_[1][2] * Jacobian_[2][0] -
+				Jacobian_[0][2] * Jacobian_[1][1] * Jacobian_[2][0] -
+				Jacobian_[0][1] * Jacobian_[1][0] * Jacobian_[2][2] -
+				Jacobian_[1][2] * Jacobian_[2][1] * Jacobian_[0][0];
+
+
+			return det_Jacobian_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_detJacobian(iso_point, elem_nodes);
+			double& J11 = Jacobian_[0][0];
+			double& J21 = Jacobian_[1][0];
+			double& J31 = Jacobian_[2][0];
+			double& J12 = Jacobian_[0][1];
+			double& J22 = Jacobian_[1][1];
+			double& J32 = Jacobian_[2][1];
+			double& J13 = Jacobian_[0][2];
+			double& J23 = Jacobian_[1][2];
+			double& J33 = Jacobian_[2][2];
+
+			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*(J22*J33 - J32 * J23);
+			inv_Jacobian_[1][0] = (1. / det_Jacobian_)*(J31*J23 - J21 * J33);
+			inv_Jacobian_[2][0] = (1. / det_Jacobian_)*(J21*J32 - J31 * J22);
+			inv_Jacobian_[0][1] = (1. / det_Jacobian_)*(J32*J13 - J12 * J33);
+			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*(J11*J33 - J31 * J13);
+			inv_Jacobian_[2][1] = (1. / det_Jacobian_)*(J31*J12 - J11 * J32);
+			inv_Jacobian_[0][2] = (1. / det_Jacobian_)*(J12*J23 - J22 * J13);
+			inv_Jacobian_[1][2] = (1. / det_Jacobian_)*(J21*J13 - J11 * J23);
+			inv_Jacobian_[2][2] = (1. / det_Jacobian_)*(J11*J22 - J21 * J12);
+
+			return inv_Jacobian_;
+		}
+
+	private:
+
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_; // 3x5
+		std::vector<std::vector<double>> dNdx_;  // 3x5
+		std::vector<std::vector<double>> Jacobian_; // 3x3
+		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
+		double det_Jacobian_;
+
+		LagrangePyramid5() :
+			N_(5),
+			dNdxi_(3, std::vector<double>(5)),
+			dNdx_(3, std::vector<double>(5)),
+			Jacobian_(3, std::vector<double>(3)),
+			inv_Jacobian_(3, std::vector<double>(3)) {}
+
+		LagrangePyramid5(const LagrangePyramid5&) {}
+
+		LagrangePyramid5& operator=(const LagrangePyramid5&) {}
+	};
+
+	template<class PointType>
+	class SerendipityTetra10 :public BasisFunction<PointType>{
+	public:
+		friend class SingletonHolder<SerendipityTetra10>;
 
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
@@ -968,28 +1563,22 @@ namespace art_pde {
 		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
 		double det_Jacobian_;
 
-		ShapeFunction() :
+		SerendipityTetra10() :
 			N_(10),
 			dNdxi_(3, std::vector<double>(10)),
 			dNdx_(3, std::vector<double>(10)),
 			Jacobian_(3, std::vector<double>(3)),
 			inv_Jacobian_(3, std::vector<double>(3)) {}
 
-		ShapeFunction(const ShapeFunction&) {}
+		SerendipityTetra10(const SerendipityTetra10&) {}
 
-		ShapeFunction& operator=(const ShapeFunction&) {}
+		SerendipityTetra10& operator=(const SerendipityTetra10&) {}
 	};
 
-	template<>
-	class ShapeFunction< Dim3D, Hexa20, Serendipity > :
-		public SerendipityType<Dim3D>
-	{
+	template<class PointType>
+	class SerendipityHexa20 :public BasisFunction<PointType>{
 	public:
-
-		using PointType = Point<Dim3D, CartesianCoordinate>;
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Hexa20, Serendipity > >;
-
+		friend class SingletonHolder<SerendipityHexa20>;
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
 		{
@@ -1398,278 +1987,22 @@ namespace art_pde {
 		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
 		double det_Jacobian_;
 
-		ShapeFunction() :
+		SerendipityHexa20() :
 			N_(20),
 			dNdxi_(3, std::vector<double>(20)),
 			dNdx_(3, std::vector<double>(20)),
 			Jacobian_(3, std::vector<double>(3)),
 			inv_Jacobian_(3, std::vector<double>(3)) {}
 
-		ShapeFunction(const ShapeFunction&) {}
+		SerendipityHexa20(const SerendipityHexa20&) {}
 
-		ShapeFunction& operator=(const ShapeFunction&) {}
+		SerendipityHexa20& operator=(const SerendipityHexa20&) {}
 	};
 
-	template<>
-	class ShapeFunction< Dim3D, Pyramid13, Serendipity > :
-		public SerendipityType<Dim3D>
-	{
+	template<class PointType>
+	class SerendipityPrism15 :public BasisFunction<PointType>{
 	public:
-
-		using PointType = Point<Dim3D, CartesianCoordinate>;
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Pyramid13, Serendipity > >;
-
-		virtual std::vector<double>&
-			evaluate_shape(const PointType& iso_point) override
-		{
-			const double& xi = iso_point.getX();
-			const double& eta = iso_point.getY();
-			const double& zeta = iso_point.getZ();
-
-			N_[0] = 0.5*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.)*(xi - 0.5) / (1. - zeta);
-			N_[1] = 0.5*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.)*(eta - 0.5) / (1. - zeta);
-			N_[2] = 0.5*(xi - eta + zeta - 1.)*(xi + eta + zeta - 1.)*(-xi - 0.5) / (1. - zeta);
-			N_[3] = 0.5*(xi + eta + zeta - 1.)*(-xi + eta + zeta - 1.)*(-eta - 0.5) / (1. - zeta);
-			N_[4] = 2. * zeta*(zeta - 0.5);
-			N_[5] = 0.5*(xi - eta - zeta + 1.)*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
-			N_[6] = 0.5*(xi + eta - zeta + 1.)*(xi - eta + zeta - 1.)*(xi + eta + zeta - 1.) / (1. - zeta);
-			N_[7] = 0.5*(-xi + eta - zeta + 1)*(xi + eta + zeta - 1)*(-xi + eta + zeta - 1) / (1 - zeta);
-			N_[8] = 0.5*(-xi - eta - zeta + 1.)*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.) / (1. - zeta);
-			N_[9] = zeta*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.) / (1. - zeta);
-			N_[10] = zeta*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
-			N_[11] = zeta*(xi - eta + zeta - 1.)*(xi + eta + zeta - 1.) / (1. - zeta);
-			N_[12] = zeta * (xi + eta + zeta - 1.)*(-xi + eta + zeta - 1.) / (1. - zeta);
-
-			return N_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_dNdxi(const PointType& iso_point) override
-		{
-			const double& xi = iso_point.getX();
-			const double& eta = iso_point.getY();
-			const double& zeta = iso_point.getZ();
-
-			dNdxi_[0][0] = (-1.5*xi*xi + xi * (2. * zeta - 1.5) + 0.5*eta*eta - 0.5*zeta*zeta + 0.5*zeta) / (zeta - 1.);
-			dNdxi_[0][1] = xi * (eta - 0.5) / (zeta - 1.);
-			dNdxi_[0][2] = 0.5*(3. * xi*xi + 4. * xi*zeta - 3. * xi - eta * eta + zeta * zeta - zeta) / (zeta - 1.);
-			dNdxi_[0][3] = xi * (-eta - 0.5) / (zeta - 1.);
-			dNdxi_[0][4] = 0.0;
-			dNdxi_[0][5] = (1.5*xi*xi - xi * eta - 0.5*eta*eta) / (zeta - 1.) - xi - eta - 0.5*zeta + 0.5;
-			dNdxi_[0][6] = (-1.5*xi*xi - xi * eta + 0.5*eta*eta) / (zeta - 1.) - xi - eta + 0.5*zeta - 0.5;
-			dNdxi_[0][7] = (1.5*xi*xi - xi * eta - 0.5*eta*eta) / (zeta - 1.) - xi + eta - 0.5*zeta + 0.5;
-			dNdxi_[0][8] = (1.5*xi*xi + xi * eta - 0.5*eta*eta) / (zeta - 1.) - xi - eta - 0.5*zeta + 0.5;
-			dNdxi_[0][9] = (2. * zeta*(xi - zeta + 1.)) / (1. - zeta);
-			dNdxi_[0][10] = 2. * xi*zeta / (zeta - 1.);
-			dNdxi_[0][11] = (2. * zeta*(xi + zeta - 1.)) / (1. - zeta);
-			dNdxi_[0][12] = (2. * xi*zeta) / (zeta - 1.);
-
-			dNdxi_[1][0] = (xi - 0.5)*eta / (zeta - 1.);
-			dNdxi_[1][1] = (0.5*xi*xi - 1.5*eta*eta + eta * (2. * zeta - 1.5) - 0.5*zeta*zeta + 0.5*zeta) / (zeta - 1.);
-			dNdxi_[1][2] = (-xi - 0.5)*eta / (zeta - 1.);
-			dNdxi_[1][3] = (-0.5*xi*xi + 1.5*eta*eta + eta * (2. * zeta - 1.5) + 0.5*zeta*zeta - 0.5*zeta) / (zeta - 1.);
-			dNdxi_[1][4] = 0.0;
-			dNdxi_[1][5] = (-0.5*xi*xi - xi * eta + 1.5*eta*eta) / (zeta - 1.) + xi - eta - 0.5*zeta + 0.5;
-			dNdxi_[1][6] = (-0.5*xi*xi + xi * eta + 1.5*eta*eta) / (zeta - 1.) - xi - eta - 0.5*zeta + 0.5;
-			dNdxi_[1][7] = (-0.5*xi*xi - xi * eta + 1.5*eta*eta) / (zeta - 1.) + xi - eta - 0.5*zeta + 0.5;
-			dNdxi_[1][8] = (0.5*xi*xi - xi * eta - 1.5*eta*eta) / (zeta - 1.) - xi - eta + 0.5*zeta - 0.5;
-			dNdxi_[1][9] = (2. * eta*zeta) / (zeta - 1.);
-			dNdxi_[1][10] = (2. * zeta*(eta - zeta + 1.)) / (zeta - 1.);
-			dNdxi_[1][11] = (2. * eta*zeta) / (zeta - 1.);
-			dNdxi_[1][12] = (2. * zeta*(eta + zeta - 1.)) / (1. - zeta);
-
-			dNdxi_[2][0] = (0.5*xi*xi*xi - 0.25*xi*xi + xi * (-0.5*eta*eta - 0.5*(1. - zeta)*(1. - zeta)) + 0.25*eta*eta + 0.25*(1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][1] = (xi*xi*(0.25 - 0.5*eta) + 0.5*eta*eta*eta - 0.25*eta*eta + (0.25 - 0.5*eta)*(1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][2] = (-0.5*xi*xi*xi - 0.25*xi*xi + xi * (0.5*eta*eta + 0.5*(1. - zeta)*(1. - zeta)) + 0.25*(eta*eta + (1. - zeta)*(1. - zeta))) / (1. - zeta)*(1. - zeta);
-			dNdxi_[2][3] = (xi*xi*(0.5*eta + 0.25) - 0.5*eta*eta*eta - 0.25*eta*eta + 0.5*eta*(1. - zeta)*(1. - zeta) + 0.25*(1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][4] = 4. * zeta - 1.;
-			dNdxi_[2][5] = (-0.5*xi*xi*xi + 0.5*xi*xi*eta + 0.5*xi*(eta*eta - (1. - zeta)*(1. - zeta)) - 0.5*eta*eta*eta - 0.5*eta*(1. - zeta)*(1. - zeta) + (zeta - 1.)*(zeta - 1.)*(zeta - 1.)) / (1. - zeta) / (1. - zeta);
-			dNdxi_[2][6] = 0.5*(xi*xi*xi + xi * xi*eta - xi * eta*eta - eta * eta*eta) / (1. - zeta) / (1. - zeta) + 0.5*xi - 0.5*eta + zeta - 1.;
-			dNdxi_[2][7] = 0.5*(xi*xi*xi + xi * xi*eta + xi * eta*eta - eta * eta*eta) / (1. - zeta) / (1. - zeta) - 0.5*xi - 0.5*eta + zeta - 1.;
-			dNdxi_[2][8] = 0.5*(xi*xi*xi - xi * xi*eta + 0.5*xi*eta*eta + 0.5*eta*eta*eta) / (1. - zeta) / (1. - zeta) - 0.5*xi + 0.5*eta + zeta - 1.;
-			dNdxi_[2][9] = (xi*xi - eta - eta) / (zeta - 1.) / (zeta - 1.) + 2. * xi - 2. * zeta + 1.;
-			dNdxi_[2][10] = (eta*eta - xi * xi) / (zeta - 1.) / (zeta - 1.) + 2. * eta - 2. * zeta + 1.;
-			dNdxi_[2][11] = (xi*xi - eta * eta) / (1. - zeta) / (1. - zeta) - 2. * xi - 2. * zeta + 1.;
-			dNdxi_[2][12] = (eta*eta - xi * xi) / (1. - zeta) / (1. - zeta) - 2. * eta - 2. * zeta + 1.;
-
-
-			return dNdxi_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-			evaluate_dNdxi(iso_point);
-			evaluate_invJacobian(iso_point, elem_nodes);
-			for (int j = 0; j < 13; ++j) {
-				for (int i = 0; i < 3; ++i) {
-					dNdx_[i][j] =
-						dNdxi_[0][j] * inv_Jacobian_[i][0] +
-						dNdxi_[1][j] * inv_Jacobian_[i][1] +
-						dNdxi_[2][j] * inv_Jacobian_[i][2];
-				}
-			}
-
-			return dNdx_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-			const double& xi = iso_point.getX();
-			const double& eta = iso_point.getY();
-			const double& zeta = iso_point.getZ();
-
-			const double& x1 = elem_nodes[0].getX();
-			const double& x2 = elem_nodes[1].getX();
-			const double& x3 = elem_nodes[2].getX();
-			const double& x4 = elem_nodes[3].getX();
-			const double& x5 = elem_nodes[4].getX();
-			const double& x6 = elem_nodes[5].getX();
-			const double& x7 = elem_nodes[6].getX();
-			const double& x8 = elem_nodes[7].getX();
-			const double& x9 = elem_nodes[8].getX();
-			const double& x10 = elem_nodes[9].getX();
-			const double& x11 = elem_nodes[10].getX();
-			const double& x12 = elem_nodes[11].getX();
-			const double& x13 = elem_nodes[12].getX();
-
-			const double& y1 = elem_nodes[0].getY();
-			const double& y2 = elem_nodes[1].getY();
-			const double& y3 = elem_nodes[2].getY();
-			const double& y4 = elem_nodes[3].getY();
-			const double& y5 = elem_nodes[4].getY();
-			const double& y6 = elem_nodes[5].getY();
-			const double& y7 = elem_nodes[6].getY();
-			const double& y8 = elem_nodes[7].getY();
-			const double& y9 = elem_nodes[8].getY();
-			const double& y10 = elem_nodes[9].getY();
-			const double& y11 = elem_nodes[10].getY();
-			const double& y12 = elem_nodes[11].getY();
-			const double& y13 = elem_nodes[12].getY();
-
-			const double& z1 = elem_nodes[0].getZ();
-			const double& z2 = elem_nodes[1].getZ();
-			const double& z3 = elem_nodes[2].getZ();
-			const double& z4 = elem_nodes[3].getZ();
-			const double& z5 = elem_nodes[4].getZ();
-			const double& z6 = elem_nodes[5].getZ();
-			const double& z7 = elem_nodes[6].getZ();
-			const double& z8 = elem_nodes[7].getZ();
-			const double& z9 = elem_nodes[8].getZ();
-			const double& z10 = elem_nodes[9].getZ();
-			const double& z11 = elem_nodes[10].getZ();
-			const double& z12 = elem_nodes[11].getZ();
-			const double& z13 = elem_nodes[12].getZ();
-
-			Jacobian_[0][0] = (x1*(zeta / 2. + xi * (2. * zeta - 3. / 2.) + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - x7 * (eta + xi - zeta / 2. + (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) + 1. / 2.) - x9 * (eta + xi + zeta / 2. - (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - x8 * (xi - eta + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - (x3*((3. * xi) / 2. + zeta / 2. - 2. * xi*zeta + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - x6 * (eta + xi + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) + (2. * x11*xi*zeta) / (zeta - 1.) + (2. * x13*xi*zeta) / (zeta - 1.) - (2. * x10*zeta*(xi - zeta + 1.)) / (zeta - 1.) + (x2*xi*(eta - 1. / 2.)) / (zeta - 1.) - (x4*xi*(eta + 1. / 2.)) / (zeta - 1.) - (2. * x12*zeta*(xi + zeta - 1.)) / (zeta - 1.);
-				
-
-			Jacobian_[0][1] = (y1*(zeta / 2. + xi * (2. * zeta - 3. / 2.) + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - y7 * (eta + xi - zeta / 2. + (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) + 1. / 2.) - y9 * (eta + xi + zeta / 2. - (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - y8 * (xi - eta + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - (y3*((3. * xi) / 2. + zeta / 2. - 2. * xi*zeta + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - y6 * (eta + xi + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) + (2. * xi*y11*zeta) / (zeta - 1.) + (2. * xi*y13*zeta) / (zeta - 1.) - (2. * y10*zeta*(xi - zeta + 1.)) / (zeta - 1.) + (xi*y2*(eta - 1. / 2.)) / (zeta - 1.) - (xi*y4*(eta + 1. / 2.)) / (zeta - 1.) - (2. * y12*zeta*(xi + zeta - 1.)) / (zeta - 1.);
-				
-
-			Jacobian_[0][2] = (z1*(zeta / 2. + xi * (2. * zeta - 3. / 2.) + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - z7 * (eta + xi - zeta / 2. + (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) + 1. / 2.) - z9 * (eta + xi + zeta / 2. - (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - z8 * (xi - eta + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - (z3*((3. * xi) / 2. + zeta / 2. - 2. * xi*zeta + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - z6 * (eta + xi + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) + (2. * xi*z11*zeta) / (zeta - 1.) + (2. * xi*z13*zeta) / (zeta - 1.) - (2. * z10*zeta*(xi - zeta + 1.)) / (zeta - 1.) + (xi*z2*(eta - 1. / 2.)) / (zeta - 1.) - (xi*z4*(eta + 1. / 2.)) / (zeta - 1.) - (2. * z12*zeta*(xi + zeta - 1.)) / (zeta - 1.);
-				
-
-			Jacobian_[1][0] = (x2*(zeta / 2. - (3. * eta*eta) / 2. + xi*xi / 2. - zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) - x9 * (eta + xi - zeta / 2. + ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) + 1. / 2.) - x6 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - x8 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - x7 * (eta + xi + zeta / 2. - ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) - 1. / 2.) + (x4*((3. * eta*eta) / 2. - zeta / 2. - xi*xi / 2. + zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) + (2. * x11*zeta*(eta - zeta + 1.)) / (zeta - 1.) + (eta*x1*(xi - 1. / 2.)) / (zeta - 1.) - (eta*x3*(xi + 1. / 2.)) / (zeta - 1.) - (2. * x13*zeta*(eta + zeta - 1.)) / (zeta - 1.) + (2. * eta*x10*zeta) / (zeta - 1.) + (2. * eta*x12*zeta) / (zeta - 1.);
-				
-
-			Jacobian_[1][1] = (y2*(zeta / 2. - (3. * eta*eta) / 2. + xi*xi / 2. - zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) - y9 * (eta + xi - zeta / 2. + ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) + 1. / 2.) - y6 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - y8 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - y7 * (eta + xi + zeta / 2. - ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) - 1. / 2.) + (y4*((3. * eta*eta) / 2. - zeta / 2. - xi*xi / 2. + zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) + (2. * y11*zeta*(eta - zeta + 1.)) / (zeta - 1.) + (eta*y1*(xi - 1. / 2.)) / (zeta - 1.) - (eta*y3*(xi + 1. / 2.)) / (zeta - 1.) - (2. * y13*zeta*(eta + zeta - 1.)) / (zeta - 1.) + (2. * eta*y10*zeta) / (zeta - 1.) + (2. * eta*y12*zeta) / (zeta - 1.);
-				
-
-			Jacobian_[1][2] = (z2*(zeta / 2. - (3. * eta*eta) / 2. + xi*xi / 2. - zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) - z9 * (eta + xi - zeta / 2. + ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) + 1. / 2.) - z6 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - z8 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - z7 * (eta + xi + zeta / 2. - ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) - 1. / 2.) + (z4*((3. * eta*eta) / 2. - zeta / 2. - xi*xi / 2. + zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) + (2. * z11*zeta*(eta - zeta + 1.)) / (zeta - 1.) + (eta*z1*(xi - 1. / 2.)) / (zeta - 1.) - (eta*z3*(xi + 1. / 2.)) / (zeta - 1.) - (2. * z13*zeta*(eta + zeta - 1.)) / (zeta - 1.) + (2. * eta*z10*zeta) / (zeta - 1.) + (2. * eta*z12*zeta) / (zeta - 1.);
-				
-
-			Jacobian_[2][0] = x5 * (4. * zeta - 1.) + x3 * ((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. + xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. - xi*xi*xi / 2.) - x8 * (eta / 2. + xi / 2. - zeta - (-eta*eta*eta / 2. + (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  + 1.) + x11 * (2. * eta - 2. * zeta + (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  + 1.) - x13 * (2. * eta + 2. * zeta - (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  - 1.) + x7 * (xi / 2. - eta / 2. + zeta + (-eta*eta*eta / 2. - (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  - 1.) + x9 * (eta / 2. - xi / 2. + zeta + (eta*eta*eta / 4. + (eta*eta * xi) / 4. - (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  - 1.) + x10 * (2. * xi - 2. * zeta - (-xi*xi + 2. * eta) /(zeta - 1.) /(zeta - 1.)  + 1.) - x12 * (2. * xi + 2. * zeta + (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  - 1.) + (x1*((zeta / 4. - 1. / 4.)*(zeta - 1.) + eta*eta / 4. - xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. + xi*xi*xi / 2.)) /(zeta - 1.) /(zeta - 1.)  + (x4*(xi*xi * (eta / 2. + 1. / 4.) + (zeta / 4. - 1. / 4.)*(zeta - 1.) - eta*eta / 4. - eta*eta*eta / 2. + (eta*(zeta - 1.)*(zeta - 1.) ) / 2.)) /(zeta - 1.) /(zeta - 1.)  - (x6*((xi*((zeta - 1.)*(zeta - 1.)  - eta*eta)) / 2. - (zeta - 1.)*(zeta - 1.)*(zeta - 1.) - (eta*xi*xi) / 2. + eta*eta*eta / 2. + xi*xi*xi / 2. + (eta*(zeta - 1.)*(zeta - 1.) ) / 2.)) /(zeta - 1.) /(zeta - 1.)  - (x2*(xi*xi * (eta / 2. - 1. / 4.) + (eta / 2. - 1. / 4.)*(zeta - 1.)*(zeta - 1.)  + eta*eta / 4. - eta*eta*eta / 2.)) /(zeta - 1.) /(zeta - 1.) ;
-				
-
-			Jacobian_[2][1] = y5 * (4. * zeta - 1.) + y3 * ((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. + xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. - xi*xi*xi / 2.) - y8 * (eta / 2. + xi / 2. - zeta - (-eta*eta*eta / 2. + (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  + 1.) + y11 * (2. * eta - 2. * zeta + (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  + 1.) - y13 * (2. * eta + 2. * zeta - (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  - 1.) + y7 * (xi / 2. - eta / 2. + zeta + (-eta*eta*eta / 2. - (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  - 1.) + y9 * (eta / 2. - xi / 2. + zeta + (eta*eta*eta / 4. + (eta*eta * xi) / 4. - (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  - 1.) + y10 * (2. * xi - 2. * zeta - (-xi*xi + 2. * eta) /(zeta - 1.) /(zeta - 1.)  + 1.) - y12 * (2. * xi + 2. * zeta + (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  - 1.) + (y1*((zeta / 4. - 1. / 4.)*(zeta - 1.) + eta*eta / 4. - xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. + xi*xi*xi / 2.)) /(zeta - 1.) /(zeta - 1.)  + (y4*(xi*xi * (eta / 2. + 1. / 4.) + (zeta / 4. - 1. / 4.)*(zeta - 1.) - eta*eta / 4. - eta*eta*eta / 2. + (eta*(zeta - 1.)*(zeta - 1.) ) / 2.)) /(zeta - 1.) /(zeta - 1.)  - (y6*((xi*((zeta - 1.)*(zeta - 1.)  - eta*eta)) / 2. - (zeta - 1.)*(zeta - 1.)*(zeta - 1.) - (eta*xi*xi) / 2. + eta*eta*eta / 2. + xi*xi*xi / 2. + (eta*(zeta - 1.)*(zeta - 1.) ) / 2.)) /(zeta - 1.) /(zeta - 1.)  - (y2*(xi*xi * (eta / 2. - 1. / 4.) + (eta / 2. - 1. / 4.)*(zeta - 1.)*(zeta - 1.)  + eta*eta / 4. - eta*eta*eta / 2.)) /(zeta - 1.) /(zeta - 1.) ;
-				
-
-			Jacobian_[2][2] = z5 * (4. * zeta - 1.) + z3 * ((zeta - 1.)*(zeta - 1.)  / 4. + eta*eta / 4. + xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. - xi*xi*xi / 2.) - z8 * (eta / 2. + xi / 2. - zeta - (-eta*eta*eta / 2. + (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  + 1.) + z11 * (2. * eta - 2. * zeta + (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  + 1.) - z13 * (2. * eta + 2. * zeta - (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  - 1.) + z7 * (xi / 2. - eta / 2. + zeta + (-eta*eta*eta / 2. - (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  - 1.) + z9 * (eta / 2. - xi / 2. + zeta + (eta*eta*eta / 4. + (eta*eta * xi) / 4. - (eta*xi*xi) / 2. + xi*xi*xi / 2.) /(zeta - 1.) /(zeta - 1.)  - 1.) + z10 * (2. * xi - 2. * zeta - (-xi*xi + 2. * eta) /(zeta - 1.) /(zeta - 1.)  + 1.) - z12 * (2. * xi + 2. * zeta + (eta*eta - xi*xi) /(zeta - 1.) /(zeta - 1.)  - 1.) + (z1*((zeta / 4. - 1. / 4.)*(zeta - 1.) + eta*eta / 4. - xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. + xi*xi*xi / 2.)) /(zeta - 1.) /(zeta - 1.)  + (z4*(xi*xi * (eta / 2. + 1. / 4.) + (zeta / 4. - 1. / 4.)*(zeta - 1.) - eta*eta / 4. - eta*eta*eta / 2. + (eta*(zeta - 1.)*(zeta - 1.) ) / 2.)) /(zeta - 1.) /(zeta - 1.)  - (z6*((xi*((zeta - 1.)*(zeta - 1.)  - eta*eta)) / 2. - (zeta - 1.)*(zeta - 1.)*(zeta - 1.) - (eta*xi*xi) / 2. + eta*eta*eta / 2. + xi*xi*xi / 2. + (eta*(zeta - 1.)*(zeta - 1.) ) / 2.)) /(zeta - 1.) /(zeta - 1.)  - (z2*(xi*xi * (eta / 2. - 1. / 4.) + (eta / 2. - 1. / 4.)*(zeta - 1.)*(zeta - 1.)  + eta*eta / 4. - eta*eta*eta / 2.)) /(zeta - 1.) /(zeta - 1.) ;
-				
-
-			return Jacobian_;
-		}
-
-		virtual double
-			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-
-			evaluate_Jacobian(iso_point, elem_nodes);
-
-
-			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] * Jacobian_[2][2] +
-				Jacobian_[1][0] * Jacobian_[2][1] * Jacobian_[0][2] +
-				Jacobian_[0][1] * Jacobian_[1][2] * Jacobian_[2][0] -
-				Jacobian_[0][2] * Jacobian_[1][1] * Jacobian_[2][0] -
-				Jacobian_[0][1] * Jacobian_[1][0] * Jacobian_[2][2] -
-				Jacobian_[1][2] * Jacobian_[2][1] * Jacobian_[0][0];
-
-
-			return det_Jacobian_;
-		}
-
-		virtual std::vector<std::vector<double>>&
-			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
-		{
-
-			evaluate_detJacobian(iso_point, elem_nodes);
-			double& J11 = Jacobian_[0][0];
-			double& J21 = Jacobian_[1][0];
-			double& J31 = Jacobian_[2][0];
-			double& J12 = Jacobian_[0][1];
-			double& J22 = Jacobian_[1][1];
-			double& J32 = Jacobian_[2][1];
-			double& J13 = Jacobian_[0][2];
-			double& J23 = Jacobian_[1][2];
-			double& J33 = Jacobian_[2][2];
-
-			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*(J22*J33 - J32 * J23);
-			inv_Jacobian_[1][0] = (1. / det_Jacobian_)*(J31*J23 - J21 * J33);
-			inv_Jacobian_[2][0] = (1. / det_Jacobian_)*(J21*J32 - J31 * J22);
-			inv_Jacobian_[0][1] = (1. / det_Jacobian_)*(J32*J13 - J12 * J33);
-			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*(J11*J33 - J31 * J13);
-			inv_Jacobian_[2][1] = (1. / det_Jacobian_)*(J31*J12 - J11 * J32);
-			inv_Jacobian_[0][2] = (1. / det_Jacobian_)*(J12*J23 - J22 * J13);
-			inv_Jacobian_[1][2] = (1. / det_Jacobian_)*(J21*J13 - J11 * J23);
-			inv_Jacobian_[2][2] = (1. / det_Jacobian_)*(J11*J22 - J21 * J12);
-
-			return inv_Jacobian_;
-		}
-
-	private:
-
-		std::vector<double> N_;
-		std::vector<std::vector<double>> dNdxi_; // 3x13
-		std::vector<std::vector<double>> dNdx_;  // 3x13
-		std::vector<std::vector<double>> Jacobian_; // 3x3
-		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
-		double det_Jacobian_;
-
-		ShapeFunction() :
-			N_(13),
-			dNdxi_(3, std::vector<double>(13)),
-			dNdx_(3, std::vector<double>(13)),
-			Jacobian_(3, std::vector<double>(3)),
-			inv_Jacobian_(3, std::vector<double>(3)) {}
-
-		ShapeFunction(const ShapeFunction&) {}
-
-		ShapeFunction& operator=(const ShapeFunction&) {}
-	};
-
-	template<>
-	class ShapeFunction< Dim3D, Prism15, Serendipity > :
-		public SerendipityType<Dim3D>
-	{
-	public:
-
-		using PointType = Point<Dim3D, CartesianCoordinate>;
-
-		friend class SingletonHolder < ShapeFunction< Dim3D, Prism15, Serendipity > >;
-
+		friend class SingletonHolder<SerendipityPrism15>;
 		virtual std::vector<double>&
 			evaluate_shape(const PointType& iso_point) override
 		{
@@ -2019,33 +2352,265 @@ namespace art_pde {
 		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
 		double det_Jacobian_;
 
-		ShapeFunction() :
+		SerendipityPrism15() :
 			N_(15),
 			dNdxi_(3, std::vector<double>(15)),
 			dNdx_(3, std::vector<double>(15)),
 			Jacobian_(3, std::vector<double>(3)),
 			inv_Jacobian_(3, std::vector<double>(3)) {}
 
-		ShapeFunction(const ShapeFunction&) {}
+		SerendipityPrism15(const SerendipityPrism15&) {}
 
-		ShapeFunction& operator=(const ShapeFunction&) {}
+		SerendipityPrism15& operator=(const SerendipityPrism15&) {}
 	};
 
+	template<class PointType>
+	class SerendipityPyramid13 :public BasisFunction<PointType>{
+	public:
+		friend class SingletonHolder<SerendipityPyramid13>;
+		virtual std::vector<double>&
+			evaluate_shape(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			const double& zeta = iso_point.getZ();
+
+			N_[0] = 0.5*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.)*(xi - 0.5) / (1. - zeta);
+			N_[1] = 0.5*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.)*(eta - 0.5) / (1. - zeta);
+			N_[2] = 0.5*(xi - eta + zeta - 1.)*(xi + eta + zeta - 1.)*(-xi - 0.5) / (1. - zeta);
+			N_[3] = 0.5*(xi + eta + zeta - 1.)*(-xi + eta + zeta - 1.)*(-eta - 0.5) / (1. - zeta);
+			N_[4] = 2. * zeta*(zeta - 0.5);
+			N_[5] = 0.5*(xi - eta - zeta + 1.)*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
+			N_[6] = 0.5*(xi + eta - zeta + 1.)*(xi - eta + zeta - 1.)*(xi + eta + zeta - 1.) / (1. - zeta);
+			N_[7] = 0.5*(-xi + eta - zeta + 1)*(xi + eta + zeta - 1)*(-xi + eta + zeta - 1) / (1 - zeta);
+			N_[8] = 0.5*(-xi - eta - zeta + 1.)*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.) / (1. - zeta);
+			N_[9] = zeta*(-xi + eta + zeta - 1.)*(-xi - eta + zeta - 1.) / (1. - zeta);
+			N_[10] = zeta*(-xi - eta + zeta - 1.)*(xi - eta + zeta - 1.) / (1. - zeta);
+			N_[11] = zeta*(xi - eta + zeta - 1.)*(xi + eta + zeta - 1.) / (1. - zeta);
+			N_[12] = zeta * (xi + eta + zeta - 1.)*(-xi + eta + zeta - 1.) / (1. - zeta);
+
+			return N_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdxi(const PointType& iso_point) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			const double& zeta = iso_point.getZ();
+
+			dNdxi_[0][0] = (-1.5*xi*xi + xi * (2. * zeta - 1.5) + 0.5*eta*eta - 0.5*zeta*zeta + 0.5*zeta) / (zeta - 1.);
+			dNdxi_[0][1] = xi * (eta - 0.5) / (zeta - 1.);
+			dNdxi_[0][2] = 0.5*(3. * xi*xi + 4. * xi*zeta - 3. * xi - eta * eta + zeta * zeta - zeta) / (zeta - 1.);
+			dNdxi_[0][3] = xi * (-eta - 0.5) / (zeta - 1.);
+			dNdxi_[0][4] = 0.0;
+			dNdxi_[0][5] = (1.5*xi*xi - xi * eta - 0.5*eta*eta) / (zeta - 1.) - xi - eta - 0.5*zeta + 0.5;
+			dNdxi_[0][6] = (-1.5*xi*xi - xi * eta + 0.5*eta*eta) / (zeta - 1.) - xi - eta + 0.5*zeta - 0.5;
+			dNdxi_[0][7] = (1.5*xi*xi - xi * eta - 0.5*eta*eta) / (zeta - 1.) - xi + eta - 0.5*zeta + 0.5;
+			dNdxi_[0][8] = (1.5*xi*xi + xi * eta - 0.5*eta*eta) / (zeta - 1.) - xi - eta - 0.5*zeta + 0.5;
+			dNdxi_[0][9] = (2. * zeta*(xi - zeta + 1.)) / (1. - zeta);
+			dNdxi_[0][10] = 2. * xi*zeta / (zeta - 1.);
+			dNdxi_[0][11] = (2. * zeta*(xi + zeta - 1.)) / (1. - zeta);
+			dNdxi_[0][12] = (2. * xi*zeta) / (zeta - 1.);
+
+			dNdxi_[1][0] = (xi - 0.5)*eta / (zeta - 1.);
+			dNdxi_[1][1] = (0.5*xi*xi - 1.5*eta*eta + eta * (2. * zeta - 1.5) - 0.5*zeta*zeta + 0.5*zeta) / (zeta - 1.);
+			dNdxi_[1][2] = (-xi - 0.5)*eta / (zeta - 1.);
+			dNdxi_[1][3] = (-0.5*xi*xi + 1.5*eta*eta + eta * (2. * zeta - 1.5) + 0.5*zeta*zeta - 0.5*zeta) / (zeta - 1.);
+			dNdxi_[1][4] = 0.0;
+			dNdxi_[1][5] = (-0.5*xi*xi - xi * eta + 1.5*eta*eta) / (zeta - 1.) + xi - eta - 0.5*zeta + 0.5;
+			dNdxi_[1][6] = (-0.5*xi*xi + xi * eta + 1.5*eta*eta) / (zeta - 1.) - xi - eta - 0.5*zeta + 0.5;
+			dNdxi_[1][7] = (-0.5*xi*xi - xi * eta + 1.5*eta*eta) / (zeta - 1.) + xi - eta - 0.5*zeta + 0.5;
+			dNdxi_[1][8] = (0.5*xi*xi - xi * eta - 1.5*eta*eta) / (zeta - 1.) - xi - eta + 0.5*zeta - 0.5;
+			dNdxi_[1][9] = (2. * eta*zeta) / (zeta - 1.);
+			dNdxi_[1][10] = (2. * zeta*(eta - zeta + 1.)) / (zeta - 1.);
+			dNdxi_[1][11] = (2. * eta*zeta) / (zeta - 1.);
+			dNdxi_[1][12] = (2. * zeta*(eta + zeta - 1.)) / (1. - zeta);
+
+			dNdxi_[2][0] = (0.5*xi*xi*xi - 0.25*xi*xi + xi * (-0.5*eta*eta - 0.5*(1. - zeta)*(1. - zeta)) + 0.25*eta*eta + 0.25*(1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][1] = (xi*xi*(0.25 - 0.5*eta) + 0.5*eta*eta*eta - 0.25*eta*eta + (0.25 - 0.5*eta)*(1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][2] = (-0.5*xi*xi*xi - 0.25*xi*xi + xi * (0.5*eta*eta + 0.5*(1. - zeta)*(1. - zeta)) + 0.25*(eta*eta + (1. - zeta)*(1. - zeta))) / (1. - zeta)*(1. - zeta);
+			dNdxi_[2][3] = (xi*xi*(0.5*eta + 0.25) - 0.5*eta*eta*eta - 0.25*eta*eta + 0.5*eta*(1. - zeta)*(1. - zeta) + 0.25*(1. - zeta)*(1. - zeta)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][4] = 4. * zeta - 1.;
+			dNdxi_[2][5] = (-0.5*xi*xi*xi + 0.5*xi*xi*eta + 0.5*xi*(eta*eta - (1. - zeta)*(1. - zeta)) - 0.5*eta*eta*eta - 0.5*eta*(1. - zeta)*(1. - zeta) + (zeta - 1.)*(zeta - 1.)*(zeta - 1.)) / (1. - zeta) / (1. - zeta);
+			dNdxi_[2][6] = 0.5*(xi*xi*xi + xi * xi*eta - xi * eta*eta - eta * eta*eta) / (1. - zeta) / (1. - zeta) + 0.5*xi - 0.5*eta + zeta - 1.;
+			dNdxi_[2][7] = 0.5*(xi*xi*xi + xi * xi*eta + xi * eta*eta - eta * eta*eta) / (1. - zeta) / (1. - zeta) - 0.5*xi - 0.5*eta + zeta - 1.;
+			dNdxi_[2][8] = 0.5*(xi*xi*xi - xi * xi*eta + 0.5*xi*eta*eta + 0.5*eta*eta*eta) / (1. - zeta) / (1. - zeta) - 0.5*xi + 0.5*eta + zeta - 1.;
+			dNdxi_[2][9] = (xi*xi - eta - eta) / (zeta - 1.) / (zeta - 1.) + 2. * xi - 2. * zeta + 1.;
+			dNdxi_[2][10] = (eta*eta - xi * xi) / (zeta - 1.) / (zeta - 1.) + 2. * eta - 2. * zeta + 1.;
+			dNdxi_[2][11] = (xi*xi - eta * eta) / (1. - zeta) / (1. - zeta) - 2. * xi - 2. * zeta + 1.;
+			dNdxi_[2][12] = (eta*eta - xi * xi) / (1. - zeta) / (1. - zeta) - 2. * eta - 2. * zeta + 1.;
 
 
-}
+			return dNdxi_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_dNdx(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			evaluate_dNdxi(iso_point);
+			evaluate_invJacobian(iso_point, elem_nodes);
+			for (int j = 0; j < 13; ++j) {
+				for (int i = 0; i < 3; ++i) {
+					dNdx_[i][j] =
+						dNdxi_[0][j] * inv_Jacobian_[i][0] +
+						dNdxi_[1][j] * inv_Jacobian_[i][1] +
+						dNdxi_[2][j] * inv_Jacobian_[i][2];
+				}
+			}
+
+			return dNdx_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_Jacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+			const double& xi = iso_point.getX();
+			const double& eta = iso_point.getY();
+			const double& zeta = iso_point.getZ();
+
+			const double& x1 = elem_nodes[0].getX();
+			const double& x2 = elem_nodes[1].getX();
+			const double& x3 = elem_nodes[2].getX();
+			const double& x4 = elem_nodes[3].getX();
+			const double& x5 = elem_nodes[4].getX();
+			const double& x6 = elem_nodes[5].getX();
+			const double& x7 = elem_nodes[6].getX();
+			const double& x8 = elem_nodes[7].getX();
+			const double& x9 = elem_nodes[8].getX();
+			const double& x10 = elem_nodes[9].getX();
+			const double& x11 = elem_nodes[10].getX();
+			const double& x12 = elem_nodes[11].getX();
+			const double& x13 = elem_nodes[12].getX();
+
+			const double& y1 = elem_nodes[0].getY();
+			const double& y2 = elem_nodes[1].getY();
+			const double& y3 = elem_nodes[2].getY();
+			const double& y4 = elem_nodes[3].getY();
+			const double& y5 = elem_nodes[4].getY();
+			const double& y6 = elem_nodes[5].getY();
+			const double& y7 = elem_nodes[6].getY();
+			const double& y8 = elem_nodes[7].getY();
+			const double& y9 = elem_nodes[8].getY();
+			const double& y10 = elem_nodes[9].getY();
+			const double& y11 = elem_nodes[10].getY();
+			const double& y12 = elem_nodes[11].getY();
+			const double& y13 = elem_nodes[12].getY();
+
+			const double& z1 = elem_nodes[0].getZ();
+			const double& z2 = elem_nodes[1].getZ();
+			const double& z3 = elem_nodes[2].getZ();
+			const double& z4 = elem_nodes[3].getZ();
+			const double& z5 = elem_nodes[4].getZ();
+			const double& z6 = elem_nodes[5].getZ();
+			const double& z7 = elem_nodes[6].getZ();
+			const double& z8 = elem_nodes[7].getZ();
+			const double& z9 = elem_nodes[8].getZ();
+			const double& z10 = elem_nodes[9].getZ();
+			const double& z11 = elem_nodes[10].getZ();
+			const double& z12 = elem_nodes[11].getZ();
+			const double& z13 = elem_nodes[12].getZ();
+
+			Jacobian_[0][0] = (x1*(zeta / 2. + xi * (2. * zeta - 3. / 2.) + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - x7 * (eta + xi - zeta / 2. + (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) + 1. / 2.) - x9 * (eta + xi + zeta / 2. - (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - x8 * (xi - eta + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - (x3*((3. * xi) / 2. + zeta / 2. - 2. * xi*zeta + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - x6 * (eta + xi + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) + (2. * x11*xi*zeta) / (zeta - 1.) + (2. * x13*xi*zeta) / (zeta - 1.) - (2. * x10*zeta*(xi - zeta + 1.)) / (zeta - 1.) + (x2*xi*(eta - 1. / 2.)) / (zeta - 1.) - (x4*xi*(eta + 1. / 2.)) / (zeta - 1.) - (2. * x12*zeta*(xi + zeta - 1.)) / (zeta - 1.);
 
 
+			Jacobian_[0][1] = (y1*(zeta / 2. + xi * (2. * zeta - 3. / 2.) + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - y7 * (eta + xi - zeta / 2. + (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) + 1. / 2.) - y9 * (eta + xi + zeta / 2. - (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - y8 * (xi - eta + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - (y3*((3. * xi) / 2. + zeta / 2. - 2. * xi*zeta + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - y6 * (eta + xi + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) + (2. * xi*y11*zeta) / (zeta - 1.) + (2. * xi*y13*zeta) / (zeta - 1.) - (2. * y10*zeta*(xi - zeta + 1.)) / (zeta - 1.) + (xi*y2*(eta - 1. / 2.)) / (zeta - 1.) - (xi*y4*(eta + 1. / 2.)) / (zeta - 1.) - (2. * y12*zeta*(xi + zeta - 1.)) / (zeta - 1.);
 
 
-#endif //ARTCFD_LAGRANGE3DSHAPEFUNCTION_H
+			Jacobian_[0][2] = (z1*(zeta / 2. + xi * (2. * zeta - 3. / 2.) + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - z7 * (eta + xi - zeta / 2. + (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) + 1. / 2.) - z9 * (eta + xi + zeta / 2. - (-eta*eta / 2. + eta * xi + (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - z8 * (xi - eta + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) - (z3*((3. * xi) / 2. + zeta / 2. - 2. * xi*zeta + eta*eta / 2. - (3. * xi*xi) / 2. - zeta*zeta / 2.)) / (zeta - 1.) - z6 * (eta + xi + zeta / 2. + (eta*eta / 2. + xi * eta - (3. * xi*xi) / 2.) / (zeta - 1.) - 1. / 2.) + (2. * xi*z11*zeta) / (zeta - 1.) + (2. * xi*z13*zeta) / (zeta - 1.) - (2. * z10*zeta*(xi - zeta + 1.)) / (zeta - 1.) + (xi*z2*(eta - 1. / 2.)) / (zeta - 1.) - (xi*z4*(eta + 1. / 2.)) / (zeta - 1.) - (2. * z12*zeta*(xi + zeta - 1.)) / (zeta - 1.);
 
 
+			Jacobian_[1][0] = (x2*(zeta / 2. - (3. * eta*eta) / 2. + xi*xi / 2. - zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) - x9 * (eta + xi - zeta / 2. + ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) + 1. / 2.) - x6 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - x8 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - x7 * (eta + xi + zeta / 2. - ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) - 1. / 2.) + (x4*((3. * eta*eta) / 2. - zeta / 2. - xi*xi / 2. + zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) + (2. * x11*zeta*(eta - zeta + 1.)) / (zeta - 1.) + (eta*x1*(xi - 1. / 2.)) / (zeta - 1.) - (eta*x3*(xi + 1. / 2.)) / (zeta - 1.) - (2. * x13*zeta*(eta + zeta - 1.)) / (zeta - 1.) + (2. * eta*x10*zeta) / (zeta - 1.) + (2. * eta*x12*zeta) / (zeta - 1.);
 
 
+			Jacobian_[1][1] = (y2*(zeta / 2. - (3. * eta*eta) / 2. + xi*xi / 2. - zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) - y9 * (eta + xi - zeta / 2. + ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) + 1. / 2.) - y6 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - y8 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - y7 * (eta + xi + zeta / 2. - ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) - 1. / 2.) + (y4*((3. * eta*eta) / 2. - zeta / 2. - xi*xi / 2. + zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) + (2. * y11*zeta*(eta - zeta + 1.)) / (zeta - 1.) + (eta*y1*(xi - 1. / 2.)) / (zeta - 1.) - (eta*y3*(xi + 1. / 2.)) / (zeta - 1.) - (2. * y13*zeta*(eta + zeta - 1.)) / (zeta - 1.) + (2. * eta*y10*zeta) / (zeta - 1.) + (2. * eta*y12*zeta) / (zeta - 1.);
 
 
+			Jacobian_[1][2] = (z2*(zeta / 2. - (3. * eta*eta) / 2. + xi*xi / 2. - zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) - z9 * (eta + xi - zeta / 2. + ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) + 1. / 2.) - z6 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - z8 * (eta - xi + zeta / 2. + (xi*xi / 2. + eta * xi - (3. * eta*eta) / 2.) / (zeta - 1.) - 1. / 2.) - z7 * (eta + xi + zeta / 2. - ((3. * eta*eta) / 2. + eta * xi - xi*xi / 2.) / (zeta - 1.) - 1. / 2.) + (z4*((3. * eta*eta) / 2. - zeta / 2. - xi*xi / 2. + zeta*zeta / 2. + eta * (2. * zeta - 3. / 2.))) / (zeta - 1.) + (2. * z11*zeta*(eta - zeta + 1.)) / (zeta - 1.) + (eta*z1*(xi - 1. / 2.)) / (zeta - 1.) - (eta*z3*(xi + 1. / 2.)) / (zeta - 1.) - (2. * z13*zeta*(eta + zeta - 1.)) / (zeta - 1.) + (2. * eta*z10*zeta) / (zeta - 1.) + (2. * eta*z12*zeta) / (zeta - 1.);
 
 
+			Jacobian_[2][0] = x5 * (4. * zeta - 1.) + x3 * ((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. + xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. - xi*xi*xi / 2.) - x8 * (eta / 2. + xi / 2. - zeta - (-eta*eta*eta / 2. + (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) + 1.) + x11 * (2. * eta - 2. * zeta + (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) + 1.) - x13 * (2. * eta + 2. * zeta - (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) - 1.) + x7 * (xi / 2. - eta / 2. + zeta + (-eta*eta*eta / 2. - (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) - 1.) + x9 * (eta / 2. - xi / 2. + zeta + (eta*eta*eta / 4. + (eta*eta * xi) / 4. - (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) - 1.) + x10 * (2. * xi - 2. * zeta - (-xi*xi + 2. * eta) / (zeta - 1.) / (zeta - 1.) + 1.) - x12 * (2. * xi + 2. * zeta + (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) - 1.) + (x1*((zeta / 4. - 1. / 4.)*(zeta - 1.) + eta*eta / 4. - xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. + xi*xi*xi / 2.)) / (zeta - 1.) / (zeta - 1.) + (x4*(xi*xi * (eta / 2. + 1. / 4.) + (zeta / 4. - 1. / 4.)*(zeta - 1.) - eta*eta / 4. - eta*eta*eta / 2. + (eta*(zeta - 1.)*(zeta - 1.)) / 2.)) / (zeta - 1.) / (zeta - 1.) - (x6*((xi*((zeta - 1.)*(zeta - 1.) - eta*eta)) / 2. - (zeta - 1.)*(zeta - 1.)*(zeta - 1.) - (eta*xi*xi) / 2. + eta*eta*eta / 2. + xi*xi*xi / 2. + (eta*(zeta - 1.)*(zeta - 1.)) / 2.)) / (zeta - 1.) / (zeta - 1.) - (x2*(xi*xi * (eta / 2. - 1. / 4.) + (eta / 2. - 1. / 4.)*(zeta - 1.)*(zeta - 1.) + eta*eta / 4. - eta*eta*eta / 2.)) / (zeta - 1.) / (zeta - 1.);
 
 
+			Jacobian_[2][1] = y5 * (4. * zeta - 1.) + y3 * ((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. + xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. - xi*xi*xi / 2.) - y8 * (eta / 2. + xi / 2. - zeta - (-eta*eta*eta / 2. + (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) + 1.) + y11 * (2. * eta - 2. * zeta + (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) + 1.) - y13 * (2. * eta + 2. * zeta - (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) - 1.) + y7 * (xi / 2. - eta / 2. + zeta + (-eta*eta*eta / 2. - (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) - 1.) + y9 * (eta / 2. - xi / 2. + zeta + (eta*eta*eta / 4. + (eta*eta * xi) / 4. - (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) - 1.) + y10 * (2. * xi - 2. * zeta - (-xi*xi + 2. * eta) / (zeta - 1.) / (zeta - 1.) + 1.) - y12 * (2. * xi + 2. * zeta + (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) - 1.) + (y1*((zeta / 4. - 1. / 4.)*(zeta - 1.) + eta*eta / 4. - xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. + xi*xi*xi / 2.)) / (zeta - 1.) / (zeta - 1.) + (y4*(xi*xi * (eta / 2. + 1. / 4.) + (zeta / 4. - 1. / 4.)*(zeta - 1.) - eta*eta / 4. - eta*eta*eta / 2. + (eta*(zeta - 1.)*(zeta - 1.)) / 2.)) / (zeta - 1.) / (zeta - 1.) - (y6*((xi*((zeta - 1.)*(zeta - 1.) - eta*eta)) / 2. - (zeta - 1.)*(zeta - 1.)*(zeta - 1.) - (eta*xi*xi) / 2. + eta*eta*eta / 2. + xi*xi*xi / 2. + (eta*(zeta - 1.)*(zeta - 1.)) / 2.)) / (zeta - 1.) / (zeta - 1.) - (y2*(xi*xi * (eta / 2. - 1. / 4.) + (eta / 2. - 1. / 4.)*(zeta - 1.)*(zeta - 1.) + eta*eta / 4. - eta*eta*eta / 2.)) / (zeta - 1.) / (zeta - 1.);
+
+
+			Jacobian_[2][2] = z5 * (4. * zeta - 1.) + z3 * ((zeta - 1.)*(zeta - 1.) / 4. + eta*eta / 4. + xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. - xi*xi*xi / 2.) - z8 * (eta / 2. + xi / 2. - zeta - (-eta*eta*eta / 2. + (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) + 1.) + z11 * (2. * eta - 2. * zeta + (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) + 1.) - z13 * (2. * eta + 2. * zeta - (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) - 1.) + z7 * (xi / 2. - eta / 2. + zeta + (-eta*eta*eta / 2. - (eta*eta * xi) / 2. + (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) - 1.) + z9 * (eta / 2. - xi / 2. + zeta + (eta*eta*eta / 4. + (eta*eta * xi) / 4. - (eta*xi*xi) / 2. + xi*xi*xi / 2.) / (zeta - 1.) / (zeta - 1.) - 1.) + z10 * (2. * xi - 2. * zeta - (-xi*xi + 2. * eta) / (zeta - 1.) / (zeta - 1.) + 1.) - z12 * (2. * xi + 2. * zeta + (eta*eta - xi*xi) / (zeta - 1.) / (zeta - 1.) - 1.) + (z1*((zeta / 4. - 1. / 4.)*(zeta - 1.) + eta*eta / 4. - xi * (eta*eta / 2. + (zeta / 2. - 1. / 2.)*(zeta - 1.)) - xi*xi / 4. + xi*xi*xi / 2.)) / (zeta - 1.) / (zeta - 1.) + (z4*(xi*xi * (eta / 2. + 1. / 4.) + (zeta / 4. - 1. / 4.)*(zeta - 1.) - eta*eta / 4. - eta*eta*eta / 2. + (eta*(zeta - 1.)*(zeta - 1.)) / 2.)) / (zeta - 1.) / (zeta - 1.) - (z6*((xi*((zeta - 1.)*(zeta - 1.) - eta*eta)) / 2. - (zeta - 1.)*(zeta - 1.)*(zeta - 1.) - (eta*xi*xi) / 2. + eta*eta*eta / 2. + xi*xi*xi / 2. + (eta*(zeta - 1.)*(zeta - 1.)) / 2.)) / (zeta - 1.) / (zeta - 1.) - (z2*(xi*xi * (eta / 2. - 1. / 4.) + (eta / 2. - 1. / 4.)*(zeta - 1.)*(zeta - 1.) + eta*eta / 4. - eta*eta*eta / 2.)) / (zeta - 1.) / (zeta - 1.);
+
+
+			return Jacobian_;
+		}
+
+		virtual double
+			evaluate_detJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_Jacobian(iso_point, elem_nodes);
+
+
+			det_Jacobian_ = Jacobian_[0][0] * Jacobian_[1][1] * Jacobian_[2][2] +
+				Jacobian_[1][0] * Jacobian_[2][1] * Jacobian_[0][2] +
+				Jacobian_[0][1] * Jacobian_[1][2] * Jacobian_[2][0] -
+				Jacobian_[0][2] * Jacobian_[1][1] * Jacobian_[2][0] -
+				Jacobian_[0][1] * Jacobian_[1][0] * Jacobian_[2][2] -
+				Jacobian_[1][2] * Jacobian_[2][1] * Jacobian_[0][0];
+
+
+			return det_Jacobian_;
+		}
+
+		virtual std::vector<std::vector<double>>&
+			evaluate_invJacobian(const PointType& iso_point, const std::vector<PointType>& elem_nodes) override
+		{
+
+			evaluate_detJacobian(iso_point, elem_nodes);
+			double& J11 = Jacobian_[0][0];
+			double& J21 = Jacobian_[1][0];
+			double& J31 = Jacobian_[2][0];
+			double& J12 = Jacobian_[0][1];
+			double& J22 = Jacobian_[1][1];
+			double& J32 = Jacobian_[2][1];
+			double& J13 = Jacobian_[0][2];
+			double& J23 = Jacobian_[1][2];
+			double& J33 = Jacobian_[2][2];
+
+			inv_Jacobian_[0][0] = (1. / det_Jacobian_)*(J22*J33 - J32 * J23);
+			inv_Jacobian_[1][0] = (1. / det_Jacobian_)*(J31*J23 - J21 * J33);
+			inv_Jacobian_[2][0] = (1. / det_Jacobian_)*(J21*J32 - J31 * J22);
+			inv_Jacobian_[0][1] = (1. / det_Jacobian_)*(J32*J13 - J12 * J33);
+			inv_Jacobian_[1][1] = (1. / det_Jacobian_)*(J11*J33 - J31 * J13);
+			inv_Jacobian_[2][1] = (1. / det_Jacobian_)*(J31*J12 - J11 * J32);
+			inv_Jacobian_[0][2] = (1. / det_Jacobian_)*(J12*J23 - J22 * J13);
+			inv_Jacobian_[1][2] = (1. / det_Jacobian_)*(J21*J13 - J11 * J23);
+			inv_Jacobian_[2][2] = (1. / det_Jacobian_)*(J11*J22 - J21 * J12);
+
+			return inv_Jacobian_;
+		}
+
+	private:
+
+		std::vector<double> N_;
+		std::vector<std::vector<double>> dNdxi_; // 3x13
+		std::vector<std::vector<double>> dNdx_;  // 3x13
+		std::vector<std::vector<double>> Jacobian_; // 3x3
+		std::vector<std::vector<double>> inv_Jacobian_; // 3x3
+		double det_Jacobian_;
+
+		SerendipityPyramid13() :
+			N_(13),
+			dNdxi_(3, std::vector<double>(13)),
+			dNdx_(3, std::vector<double>(13)),
+			Jacobian_(3, std::vector<double>(3)),
+			inv_Jacobian_(3, std::vector<double>(3)) {}
+
+		SerendipityPyramid13(const SerendipityPyramid13&) {}
+
+		SerendipityPyramid13& operator=(const SerendipityPyramid13&) {}
+	};
+
+}// namespace Dim3D
+}// namespace isoparametric
+}// namespace function_space
+}// namespace art_pde
+
+#endif
