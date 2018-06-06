@@ -2,19 +2,27 @@
 #include <iostream>
 # include "FunctionSpace\lagrange3d_shape_function.h"
 # include "FunctionSpace\ShapeFunctionFactory.h"
-
+# include "FunctionSpace\basis_function_lagrange.h"
 # include <random>
 
 using namespace art_pde;
 
+namespace  dim2 = art_pde::function_space::isoparametric::Dim2D;
+namespace  dim3 = art_pde::function_space::isoparametric::Dim3D;
+
 auto& Lagrange2d =
-SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim2D>, ElementType2D>>::instance();
+//SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim2D>, ElementType2D>>::instance();
+SingletonHolder<art_pde::function_space::isoparametric::Dim2D::BasisFunctionFactory<Point<Dim2D, CartesianCoordinate> >>::instance();
 
 auto& Lagrange3d =
-SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim3D>, ElementType3D>>::instance();
+//SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim3D>, ElementType3D>>::instance();
+SingletonHolder<art_pde::function_space::isoparametric::Dim3D::BasisFunctionFactory<Point<Dim3D, CartesianCoordinate> >>::instance();
+
 
 auto& Serendipity3d =
-SingletonHolder<ShapeFunctionFactory<SerendipityType<Dim3D>, ElementType3D>>::instance();
+//SingletonHolder<ShapeFunctionFactory<SerendipityType<Dim3D>, ElementType3D>>::instance();
+SingletonHolder<art_pde::function_space::isoparametric::Dim3D::BasisFunctionFactory<Point<Dim3D, CartesianCoordinate> >>::instance();
+
 
 double rand1(void){
 	std::random_device rd;
@@ -209,7 +217,7 @@ class TestQ4 :public TestBase<Dim2D, LagrangeType>{
 
 public:
 	TestQ4() :
-		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(ElementType2D::Q4)){
+		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(dim2::ElementType::Q4)){
 		init();
 	}
 protected:
@@ -257,7 +265,7 @@ class TestT3 :public TestBase<Dim2D, LagrangeType>{
 
 public:
 	TestT3() :
-		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(ElementType2D::T3)){
+		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(dim2::ElementType::T3)){
 		init();
 	}
 protected:
@@ -303,7 +311,7 @@ class TestTET4 :public TestBase<Dim3D, LagrangeType>{
 
 public:
 	TestTET4() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Tetra4)){
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Tetra4)){
 		init();
 	}
 protected:
@@ -353,7 +361,7 @@ class TestHEXA8 :public TestBase<Dim3D, LagrangeType>{
 
 public:
 	TestHEXA8() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Hexa8)){
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Hexa8)){
 		init();
 	}
 protected:
@@ -419,7 +427,7 @@ class TestPrism6 :public TestBase<Dim3D, LagrangeType> {
 
 public:
 	TestPrism6() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Prism6)) {
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Prism6)) {
 		init();
 	}
 protected:
@@ -480,7 +488,7 @@ class TestPyra5 :public TestBase<Dim3D, LagrangeType> {
 
 public:
 	TestPyra5() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Pyramid5)) {
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Pyramid5)) {
 		init();
 	}
 protected:
@@ -535,7 +543,7 @@ class TestTET10 :public TestBase<Dim3D, SerendipityType>{
 
 public:
 	TestTET10() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Tetra10)){
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Tetra10)){
 		init();
 	}
 protected:
@@ -621,7 +629,7 @@ class TestHexa20 :public TestBase<Dim3D, SerendipityType>{
 
 public:
 	TestHexa20() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Hexa20)){
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Hexa20)){
 		init();
 	}
 protected:
@@ -760,7 +768,7 @@ class TestPrism15 :public TestBase<Dim3D, SerendipityType> {
 
 public:
 	TestPrism15() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Prism15)) {
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Prism15)) {
 		init();
 	}
 protected:
@@ -873,7 +881,7 @@ class TestPyra13 :public TestBase<Dim3D, SerendipityType> {
 
 public:
 	TestPyra13() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Pyramid13)) {
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Pyramid13)) {
 		init();
 	}
 protected:
@@ -948,6 +956,7 @@ protected:
 };
 
 int main() {
+
 
 	TestPyra13 trial;
 	trial.testDelta();
