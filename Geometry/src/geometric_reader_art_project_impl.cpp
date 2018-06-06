@@ -15,7 +15,7 @@ bool ArtProjectReader<GeometricReaderType, Dimension>::read() {
     }
 
     if(Dimension == 3){
-        // Loading Cell
+        if(!readCell()) return false;
     }
 
     std::cout << ">> ( End ) Reading ArtPDE project format files..." << std::endl;
@@ -113,6 +113,51 @@ bool ArtProjectReader<GeometricReaderType, Dimension>::readFace() {
 
 
     std::cout << ">>>> ( End ) Loading Connectivity..." << std::endl;
+    return true;
+}
+
+template<typename GeometricReaderType, size_t Dimension>
+bool ArtProjectReader<GeometricReaderType, Dimension>::readCell() {
+    using namespace geometric_tree;
+    using PointType = typename GeometricReaderType::type::PointType;
+    using PtrPointType = typename GeometricReaderType::type::PtrPointType;
+    using VertexType = typename GeometricReaderType::type::VertexType_traits::VertexType;
+    using PtrVertexType = typename GeometricReaderType::type::VertexType_traits::PtrVertexType;
+
+    std::cout << ">>>> (Start) Loading Connectivity..." << std::endl;
+    std::string file_name;
+    file_name += art_project->getProjectGeometryPath();
+    file_name += "connectivity.txt";
+
+    //std::cout << file_name << std::endl;
+
+    std::ifstream fs;
+    std::string bufferLine;
+    size_t bufferId;
+
+    auto &vec_ptr_vertex = ptr_data->getTotalVec_PtrVertex();
+    auto &vec_ptr_cell = ptr_data->getTotalVec_PtrCell();
+    Cell_Factory<PointType> cell_factory;
+
+    fs.open(file_name);
+    if(fs.is_open()){
+
+        while(getline( fs, bufferLine )) {
+            std::stringstream w(bufferLine);
+
+            cell_factory.clearVertex();
+
+            while(w >> bufferId){
+                cell_factory.addVertex(vec_ptr_vertex[bufferId]);
+            }
+
+            vec_ptr_cell.push_back(
+                    cell_factory.create()
+            );
+        }
+    }else
+        return false;
+
     return true;
 }
 
