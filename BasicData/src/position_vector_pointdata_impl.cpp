@@ -1,6 +1,7 @@
 //
 // Created by Chingkai Chou on 5/27/18.
 //
+#include "../position_vector.hpp"
 
 template <size_t Dimension>
 void PointData<Dimension>::newData(){
@@ -34,7 +35,7 @@ std::ostream &operator<<(std::ostream &os, const PointData<Dimension> &point_dat
         os << point_data.data->at(i) << " ";
     }
     os << point_data.data->at(point_data.data->size() - 1);
-    os << " ] ";
+    os << " ]";
     return os;
 };
 

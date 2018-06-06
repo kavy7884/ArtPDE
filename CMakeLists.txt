@@ -8,8 +8,13 @@ set(CMAKE_CXX_STANDARD 11)
 
 include_directories(${CMAKE_SOURCE_DIR})
 
+file(GLOB GeometrySource "Project/*.hpp")
 file(GLOB GeometrySource "BasicData/*.hpp")
 file(GLOB GeometrySource "Geometry/*.hpp")
+file(GLOB GeometrySource "Geometry/inc/GeometricTree/*.hpp")
+file(GLOB GeometrySource "Geometry/inc/GeometricData/*.hpp")
+file(GLOB GeometrySource "Geometry/inc/GeometricAlgorithm/*.hpp")
+file(GLOB GeometrySource "Geometry/inc/GeometricReader/*.hpp")
 #file(GLOB GeometrySource "Geometry_New/*.hpp")
 #file(GLOB FunctionSpaceSource "FunctionSpace/*.hpp")
 

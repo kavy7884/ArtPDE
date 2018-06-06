@@ -5,6 +5,7 @@
 #ifndef ARTPDE_KAVY_GEOMETRIC_TREE_COMPONENTS_HPP
 #define ARTPDE_KAVY_GEOMETRIC_TREE_COMPONENTS_HPP
 
+#include <iostream>
 #include <memory>
 #include <vector>
 #include <list>
@@ -12,18 +13,41 @@
 namespace art_pde{ namespace geometry {
     namespace geometric_tree{
 
-        // -------- TreeType <Start> -----------
-        enum class TreeType{TreeHead, TreeConnect, TreeEnd};
+        // -------- GeometricType <Start> -----------
+        //enum class TreeType{TreeHead, TreeConnect, TreeEnd};
+        enum class GeometricType{ None, Point, Line, Triangle, Quadrilateral, Tetrahedron, Hexahedron, Prism, Pyramid, Polyhedron };
+
+        std::ostream &operator<<(std::ostream &os, const GeometricType &geometric_type) {
+            switch(geometric_type) {
+                case GeometricType::None    : os << "None"; break;
+                case GeometricType::Point   : os << "Point"; break;
+                case GeometricType::Line    : os << "Line"; break;
+                case GeometricType::Triangle    : os << "Triangle"; break;
+                case GeometricType::Quadrilateral    : os << "Quadrilateral"; break;
+                case GeometricType::Tetrahedron    : os << "Tetrahedron"; break;
+                case GeometricType::Hexahedron    : os << "Hexahedron"; break;
+                case GeometricType::Prism    : os << "Prism"; break;
+                case GeometricType::Pyramid    : os << "Pyramid"; break;
+                case GeometricType::Polyhedron    : os << "Polyhedron"; break;
+                default : os.setstate(std::ios_base::failbit);
+            }
+            return os;
+        }
+
         // -------- TreeType < End > -----------
 
-        // -------- GeometricTree <Start> -----------
+        // -------- GeometricType <Start> -----------
         template <typename SelfType>
         class GeometricTree{
         public:
-            GeometricTree(TreeType tree_type) : tree_type(tree_type) {}
+            GeometricTree(GeometricType geometric_type) : geometric_type(geometric_type) {}
 
-            TreeType getTree_type() const {
-                return tree_type;
+            GeometricType getGeometric_Type() const {
+                return this->geometric_type;
+            }
+
+            void setGeometric_Type(GeometricType geometric_type){
+                this->geometric_type = geometric_type;
             }
 
             void setLinked_to(const std::shared_ptr<SelfType> &linked_to) {
@@ -37,8 +61,12 @@ namespace art_pde{ namespace geometry {
                 return linked_to;
             }
 
+            const bool &getIsMerged() const { return this->is_merged;}
+            void setIsMerged(bool merge_condition){this->is_merged = merge_condition;}
+
         protected:
-            TreeType tree_type;
+            GeometricType geometric_type;
+            bool is_merged{false};
             std::shared_ptr<SelfType> linked_to{nullptr};
         };
         // -------- GeometricTree < End > -----------
@@ -124,7 +152,7 @@ namespace art_pde{ namespace geometry {
         // -------- GeometricTreeChild <End> -----------
 
         // -------- GeometricTreeLayerMerge <Start> -----------
-        template <typename BaseLayerType, typename MergeLayerType>
+        template <typename MergeLayerType, typename BaseLayerType>
         class GeometricTreeLayerMerge{
         public:
             struct type{
@@ -137,8 +165,8 @@ namespace art_pde{ namespace geometry {
             GeometricTreeLayerMerge(typename type::VecPtrBaseLayerType &vec_ptr_base_layer_seed)
                     : vec_ptr_base_layer_seed(vec_ptr_base_layer_seed) {}
 
-            typename type::VecPtrMergeLayerType merge(){
-                bool merged = false;
+            bool merge(typename type::VecPtrMergeLayerType &vec_ptr_merged_layer){
+                vec_ptr_merged_layer.clear();
 
                 for (size_t i = 0; i < vec_ptr_base_layer_seed.size(); ++i) {
                     auto & list_ptr_parents = this->vec_ptr_base_layer_seed[i]->getLinked_to()->getList_ptr_parents();
@@ -146,14 +174,16 @@ namespace art_pde{ namespace geometry {
                     auto it_master = list_ptr_parents.begin();
 
                     while( it_master != list_ptr_parents.end()){
+                        if((*it_master)->getIsMerged()){
+                            ++it_master;
+                            continue;
+                        }
 
                         auto it_slave = it_master;
                         ++it_slave;
-                        merged = false;
                         while( it_slave != list_ptr_parents.end()) {
                             if((*(*it_master)) == (*(*it_slave))) {
-                                std::cout << "Merge" << std::endl;
-                                merged = true;
+                                //std::cout << "Merge" << std::endl;
                                 (*it_slave)->setLinked_to((*it_master));
                                 (*it_master)->mergeParents(*(*it_slave));
                                 for (auto &ptr_child: (*it_slave)->getVec_ptr_childs()) {
@@ -163,14 +193,12 @@ namespace art_pde{ namespace geometry {
                             }
                             ++it_slave;
                         }
-                        if(merged){
-                            vec_ptr_merged_layer.push_back((*it_master));
-                        }
-
+                        (*it_master)->setIsMerged(true);
+                        vec_ptr_merged_layer.push_back((*it_master));
                         ++it_master;
                     }
                 }
-                return vec_ptr_merged_layer;
+                return true;
             }
 
         private:

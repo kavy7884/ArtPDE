@@ -14,27 +14,27 @@ namespace art_pde{ namespace PositionVector{
 
     // -------- PointData <Start> -----------
     template <size_t Dimension>
-    class PointData{
-    public:
-        typedef std::array<double,Dimension> ArrayType;
-        typedef std::shared_ptr<ArrayType> PtrArrayType;
+        class PointData{
+        public:
+            typedef std::array<double,Dimension> ArrayType;
+            typedef std::shared_ptr<ArrayType> PtrArrayType;
 
-        PointData<Dimension>& operator=(const PointData<Dimension>& other);
+            PointData<Dimension>& operator=(const PointData<Dimension>& other);
 
-        template <size_t Dimension_>
-        friend std::ostream &operator<<(std::ostream &os, const PointData<Dimension_> &point_data);
+            template <size_t Dimension_>
+            friend std::ostream &operator<<(std::ostream &os, const PointData<Dimension_> &point_data);
 
-    protected:
-        PointData(){ this->newData(); }
-        PointData(const std::initializer_list<double> &v){ this->newData(); this->addDataByList(v);}
-        void newData();
-        void addDataByList(const std::initializer_list<double> &v);
-        const double &getDataById(const size_t &id) const;
-        void setDataById(const size_t &id, const double &value);
-        void setDataById(const size_t &id, double &value);
+        protected:
+            PointData(){ this->newData(); }
+            PointData(const std::initializer_list<double> &v){ this->newData(); this->addDataByList(v);}
+            void newData();
+            void addDataByList(const std::initializer_list<double> &v);
+            const double &getDataById(const size_t &id) const;
+            void setDataById(const size_t &id, const double &value);
+            void setDataById(const size_t &id, double &value);
 
-        PtrArrayType data{nullptr}; //real data storage
-    };
+            PtrArrayType data{nullptr}; //real data storage
+        };
 #include "./src/position_vector_pointdata_impl.cpp"
 // -------- PointData <End> -----------
 

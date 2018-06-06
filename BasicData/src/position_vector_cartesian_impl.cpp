@@ -1,6 +1,7 @@
 //
 // Created by Chingkai Chou on 5/27/18.
 //
+#include "../position_vector.hpp"
 
 template <size_t Dimension, bool Authority> class CartesianAPI;
 template <size_t Dimension, bool Authority, typename T> struct CartesianAPI_FuncHelper;
