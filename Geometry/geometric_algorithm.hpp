@@ -33,6 +33,11 @@ namespace art_pde{ namespace geometry {
                     GeometricAlgorithm():GeometricDataType(){
                         //std::cout << "Dim3::GeometricAlgorithm" << std::endl;
                     }
+
+                    bool merge(){
+                        if(!this->mergeEdge(this->vec_ptr_vertex)) return false;
+                        return this->mergeFace(this->vec_ptr_edge);
+                    }
                 };
 
             }

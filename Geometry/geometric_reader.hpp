@@ -21,14 +21,13 @@ namespace art_pde{ namespace geometry {
 
                     bool read(const std::shared_ptr<project::ArtProject> &input_ptr_proj){
                         //std::cout << "Dim2::GeometricReader->read()" << std::endl;
-
-                        geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 2> reader(this);
-                        reader.setArtProject(input_ptr_proj);
+                        geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 2>
+                                reader(input_ptr_proj, this);
                         return reader.read();
                     }
 
                 protected:
-                    template <typename, size_t> friend class geometric_reader::ArtProjectReader;
+                    template <typename T, size_t > friend class geometric_reader::ArtProjectReader;
 
                 };
             }
@@ -44,13 +43,13 @@ namespace art_pde{ namespace geometry {
 
                     bool read(const std::shared_ptr<project::ArtProject> &input_ptr_proj){
                         //std::cout << "Dim3::GeometricReader->read()" << std::endl;
-                        geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 3> reader(this);
-                        reader.setArtProject(input_ptr_proj);
+                        geometric_reader::ArtProjectReader<GeometricReader<GeometricDataType>, 3>
+                                reader(input_ptr_proj, this);
                         return reader.read();
                     }
 
                 protected:
-                    template <typename, size_t> friend class geometric_reader::ArtProjectReader;
+                    template <typename T, size_t > friend class geometric_reader::ArtProjectReader;
 
                 };
             }

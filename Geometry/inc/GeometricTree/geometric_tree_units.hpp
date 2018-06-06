@@ -6,6 +6,7 @@
 #define ARTPDE_KAVY_GEOMETRIC_TREE_UNITS_HPP
 
 #include <set>
+#include <vector>
 #include "geometric_tree_components.hpp"
 
 namespace art_pde{ namespace geometry {
@@ -107,12 +108,8 @@ namespace art_pde{ namespace geometry {
             }
 
             friend std::ostream &operator<<(std::ostream &os, const Edge<DataType> &edge) {
-                auto it_ptr_vertex = edge.c_getConnected_Vertex().cbegin();
-                while(it_ptr_vertex !=  (edge.c_getConnected_Vertex().cend() - 1)){
-                    os << **it_ptr_vertex << " , ";
-                    ++it_ptr_vertex;
-                }
-                os << **it_ptr_vertex;
+                auto it = edge.c_getConnected_Vertex().cbegin();
+                os << "(" <<**it << " -> " << **(++it) << ")" ;
                 return os;
             }
 
@@ -180,24 +177,24 @@ namespace art_pde{ namespace geometry {
             }
 
             friend std::ostream &operator<<(std::ostream &os, const Face<DataType> &face) {
-                auto vec_ptr_vertex = face.c_getConnected_Vertex();
-                auto it_ptr_vertex = vec_ptr_vertex.cbegin();
-                while(it_ptr_vertex !=  (vec_ptr_vertex.cend() - 1)){
-                    os << **it_ptr_vertex << " , ";
-                    ++it_ptr_vertex;
+                os << "[";
+                auto it_ptr_edge = face.c_getConnected_Edge().cbegin();
+                while(it_ptr_edge !=  (face.c_getConnected_Edge().cend() - 1)){
+                    os << **it_ptr_edge << " , ";
+                    ++it_ptr_edge;
                 }
-                os << **it_ptr_vertex;
+                os << **it_ptr_edge << "]";
                 return os;
             }
 
             bool operator==(Face &rhs){
-                if(this->getConnected_Edge().size() != rhs.getConnected_Edge().size())  return false;
+                if(this->c_getConnected_Edge().size() != rhs.c_getConnected_Edge().size())  return false;
                 else{
                     std::set<typename type::PtrEdgeType> set_self, set_rhs;
-                    for (auto &ptr_edge: this->getConnected_Edge()) {
+                    for (auto &ptr_edge: this->c_getConnected_Edge()) {
                         set_self.insert(ptr_edge->getLinked_to());
                     }
-                    for (auto &ptr_edge: rhs.getConnected_Edge()) {
+                    for (auto &ptr_edge: rhs.c_getConnected_Edge()) {
                         set_rhs.insert(ptr_edge->getLinked_to());
                     }
                     if ( std::equal(set_self.cbegin(), set_self.cend(), set_rhs.cbegin() ))return true;
@@ -242,19 +239,31 @@ namespace art_pde{ namespace geometry {
                 return this->c_getVec_ptr_childs();
             }
 
-//            const VecPtrVertexType getConnected_Vertex() const{
-//                VecPtrVertexType re_vertex;
-//
-//                // Hexa
-//                auto all_face = getConnected_Face();
-//                auto face_down_vertex = all_face[0]->getConnected_Vertex();
-//                auto face_up_vertex = all_face[1]->getConnected_Vertex();
-//
-//                re_vertex.insert(re_vertex.end(), face_down_vertex.begin(),face_down_vertex.end());
-//                re_vertex.insert(re_vertex.end(), face_up_vertex.begin(),face_up_vertex.end());
-//
-//                return re_vertex;
-//            }
+            const typename type::VecPtrVertexType c_getConnected_Vertex() const{
+                typename type::VecPtrVertexType re_vec_ptr_vertex;
+
+                // Hexa
+                if(this->getGeometric_Type() == GeometricType::Hexahedron){
+                    auto &face_1_vec_ptr_vertex = this->c_getConnected_Face()[0]->c_getConnected_Vertex();
+                    auto &face_2_vec_ptr_vertex = this->c_getConnected_Face()[1]->c_getConnected_Vertex();
+                    re_vec_ptr_vertex.insert(re_vec_ptr_vertex.end(), face_1_vec_ptr_vertex.begin(), face_1_vec_ptr_vertex.end());
+                    re_vec_ptr_vertex.insert(re_vec_ptr_vertex.end(), face_2_vec_ptr_vertex.begin(), face_2_vec_ptr_vertex.end());
+                }
+                return re_vec_ptr_vertex;
+            }
+
+            friend std::ostream &operator<<(std::ostream &os, const Cell<DataType> &cell) {
+                os << "{";
+                auto it_ptr_face = cell.c_getConnected_Face().cbegin();
+                while(it_ptr_face !=  (cell.c_getConnected_Face().cend() - 1)){
+                    os << **it_ptr_face << " , ";
+                    ++it_ptr_face;
+                }
+                os << **it_ptr_face << "}";
+                return os;
+            }
+
+
         };
         // -------- Cell < End > -----------
     }

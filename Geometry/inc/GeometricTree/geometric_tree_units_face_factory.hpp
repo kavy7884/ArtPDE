@@ -14,7 +14,6 @@ namespace art_pde{ namespace geometry {
             class Quadrilateral_Face: public Face<DataType>{
             public:
                 using PtrVertexType = typename Face<DataType>::type::PtrVertexType;
-                using EdgeType = Edge<DataType>;
                 using PtrEdgeType = typename Face<DataType>::type::PtrEdgeType;
 
                 Quadrilateral_Face(): Face<DataType>(GeometricType::Quadrilateral){}
@@ -58,7 +57,7 @@ namespace art_pde{ namespace geometry {
 
             private:
                 PtrEdgeType genEdge(const PtrVertexType& v1, const PtrVertexType& v2){
-                    PtrEdgeType reEdge = std::make_shared<EdgeType>();
+                    PtrEdgeType reEdge = std::make_shared<Edge<DataType>>();
                     v1->addParent(reEdge);
                     v2->addParent(reEdge);
                     reEdge->addChild(v1);

@@ -35,7 +35,7 @@ std::ostream &operator<<(std::ostream &os, const PointData<Dimension> &point_dat
         os << point_data.data->at(i) << " ";
     }
     os << point_data.data->at(point_data.data->size() - 1);
-    os << " ] ";
+    os << " ]";
     return os;
 };
 

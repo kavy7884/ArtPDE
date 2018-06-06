@@ -9,8 +9,9 @@ int main() {
 
 //    DemoArtProject();
 
+    DemoGeometry2D();
 
-    DemoGeometry();
+    DemoGeometry3D();
 
 
     return 0;

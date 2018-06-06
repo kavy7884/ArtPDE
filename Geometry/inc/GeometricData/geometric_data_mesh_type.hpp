@@ -8,6 +8,8 @@
 #include <memory>
 #include "../GeometricTree/geometric_tree_units.hpp"
 #include "Geometry/inc/GeometricTree/geometric_tree_units_face_factory.hpp"
+#include "Geometry/inc/GeometricTree/geometric_tree_units_cell_factory.hpp"
+
 namespace art_pde { namespace geometry { namespace mesh_type {
             namespace geometric_data{
 
@@ -93,6 +95,12 @@ namespace art_pde { namespace geometry { namespace mesh_type {
 
                     const typename type::VecPtrFaceType &c_getTotalVec_PtrFace() const {
                         return this->vec_ptr_face;
+                    }
+
+                    bool mergeFace(typename MeshTypeData_Edge<PointType>::type::VecPtrEdgeType &vec_ptr_edge_seed){
+                        GeometricTreeLayerMerge<typename type::FaceType, typename MeshTypeData_Edge<PointType>::type::EdgeType >
+                                merge_algo(vec_ptr_edge_seed);
+                        return merge_algo.merge(this->vec_ptr_face);
                     }
 
                 protected:
