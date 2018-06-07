@@ -20,7 +20,7 @@ namespace art_pde{
         explicit Geometry(GeometryDummy): T()...{};
 
         static std::shared_ptr<Geometry> create(){
-            return make_shared_ArtProject();
+            return make_shared_Geometry();
         }
 
         void debugFunc(){
@@ -31,7 +31,7 @@ namespace art_pde{
         };
 
     protected:
-        static std::shared_ptr<Geometry> make_shared_ArtProject() {
+        static std::shared_ptr<Geometry> make_shared_Geometry() {
             return std::make_shared<Geometry>(GeometryDummy());
         }
 

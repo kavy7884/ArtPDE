@@ -1,6 +1,7 @@
 #include "Demo/DemoPositionVector.hpp"
 #include "Demo/DemoGeometry.hpp"
 #include "Demo/DemoArtProject.hpp"
+#include "Demo/DemoFunctionSpace.hpp"
 
 using namespace art_pde;
 
@@ -9,9 +10,11 @@ int main() {
 
 //    DemoArtProject();
 
-    DemoGeometry2D();
+//    DemoGeometry2D();
+//
+//    DemoGeometry3D();
 
-    DemoGeometry3D();
+    DemoFunctionSpace();
 
 
     return 0;
