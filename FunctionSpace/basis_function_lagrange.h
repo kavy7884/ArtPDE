@@ -504,13 +504,12 @@ namespace art_pde{namespace function_space{namespace isoparametric{namespace Dim
 
 	enum class ElementType { Q4, Q8, Q9, T3 };
 
-
 	template<class PointType>
 	class BasisFunctionFactory
 	{
 	public:
 		using ReturnFunc = BasisFunction<PointType>;
-		friend class SingletonHolder<BasisFunctionFactory>;
+		friend class SingletonHolder<BasisFunctionFactory<PointType>>;
 		ReturnFunc& getInstance(ElementType key) {
 			return table.at(key);
 		}
@@ -665,7 +664,6 @@ namespace Dim3D{
 		std::vector<std::vector<double>> inv_Jacobian_;
 		double det_Jacobian_;
 	};
-
 
 	template<class PointType>
 	class LagrangeTetra4:public BasisFunction<PointType>{
@@ -2047,7 +2045,7 @@ namespace Dim3D{
 	{
 	public:
 		using ReturnFunc = BasisFunction<PointType>;
-			friend class SingletonHolder<BasisFunctionFactory>;
+		friend class SingletonHolder<BasisFunctionFactory<PointType>>;
 		ReturnFunc& getInstance(ElementType key) {
 			return table.at(key);
 		}

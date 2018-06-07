@@ -1,33 +1,39 @@
 
 #include <iostream>
-# include "FunctionSpace\lagrange3d_shape_function.h"
-# include "FunctionSpace\ShapeFunctionFactory.h"
-# include "FunctionSpace\basis_function_lagrange.h"
-# include <random>
+#include "FunctionSpace\lagrange3d_shape_function.h"
+#include "FunctionSpace\ShapeFunctionFactory.h"
+#include "FunctionSpace\basis_function_lagrange.h"
+#include <random>
 
 using namespace art_pde;
 
 namespace  dim2 = art_pde::function_space::isoparametric::Dim2D;
 namespace  dim3 = art_pde::function_space::isoparametric::Dim3D;
 
+using Point2 = Point<Dim2D, CartesianCoordinate>;
+using Point3 = Point<Dim3D, CartesianCoordinate>;
+
+auto basis_func2d =
+art_pde::function_space::SingletonHolder<dim2::BasisFunctionFactory<Point2>>::instance();
+
 auto& Lagrange2d =
-//SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim2D>, ElementType2D>>::instance();
-SingletonHolder<art_pde::function_space::isoparametric::Dim2D::BasisFunctionFactory<Point<Dim2D, CartesianCoordinate> >>::instance();
+SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim2D>, ElementType2D>>::instance();
+//SingletonHolder<art_pde::function_space::isoparametric::Dim2D::BasisFunctionFactory<Point<Dim2D, CartesianCoordinate> >>::instance();
 
 auto& Lagrange3d =
-//SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim3D>, ElementType3D>>::instance();
-SingletonHolder<art_pde::function_space::isoparametric::Dim3D::BasisFunctionFactory<Point<Dim3D, CartesianCoordinate> >>::instance();
+SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim3D>, ElementType3D>>::instance();
+//SingletonHolder<art_pde::function_space::isoparametric::Dim3D::BasisFunctionFactory<Point<Dim3D, CartesianCoordinate> >>::instance();
 
 
 auto& Serendipity3d =
-//SingletonHolder<ShapeFunctionFactory<SerendipityType<Dim3D>, ElementType3D>>::instance();
-SingletonHolder<art_pde::function_space::isoparametric::Dim3D::BasisFunctionFactory<Point<Dim3D, CartesianCoordinate> >>::instance();
+SingletonHolder<ShapeFunctionFactory<SerendipityType<Dim3D>, ElementType3D>>::instance();
+//SingletonHolder<art_pde::function_space::isoparametric::Dim3D::BasisFunctionFactory<Point<Dim3D, CartesianCoordinate> >>::instance();
 
 
 double rand1(void){
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(0.0, 10);
+	std::uniform_real_distribution<double> dist(0.0, 1.0);
 	return dist(mt);
 }
 
@@ -217,7 +223,7 @@ class TestQ4 :public TestBase<Dim2D, LagrangeType>{
 
 public:
 	TestQ4() :
-		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(dim2::ElementType::Q4)){
+		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(ElementType2D::Q4)){
 		init();
 	}
 protected:
@@ -236,7 +242,7 @@ protected:
 			PointType(0.2*rand1(), 0.5 + 0.2*rand1()),
 		};
 		for (size_t i = 0; i < NUM; ++i){
-			coeff.push_back(100.0*rand2());
+			coeff.push_back(1.0*rand2());
 		}
 	}
 	virtual double polyValue(PointType& coor) override{
@@ -265,7 +271,7 @@ class TestT3 :public TestBase<Dim2D, LagrangeType>{
 
 public:
 	TestT3() :
-		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(dim2::ElementType::T3)){
+		TestBase<Dim2D, LagrangeType>(Lagrange2d.getInstance(ElementType2D::T3)){
 		init();
 	}
 protected:
@@ -311,7 +317,7 @@ class TestTET4 :public TestBase<Dim3D, LagrangeType>{
 
 public:
 	TestTET4() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Tetra4)){
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Tetra4)){
 		init();
 	}
 protected:
@@ -353,7 +359,9 @@ protected:
 		return grad;
 	}
 	virtual PointType getIsoPoint() override{
-		return PointType(0.5*rand1(), 0.5*rand1(), 0.5*rand1());
+		auto a = PointType(0.5*rand1(), 0.5*rand1(), 0.5*rand1());
+		//std::cout << a.getX() << " " << a.getY() << " " << a.getZ() << "\n";
+		return a;
 	}
 };
 
@@ -361,7 +369,7 @@ class TestHEXA8 :public TestBase<Dim3D, LagrangeType>{
 
 public:
 	TestHEXA8() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Hexa8)){
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Hexa8)){
 		init();
 	}
 protected:
@@ -427,7 +435,7 @@ class TestPrism6 :public TestBase<Dim3D, LagrangeType> {
 
 public:
 	TestPrism6() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Prism6)) {
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Prism6)) {
 		init();
 	}
 protected:
@@ -483,12 +491,11 @@ protected:
 	}
 };
 
-
 class TestPyra5 :public TestBase<Dim3D, LagrangeType> {
 
 public:
 	TestPyra5() :
-		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(dim3::ElementType::Pyramid5)) {
+		TestBase<Dim3D, LagrangeType>(Lagrange3d.getInstance(ElementType3D::Pyramid5)) {
 		init();
 	}
 protected:
@@ -543,7 +550,7 @@ class TestTET10 :public TestBase<Dim3D, SerendipityType>{
 
 public:
 	TestTET10() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Tetra10)){
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Tetra10)){
 		init();
 	}
 protected:
@@ -589,7 +596,7 @@ protected:
 			PointType(0.5*(x3 + x4), 0.5*(y3 + y4), 0.5*(z3 + z4))
 		};
 		for (size_t i = 0; i < NUM; ++i){
-			coeff.push_back(100.0*rand2());
+			coeff.push_back(1.0);
 		}
 	}
 	virtual double polyValue(PointType& coor) override{
@@ -615,13 +622,15 @@ protected:
 		double x = coor.getX();
 		double y = coor.getY();
 		double z = coor.getZ();
-		grad[0] = coeff[1] + 2.0 * coeff[4] * x + coeff[7] * y + coeff[9] * z;
-		grad[1] = coeff[2] + 2.0 * coeff[5] * y + coeff[7] * x + coeff[8] * z;
-		grad[2] = coeff[3] + 2.0 * coeff[6] * z + coeff[8] * y + coeff[9] * x;
+		grad[0] = coeff[1] +2.0 * coeff[4] * x + coeff[7] * y + coeff[9] * z;
+		grad[1] = coeff[2] +2.0 * coeff[5] * y + coeff[7] * x + coeff[8] * z;
+		grad[2] = coeff[3] +2.0 * coeff[6] * z + coeff[8] * y + coeff[9] * x;
 		return grad;
 	}
 	virtual PointType getIsoPoint() override{
-		return PointType(0.5*rand1(), 0.5*rand1(), 0.5*rand1());
+		auto a = PointType(0.5*rand1(), 0.5*rand1(), 0.5*rand1());
+		//std::cout << a.getX() << " " << a.getY() << " " << a.getZ() << "\n";
+		return a;
 	}
 };
 
@@ -629,7 +638,7 @@ class TestHexa20 :public TestBase<Dim3D, SerendipityType>{
 
 public:
 	TestHexa20() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Hexa20)){
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Hexa20)){
 		init();
 	}
 protected:
@@ -768,7 +777,7 @@ class TestPrism15 :public TestBase<Dim3D, SerendipityType> {
 
 public:
 	TestPrism15() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Prism15)) {
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Prism15)) {
 		init();
 	}
 protected:
@@ -815,7 +824,7 @@ protected:
 			PointType(2*rand2(), 2*rand2(), 10+2*rand2())
 		};
 		for (size_t i = 0; i < NUM; ++i) {
-			coeff.push_back(100.0*rand2());
+			coeff.push_back(1.0);
 		}
 	}
 	virtual double polyValue(PointType& coor) override {
@@ -881,7 +890,7 @@ class TestPyra13 :public TestBase<Dim3D, SerendipityType> {
 
 public:
 	TestPyra13() :
-		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(dim3::ElementType::Pyramid13)) {
+		TestBase<Dim3D, SerendipityType>(Serendipity3d.getInstance(ElementType3D::Pyramid13)) {
 		init();
 	}
 protected:
@@ -958,7 +967,7 @@ protected:
 int main() {
 
 
-	TestPyra13 trial;
+	TestTET10 trial;
 	trial.testDelta();
 	trial.testUnity();
 	trial.testIsoInterpolation();
