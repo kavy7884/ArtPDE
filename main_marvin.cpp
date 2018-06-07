@@ -13,8 +13,13 @@ namespace  dim3 = art_pde::function_space::isoparametric::Dim3D;
 using Point2 = Point<Dim2D, CartesianCoordinate>;
 using Point3 = Point<Dim3D, CartesianCoordinate>;
 
-auto basis_func2d =
+auto& basis_func2d =
 art_pde::function_space::SingletonHolder<dim2::BasisFunctionFactory<Point2>>::instance();
+
+auto& basis_func3d =
+art_pde::function_space::SingletonHolder<dim3::BasisFunctionFactory<Point3>>::instance();
+
+
 
 auto& Lagrange2d =
 SingletonHolder<ShapeFunctionFactory<LagrangeType<Dim2D>, ElementType2D>>::instance();
