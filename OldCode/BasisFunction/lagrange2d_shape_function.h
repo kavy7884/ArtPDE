@@ -380,8 +380,8 @@ namespace art_pde{
 			const double& y3 = elem_nodes[2].getY();
 
 			Jacobian_[0][0] = x2 - x1;
-			Jacobian_[1][0] = y2 - y1;
-			Jacobian_[0][1] = x3 - x1;
+			Jacobian_[1][0] = x3 - x1;
+			Jacobian_[0][1] = y2 - y1;
 			Jacobian_[1][1] = y3 - y1;
 
 			return Jacobian_;

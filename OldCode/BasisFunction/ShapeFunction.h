@@ -16,7 +16,7 @@
 #include "Eigen/Dense"
 
 namespace art_pde{
-
+	
 	template<class T>
 	class SingletonHolder{
 	public:
