@@ -11,7 +11,7 @@
 
 void DemoGeometry2D() {
     using namespace art_pde;
-    using namespace PositionVector;
+    using namespace position_vector;
     using namespace project;
     using namespace geometry::mesh_type::Dim2;
 
@@ -79,7 +79,7 @@ void DemoGeometry2D() {
 
 void DemoGeometry3D() {
     using namespace art_pde;
-    using namespace PositionVector;
+    using namespace position_vector;
     using namespace project;
     using namespace geometry::mesh_type::Dim3;
 

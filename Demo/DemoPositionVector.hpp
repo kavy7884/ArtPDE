@@ -7,7 +7,7 @@
 
 void DemoPositionVector() {
 
-    using namespace art_pde::PositionVector;
+    using namespace art_pde::position_vector;
     const unsigned Dim = 3;
 
     auto ptr_view_pt = PositionVector<Dim>::createViewPoint({1.0,2.0,3.0});
