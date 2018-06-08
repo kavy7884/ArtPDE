@@ -10,7 +10,7 @@
 #include <memory>
 #include <algorithm>
 
-namespace art_pde{ namespace PositionVector{
+namespace art_pde{ namespace position_vector{
 
     // -------- PointData <Start> -----------
     template <size_t Dimension>

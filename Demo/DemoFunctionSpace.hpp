@@ -11,7 +11,7 @@
 
 void DemoFunctionSpace(){
     using namespace art_pde;
-    using namespace PositionVector;
+    using namespace position_vector;
     using namespace project;
     using namespace geometry::mesh_type::Dim2;
     using namespace function_space::isoparametric;

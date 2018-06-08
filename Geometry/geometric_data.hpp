@@ -33,8 +33,10 @@ namespace art_pde{ namespace geometry {
                             MeshTypeData_Face<BasicPointType>(){
                         //std::cout << "Dim2::GeometricData" << std::endl;
                     }
-                };
 
+                    const size_t getDimension() const { return Dimension;}
+                    static const size_t Dimension{2};
+                };
             }
 
             namespace Dim3 {
@@ -63,6 +65,9 @@ namespace art_pde{ namespace geometry {
                             MeshTypeData_Cell<BasicPointType>(){
                         //std::cout << "Dim3::GeometricData" << std::endl;
                     }
+
+                    const size_t getDimension() const { return Dimension;}
+                    static const size_t Dimension{3};
                 };
             }
         }
