@@ -1248,7 +1248,7 @@ namespace art_pde {
 				- x3 * (xi / 8. + 1. / 8.)*(zeta - 1.)*(2. * eta + xi - zeta - 1.)
 				- x5 * (xi / 8. - 1. / 8.)*(zeta + 1.)*(2. * eta + xi - zeta + 1.)
 				- x8 * (xi / 8. - 1. / 8.)*(zeta + 1.)*(2. * eta - xi + zeta - 1.)
-				+ x4 * (xi / 8. - 1. / 8.)*(zeta - 1.)*(2. * eta - xi - zeta + 1.)
+				+ x4 * (xi / 8. - 1. / 8.)*(zeta - 1.)*(2. * eta - xi - zeta - 1.)
 				+ x6 * (xi / 8. + 1. / 8.)*(zeta + 1.)*(2. * eta - xi - zeta + 1.)
 				+ x1 * (xi / 8. - 1. / 8.)*(zeta - 1.)*(2. * eta + xi + zeta + 1.)
 				+ x7 * (xi / 8. + 1. / 8.)*(zeta + 1.)*(2. * eta + xi + zeta - 1.);
@@ -1268,7 +1268,7 @@ namespace art_pde {
 				- y3 * (xi / 8. + 1. / 8.)*(zeta - 1.)*(2. * eta + xi - zeta - 1.)
 				- y5 * (xi / 8. - 1. / 8.)*(zeta + 1.)*(2. * eta + xi - zeta + 1.)
 				- y8 * (xi / 8. - 1. / 8.)*(zeta + 1.)*(2. * eta - xi + zeta - 1.)
-				+ y4 * (xi / 8. - 1. / 8.)*(zeta - 1.)*(2. * eta - xi - zeta + 1.)
+				+ y4 * (xi / 8. - 1. / 8.)*(zeta - 1.)*(2. * eta - xi - zeta - 1.)
 				+ y6 * (xi / 8. + 1. / 8.)*(zeta + 1.)*(2. * eta - xi - zeta + 1.);
 
 			Jacobian_[1][2] =
@@ -1295,7 +1295,7 @@ namespace art_pde {
 				+ (x11 - x15)*(xi * xi / 4. - 1. / 4.)*(eta + 1.)
 				+ (x16 - x12)*(eta * eta - 1.)*(xi / 4. - 1. / 4.)
 				- x2 * (xi / 8. + 1. / 8.)*(eta - 1.)*(eta - xi + 2. * zeta + 1.)
-				- x4 * (xi / 8. - 1. / 8.)*(eta + 1.)*(xi - eta + 2. * zeta + 1.)
+				- x4 * (xi / 8. - 1. / 8.)*(eta + 1.)*(xi - eta + 2. * zeta - 1.)
 				+ x6 * (xi / 8. + 1. / 8.)*(eta - 1.)*(eta - xi - 2. * zeta + 1.)
 				- x8 * (xi / 8. - 1. / 8.)*(eta + 1.)*(eta - xi + 2. * zeta - 1.)
 				- x17 * zeta*(xi / 2. - 1. / 2.)*(eta - 1.) + x18 * zeta*(xi / 2. + 1. / 2.)*(eta - 1.)
