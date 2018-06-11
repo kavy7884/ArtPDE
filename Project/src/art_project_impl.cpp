@@ -7,7 +7,42 @@
 ArtProjectBuilder ArtProject::create(const std::string & projectName){
     return ArtProjectBuilder(projectName);
 }
+#if defined( _MSC_VER )
+int ArtProject::checkFolder(const std::string &folderPath) {
+    char sep = *this->slash.begin();
 
+    for( std::string::const_iterator iter = folderPath.cbegin() ; iter != folderPath.cend(); )
+    {
+        std::string::const_iterator newIter = std::find( iter, folderPath.cend(), sep );
+
+        if(newIter == folderPath.cbegin()){
+            ++iter;
+            newIter = std::find( iter, folderPath.cend(), sep );
+        }
+
+        std::string newPath = std::string( folderPath.cbegin(), newIter);
+
+        if( PathFileExists(newPath.c_str()) != true)
+        {
+            if( _mkdir( newPath.c_str()) != 0)
+            {
+                std::cout << ">> cannot create folder [" << newPath << "] : " << strerror(errno) << std::endl;
+                return -1;
+            }
+            else
+                std::cout << ">> folder [" << newPath << "] created! " << std::endl;
+
+        }
+//        else
+//            std::cout << ">> path [" << newPath << "] already exists " << std::endl;
+
+        iter = newIter;
+        if( newIter != folderPath.end() )
+            ++ iter;
+    }
+    return 0;
+}
+#else
 int ArtProject::checkFolder(const std::string &folderPath) {
 
     struct stat st;
@@ -52,6 +87,7 @@ int ArtProject::checkFolder(const std::string &folderPath) {
     }
     return 0;
 }
+#endif
 
 bool ArtProject::Init() {
     if(checkFolder(getProjectPath())!= 0) return false;
