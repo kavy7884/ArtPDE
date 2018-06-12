@@ -9,6 +9,7 @@
 #include <array>
 #include <memory>
 #include <algorithm>
+#include <assert.h>
 
 namespace art_pde{ namespace position_vector{
 

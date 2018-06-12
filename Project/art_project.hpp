@@ -8,9 +8,15 @@
 #include <iostream>
 #include <string>
 #include <memory>
+
+#if defined( _MSC_VER )
+#include <direct.h>
+#include <windows.h>
+#else
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
 
 namespace art_pde{ namespace project {
 
@@ -123,7 +129,11 @@ namespace art_pde{ namespace project {
             std::string projectSettingFolderName{"Setting"};
             std::string projectInitialFolderName{"Initial"};
             std::string projectResultsFolderName{"Results"};
-            std::string slash{"/"};
+			#if defined( _MSC_VER )
+			std::string slash{ '\\' };
+			#else
+			std::string slash{ '/' };
+			#endif
         };
 
         class ArtProjectBuilder

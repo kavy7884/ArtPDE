@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD 11)
 
 include_directories(${CMAKE_SOURCE_DIR})
 
+#add_definitions(-D_MSC_VER)
+
 file(GLOB GeometrySource "Project/*.hpp")
 file(GLOB GeometrySource "BasicData/*.hpp")
 file(GLOB GeometrySource "Geometry/*.hpp")

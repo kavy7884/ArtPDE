@@ -6,16 +6,15 @@
 using namespace art_pde;
 
 int main() {
-//    DemoPositionVector();
+    //DemoPositionVector();
 
-//    DemoArtProject();
+    //DemoArtProject();
 
-//    DemoGeometry2D();
-//
-//    DemoGeometry3D();
+    //DemoGeometry2D();
+
+    //DemoGeometry3D();
 
     DemoFunctionSpace();
-
-
+	system("pause");
     return 0;
 }

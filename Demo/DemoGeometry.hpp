@@ -6,6 +6,7 @@
 #define ARTPDE_KAVY_DEMOGEOMETRY_HPP
 
 #include <iostream>
+#include <assert.h>
 #include "Project/art_project.hpp"
 #include "Geometry/geometry.hpp"
 
@@ -35,8 +36,7 @@ void DemoGeometry2D() {
     //- two files: position.txt and connectivity.txt must existing and defining properly.
     //- if the loading process failure, the program will exit and show something error in this line.
     //- P.S.: the reading method provided by "GeometricReader" API class.
-
-    assert(geo->read(proj)); // Check loading status.
+	geo->read(proj); // Check loading status.
 
     // Step 4: Merge geometry
     //- 2D case will merge Edge.
@@ -104,7 +104,7 @@ void DemoGeometry3D() {
     //- if the loading process failure, the program will exit and show something error in this line.
     //- P.S.: the reading method provided by "GeometricReader" API class.
 
-    assert(geo->read(proj)); // Check loading status.
+    geo->read(proj); // Check loading status.
 
     // Step 4: Merge geometry
     //- 3D case will merge Edge and Face.
