@@ -129,7 +129,11 @@ namespace art_pde{ namespace project {
             std::string projectSettingFolderName{"Setting"};
             std::string projectInitialFolderName{"Initial"};
             std::string projectResultsFolderName{"Results"};
-            std::string slash{"/"};
+			#if defined( _MSC_VER )
+			std::string slash{ "\\" };
+			#else
+			std::string slash{ "/" };
+			#endif
         };
 
         class ArtProjectBuilder

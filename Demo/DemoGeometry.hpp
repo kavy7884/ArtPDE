@@ -6,6 +6,7 @@
 #define ARTPDE_KAVY_DEMOGEOMETRY_HPP
 
 #include <iostream>
+#include <assert.h>
 #include "Project/art_project.hpp"
 #include "Geometry/geometry.hpp"
 
