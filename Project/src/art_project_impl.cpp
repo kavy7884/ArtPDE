@@ -7,6 +7,8 @@ ArtProjectBuilder ArtProject::create(const std::string & projectName) {
 int ArtProject::checkFolder(const std::string &folderPath) {
 	char sep = *this->slash.begin();
 
+	//std::cout << sep << std::endl;
+
 	for (std::string::const_iterator iter = folderPath.cbegin(); iter != folderPath.cend(); )
 	{
 		std::string::const_iterator newIter = std::find(iter, folderPath.cend(), sep);
@@ -18,7 +20,10 @@ int ArtProject::checkFolder(const std::string &folderPath) {
 
 		std::string newPath = std::string(folderPath.cbegin(), newIter);
 
-		if (GetFileAttributesA(newPath.c_str()) & FILE_ATTRIBUTE_DIRECTORY)
+		DWORD dwAttrib = GetFileAttributesA(newPath.c_str());
+
+		if (!(dwAttrib != INVALID_FILE_ATTRIBUTES &&
+			(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)))
 		{
 			if (_mkdir(newPath.c_str()) != 0)
 			{
@@ -28,16 +33,13 @@ int ArtProject::checkFolder(const std::string &folderPath) {
 			else
 				std::cout << ">> folder [" << newPath << "] created! " << std::endl;
 		}
-		//	//        else
-		//	//            std::cout << ">> path [" << newPath << "] already exists " << std::endl;
-
+	
 		iter = newIter;
 		if (newIter != folderPath.end())
 			++iter;
 	}
 	return 0;
 }
-
 
 #else
 int ArtProject::checkFolder(const std::string &folderPath) {

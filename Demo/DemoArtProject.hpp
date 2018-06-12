@@ -9,9 +9,9 @@
 
 void DemoArtProject() {
     using namespace art_pde::project;
-   /* auto proj_1 = ArtProject::create("TestProj").setRunPath(".").setDivideSlash("/").setInitialFolderName("Init").build();
+    auto proj_1 = ArtProject::create("TestProj").setRunPath(".").setInitialFolderName("Init").build();
 
-    auto proj_2 = ArtProject::create("OutSideProj").setRunPath("./Proj").build();*/
+    auto proj_2 = ArtProject::create("OutSideProj").setRunPath("./Proj").build();
 }
 
 #endif //ARTPDE_KAVY_DEMOARTPROJECT_HPP

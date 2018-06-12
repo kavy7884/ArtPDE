@@ -1,20 +1,20 @@
 #include "Demo/DemoPositionVector.hpp"
-//#include "Demo/DemoGeometry.hpp"
+#include "Demo/DemoGeometry.hpp"
 #include "Demo/DemoArtProject.hpp"
-//#include "Demo/DemoFunctionSpace.hpp"
+#include "Demo/DemoFunctionSpace.hpp"
 
 using namespace art_pde;
 
 int main() {
     //DemoPositionVector();
 
-    DemoArtProject();
+    //DemoArtProject();
 
-//    DemoGeometry2D();
-//
-//    DemoGeometry3D();
+    //DemoGeometry2D();
 
-    //DemoFunctionSpace();
+    //DemoGeometry3D();
+
+    DemoFunctionSpace();
 	system("pause");
     return 0;
 }

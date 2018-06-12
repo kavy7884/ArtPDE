@@ -130,9 +130,9 @@ namespace art_pde{ namespace project {
             std::string projectInitialFolderName{"Initial"};
             std::string projectResultsFolderName{"Results"};
 			#if defined( _MSC_VER )
-			std::string slash{ "\\" };
+			std::string slash{ '\\' };
 			#else
-			std::string slash{ "/" };
+			std::string slash{ '/' };
 			#endif
         };
 
